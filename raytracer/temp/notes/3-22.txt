@@ -1,1 +1,0 @@
-Found it interesting that the operator[](int i) was overloaded based on how const was used. Will look into this some more later on, in vec3.h / vec3.cpp
