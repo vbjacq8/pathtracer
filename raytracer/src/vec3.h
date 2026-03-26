@@ -40,7 +40,7 @@ class vec3{
         inline double squared_norm() const {return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];}
 
 
-
+        /** \brief scales vector by inverse of norm to make new norm 1 */
         inline void make_unit_vector();
 
         double e[3];
@@ -97,9 +97,17 @@ inline vec3 cross(const vec3& v1, const vec3& v2) {
     (v1.e[0]*v2.e[1] - v1.e[1] *v2.e[0]));
 }
 
+/** \brief creates unit vector colinear with \param v1 */
+
 inline vec3 unit_vector(const vec3& v1){
     return v1 / v1.norm();
 }
+
+/** \brief creates a vector that maps unit vector to range \param min min range \param max max range*/
+//inline vec3 map_unit_vector(const vec3& v1, float min, float max){
+//    vec3 minVec(min, min, min);
+//   minVec+=v1;
+//}
 
 /** \brief implementations of operators on class instance */
 
@@ -150,5 +158,10 @@ inline void vec3::make_unit_vector(){
     double magnitude = norm();
     *this /= magnitude;
 }
+
+//Utility functions
+
+
+
 
 #endif
