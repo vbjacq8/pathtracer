@@ -6,7 +6,7 @@
 class Ray{
     public:
         Ray(){};
-        Ray(const vec3& a, const vec3& b){A = a; B = b;}
+        Ray(const vec3& a, const vec3& b) : A(a), B(b) {}
 
 
         /** \returns constant point A */
