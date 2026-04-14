@@ -39,6 +39,12 @@ inline vec3 diffuseColor(const Ray& r, Hitable* world, int depth, int i = 0){
     else{return colorBlueWhiteGradient(r);}
 }
 
+/**
+ * \brief metal coloring method with blueWhiteGradient background
+ * \returns a color vector, based on reflective metal material (deterministic reflection)
+ * \param r Ray object that is sent to the viewport and examined for hits
+ * \param world Hitable array that is to be colored.
+ */
 inline vec3 metalColor(const Ray& r, Hitable* world, int depth, int i = 0){
     if (i >= depth){return vec3(0,0,0);}
     HitRecord hr;
@@ -56,5 +62,23 @@ inline vec3 metalColor(const Ray& r, Hitable* world, int depth, int i = 0){
     }
     else {return colorBlueWhiteGradient(r);}
 
+}
+
+inline vec3 dielectricColor(const Ray& r, Hitable* world, int depth, int i = 0){
+    if (i >= depth){return vec3(0,0,0);}
+    HitRecord hr;
+    if (world->hit(r,0.005, MAXFLOAT, hr)){
+        Ray scattered;
+        vec3 attenuation;
+        if (hr.matPtr && hr.matPtr->scatter(r, hr, attenuation, scattered)){
+            return attenuation * dielectricColor(scattered, world, depth, i+1);
+        }
+        else{
+            if (!hr.matPtr){throw std::runtime_error("null matPtr");}
+            //scatter returned false; absorbed
+            return vec3(0,0,0);
+        }
+    }
+    else {return colorBlueWhiteGradient(r);}
 }
 
