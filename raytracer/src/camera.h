@@ -7,12 +7,40 @@
 
 class Camera {
     public: 
-        Camera(vec3& origin, vec3& lowerLeftCorner, vec3& vertical, vec3& horizontal)
+        Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect)
         {
-            this->origin = origin;
+            vec3 u,w,v;
+            double theta = vfov * M_PI / 180;
+            double halfHeight = tan(theta/2); //Assumes that normal distance from camera to plane is 1
+            double halfWidth = halfHeight * aspect;
+            w = unit_vector(lookfrom - lookat);
+            u = unit_vector(cross(vup, w));
+            v = cross(w,u);
+            //this->lowerLeftCorner = vec3(-halfWidth, -halfHeight, -1);
+            this->horizontal = 2*halfWidth * u;
+            this->vertical = 2*halfHeight * v;
+            this->origin = lookfrom;
+            this->lowerLeftCorner = origin - halfWidth*u - halfHeight*v - w;
+
+            
+        }
+        Camera(double vfov, double aspect){
+            double theta = vfov * M_PI/180;
+            double halfHeight = tan(theta/2);
+            double halfWidth = halfHeight*aspect;
+            this->horizontal = vec3(2*halfWidth, 0, 0);
+            this->vertical = vec3(0,2*halfHeight,0);
+            this->lowerLeftCorner = vec3(-halfWidth, -halfHeight,-1);
+            this->origin = vec3(0,0,0);
+
+        }
+
+        //legacy: useful for debugging though
+        Camera(const vec3& lowerLeftCorner, const vec3& horizontal, const vec3& vertical, const vec3&origin){
             this->lowerLeftCorner = lowerLeftCorner;
             this->vertical = vertical;
             this->horizontal = horizontal;
+            this->origin = origin;
         }
 
         /**
@@ -82,4 +110,3 @@ class Camera {
 
 #endif
             
-

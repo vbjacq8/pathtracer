@@ -8,14 +8,14 @@
 class vec3{
     public:
         vec3(){}
-        vec3(float e1, float e2, float e3){e[0] = e1; e[1] = e2; e[2] = e3;}
+        vec3(double e1, double e2, double e3){e[0] = e1; e[1] = e2; e[2] = e3;}
         /** \brief getters for coordinates or elements */
-        inline float x() const {return e[0];}
-        inline float y() const {return e[1];}
-        inline float z() const {return e[2];}
-        inline float r() const {return e[0];}
-        inline float g() const {return e[1];}
-        inline float b() const {return e[2];}
+        inline double x() const {return e[0];}
+        inline double y() const {return e[1];}
+        inline double z() const {return e[2];}
+        inline double r() const {return e[0];}
+        inline double g() const {return e[1];}
+        inline double b() const {return e[2];}
 
         /** \brief getter for instance */
         inline const vec3& operator+(){return *this;}

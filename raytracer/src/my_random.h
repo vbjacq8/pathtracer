@@ -9,9 +9,9 @@
  */
 inline double randomDouble(double min, double max){
     std::random_device rd;
-    std::mt19937_64 engine(rd());
-    std::uniform_real_distribution<> dist(min, max);
-    return dist(engine);
+    static std::mt19937_64 engine(rd());
+    static std::uniform_real_distribution<> dist(0, 1.0);
+    return min + (max - min) * dist(engine);
 }
 
 /**

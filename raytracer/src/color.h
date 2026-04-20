@@ -26,7 +26,7 @@ inline vec3 color(const Ray& r, Hitable* world, int depth, int i = 0){
  * \param world Hitable array that is to be colored.
  */
 inline vec3 diffuseColor(const Ray& r, Hitable* world, int depth, int i = 0){
-    if (i == depth){return vec3(0,0,0);}
+    if (i >= depth){return vec3(0,0,0);}
     HitRecord hr;
     if (world->hit(r,0.001, MAXFLOAT, hr)){
         Ray scattered;
