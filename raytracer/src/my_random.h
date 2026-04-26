@@ -25,3 +25,11 @@ inline vec3 randomInSphere(){
     } while (p.squared_norm() >= 1.0);
     return p;
 }
+
+inline vec3 randomInDisc(){
+    vec3 p;
+    do {
+        p = 2.0 * vec3(randomDouble(0.0,1.0), randomDouble(0.0,1.0), 0) - vec3(1,1,0);
+    } while(p.squared_norm() >= 1.0);
+    return p;
+}

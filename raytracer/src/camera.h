@@ -7,23 +7,44 @@
 
 class Camera {
     public: 
-        Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect)
+        Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect, double aperture, double focusDist)
         {
-            vec3 u,w,v;
+            this->lensRadius = aperture/2;
+            this->focusDistance = focusDist;
             double theta = vfov * M_PI / 180;
-            double halfHeight = tan(theta/2); //Assumes that normal distance from camera to plane is 1
+            //double halfHeight = tan(theta/2); //Assumes that normal distance from camera to plane is 1
+            double halfHeight = tan(theta/2) * focusDist; //Takes into account the viewport is now the focus plane
             double halfWidth = halfHeight * aspect;
-            w = unit_vector(lookfrom - lookat);
-            u = unit_vector(cross(vup, w));
-            v = cross(w,u);
-            //this->lowerLeftCorner = vec3(-halfWidth, -halfHeight, -1);
+            this->w = unit_vector(lookfrom - lookat);
+            this->u = unit_vector(cross(vup, w));
+            this->v = cross(w,u);
             this->horizontal = 2*halfWidth * u;
             this->vertical = 2*halfHeight * v;
             this->origin = lookfrom;
-            this->lowerLeftCorner = origin - halfWidth*u - halfHeight*v - w;
+            this->lowerLeftCorner = origin - halfWidth*u * - halfHeight*v - w * focusDist;
+    
 
             
         }
+        Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect)
+        {            
+            double theta = vfov * M_PI / 180;
+            //double halfHeight = tan(theta/2); //Assumes that normal distance from camera to plane is 1
+            double halfHeight = tan(theta/2); //Takes into account the viewport is now the focus plane
+            double halfWidth = halfHeight * aspect;
+            this->w = unit_vector(lookfrom - lookat);
+            this->u = unit_vector(cross(vup, w));
+            this->v = cross(w,u);
+            this->horizontal = 2*halfWidth * u;
+            this->vertical = 2*halfHeight * v;
+            this->origin = lookfrom;
+            this->lowerLeftCorner = origin - halfWidth*u * - halfHeight*v - w;    
+            this->lensRadius = 0;
+            this->focusDistance = 1;
+            
+        }
+
+
         Camera(double vfov, double aspect){
             double theta = vfov * M_PI/180;
             double halfHeight = tan(theta/2);
@@ -46,11 +67,20 @@ class Camera {
         /**
          * \brief getter for a ray to a viewport
          * \returns a Ray from the origin to a specified point on the viewport
-         * \param u value from (0,1) representing completion of horizontal
-         * \param v value from (0,1) representing completion of vertical
+         * \param s value from (0,1) representing completion of horizontal
+         * \param t value from (0,1) representing completion of vertical
          */
-        Ray getRay(double u, double v){
-            return Ray(origin, lowerLeftCorner + u* horizontal + v * vertical - origin);
+
+         /*
+        Ray getRay(double s, double t){
+            return Ray(origin, lowerLeftCorner + s* horizontal + t * vertical - origin);
+        }
+        */
+
+        Ray getRay(double s, double t){
+            vec3 rd = lensRadius * randomInDisc();
+            vec3 offset = rd.x() * u + rd.y() * v;
+            return Ray(origin + offset, lowerLeftCorner + s*horizontal + t* vertical - origin - offset);
         }
 
         /**
@@ -106,6 +136,9 @@ class Camera {
     vec3 lowerLeftCorner;
     vec3 vertical;
     vec3 horizontal;
+    vec3 u,v,w;
+    double lensRadius;
+    double focusDistance;
     };
 
 #endif
