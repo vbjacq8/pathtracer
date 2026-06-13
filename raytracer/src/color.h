@@ -5,7 +5,7 @@
 
 /**
  * \brief generic coloring method with blueWhiteGradient background
- * \returns a color vector, based on teh normal of 
+ * \returns a color vector, based on the normal of 
  * \param r Ray object that is sent to the viewport and examined for hits
  * \param world Hitable array that is to be colored.
  */
