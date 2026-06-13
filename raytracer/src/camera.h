@@ -21,7 +21,7 @@ class Camera {
             this->horizontal = 2*halfWidth * u;
             this->vertical = 2*halfHeight * v;
             this->origin = lookfrom;
-            this->lowerLeftCorner = origin - halfWidth*u * - halfHeight*v - w * focusDist;
+            this->lowerLeftCorner = origin - halfWidth*u - halfHeight*v - w * focusDist;
     
 
             
@@ -38,7 +38,7 @@ class Camera {
             this->horizontal = 2*halfWidth * u;
             this->vertical = 2*halfHeight * v;
             this->origin = lookfrom;
-            this->lowerLeftCorner = origin - halfWidth*u * - halfHeight*v - w;    
+            this->lowerLeftCorner = origin - halfWidth*u - halfHeight*v - w;    
             this->lensRadius = 0;
             this->focusDistance = 1;
             
@@ -132,13 +132,15 @@ class Camera {
         }
         
     
-    vec3 origin;
-    vec3 lowerLeftCorner;
-    vec3 vertical;
-    vec3 horizontal;
-    vec3 u,v,w;
-    double lensRadius;
-    double focusDistance;
+    vec3 origin = vec3(0,0,0);
+    vec3 lowerLeftCorner = vec3(0,0,-1);
+    vec3 vertical = vec3(0,2,0);
+    vec3 horizontal = vec3(2,0,0);
+    vec3 u = vec3(1,0,0);
+    vec3 v = vec3(0,1,0);
+    vec3 w = vec3(0,0,1);
+    double lensRadius = 0.0;
+    double focusDistance = 1.0;
     };
 
 #endif
