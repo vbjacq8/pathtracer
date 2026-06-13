@@ -4,12 +4,16 @@
 
 class Metal : public Material{
     public:
-        Metal(const vec3& a, float f) : albedo(a) {if (f < 1) fuzz = f; else fuzz = 1;}
+        Metal(const vec3& a, float f) : albedo(a) {
+            if (f < 0) {fuzz = 0;}
+            else if (f < 1) {fuzz = f;}
+            else {fuzz = 1;}
+        }
         bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
-            vec3 reflected = reflect(unit_vector(rIn.direction()), hr.normal) + hr.normal;
+            vec3 reflected = reflect(unit_vector(rIn.direction()), hr.normal);
             scattered = Ray(hr.p, reflected + fuzz * randomInSphere());
             attenuation = albedo;
-            return (dot(reflected, hr.normal) > 0);
+            return (dot(scattered.direction(), hr.normal) > 0);
 
         }
         vec3 reflect(const vec3& v, const vec3& n) const {
