@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$ROOT_DIR/raytracer/test/cpp"
-EXEC_DIR="$ROOT_DIR/raytracer/exec"
-OUT_DIR="$ROOT_DIR/raytracer/out"
+EXEC_DIR="$ROOT_DIR/raytracer/test/exec"
+OUT_DIR="$ROOT_DIR/raytracer/test/out"
 
 usage() {
     echo "Usage: $0 [source.cpp]" >&2
