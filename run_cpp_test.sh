@@ -45,7 +45,7 @@ base_name="$(basename "$source_file" .cpp)"
 executable="$EXEC_DIR/$base_name"
 output_file="$OUT_DIR/$base_name.ppm"
 
-"${CXX:-g++}" -std=c++11 -Wall -Wextra -pedantic "$source_file" -o "$executable"
+"${CXX:-g++}" -std=c++20 -Wall -Wextra -pedantic "$source_file" -o "$executable"
 "$executable" > "$output_file"
 
 echo "Built $executable"
