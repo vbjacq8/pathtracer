@@ -77,7 +77,7 @@ class Camera {
         }
         */
 
-        Ray getRay(double s, double t){
+        Ray getRay(double s, double t) const {
             vec3 rd = lensRadius * randomInDisc();
             vec3 offset = rd.x() * u + rd.y() * v;
             return Ray(origin + offset, lowerLeftCorner + s*horizontal + t* vertical - origin - offset);

@@ -1,5 +1,6 @@
 #include "../../src/camera.h"
 #include "../../src/materials.h"
+#include "../../src/renderer.h"
 
 
 using namespace std;
@@ -7,7 +8,6 @@ using namespace std;
 int main(){
     int nx = 200;
     int ny = 100;
-    cout << "P3\n" << nx << " " << ny << "\n255\n";
     vec3 lookfrom(3,3,-2);
     vec3 lookat(0,0,-1);
     double distToFocus = (lookat-lookfrom).norm();
@@ -18,20 +18,10 @@ int main(){
     list[0] = new Sphere(vec3(0,0,0), 1, new Metal(vec3(0.9,0.9,0.9), 0.1));
     list[1] = new Sphere(vec3(0,1,0), 1, new Lambertian(vec3(0.5,0.5,0.5)));
     Hitable* world = new HitableList(list, 2);
+    Framebuffer fb(nx, ny);
+    const int totalSamples = 5;
+    render(cam, world, fb, totalSamples, 5, metalColor);
+    writePpm(fb, cout);
 
-
-    for (int j = ny-1; j >=0 ; j--){
-        for (int i = 0; i < nx; i++){
-            vec3 col = cam.colorSample(i,j,nx,ny, 5, world, 5, metalColor);
-            int ir = (int) (255.99 * col[0]);
-            int ib = (int) (255.99 * col[1]);
-            int ig = (int) (255.99 * col[2]);
-            cout << ir << " " << ig << " " << ib << endl;
-
-        }
-    }
     return 0;
-
-
-
 }
