@@ -1,5 +1,6 @@
 *.out
 raytracer/temp/** 
-raytracer/test/**
+raytracer/test/exec/**
+raytracer/test/out/**
 raytracer/exec/
 raytracer/out/
