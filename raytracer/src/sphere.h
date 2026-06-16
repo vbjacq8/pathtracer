@@ -20,7 +20,7 @@ class Sphere : public Hitable{
 /** \brief hit implementation for sphere
  *  \copydoc Hitable::hit
  */
-bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr){
+inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr){
     vec3 oc = r.origin() - center;
     double b = 2.0 * dot(oc,r.direction());
     double a = dot(r.direction(), r.direction());
