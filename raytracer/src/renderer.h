@@ -42,7 +42,7 @@ inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth, 
 *\brief writes color samples across the whole framebuffer
 *\param samplesThisFrame number of passes through the framebuffer
 */
-inline void render(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth, Camera::objectColor objCol) {
+inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth, Camera::objectColor objCol) {
     for (int s = 0; s < samplesThisFrame; s++) {
         renderPass(cam, world, fb, depth, objCol);
     }

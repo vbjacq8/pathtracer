@@ -1,6 +1,5 @@
 #include "../../src/materials.h"
-#include "../../src/camera.h"
-#include "../../src/renderer.h"
+#include "../../src/render.h"
 #include "../../src/my_random.h"
 
 Hitable* randomScene() {
@@ -29,10 +28,6 @@ Hitable* randomScene() {
                     list[i++] = new Sphere(center, 0.2, new Dielectric(1.5));
                 }
             }
-
-
-
-
         }
     }
 
@@ -43,22 +38,6 @@ Hitable* randomScene() {
     return new HitableList(list, i);
 }
 
-int main(){
-    using namespace std;
-    int nx = 200;
-    int ny = 100;
-    vec3 lookfrom(13,2,3);
-    vec3 lookat(0,0,0);
-    double distToFocus = 10.0;
-    double aperture = 0.1;
-    Camera cam(lookfrom, lookat, vec3(0,1,0), 20, double(nx)/double(ny), aperture, distToFocus);
-    
-    Hitable* world = randomScene();
-
-    Framebuffer fb(nx, ny);
-    const int totalSamples = 100;
-    render(cam, world, fb, totalSamples, 500, metalColor);
-    writePpm(fb, cout);
-
-    return 0;
+int main(int argc, char** argv) {
+    return render(argc, argv, randomScene());
 }
