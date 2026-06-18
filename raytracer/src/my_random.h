@@ -1,35 +1,40 @@
 #pragma once
-#include<random>
-#include"vec3.h"
 
-/** 
- * \brief generate a random double
- * \param min inclusive start range
- * \param max exclusive end range
+#include <random>
+#include "vec3.h"
+
+/**
+ * \brief Uniform random double in [\p min, \p max).
+ * \param min inclusive lower bound
+ * \param max exclusive upper bound
  */
-inline double randomDouble(double min, double max){
-    std::random_device rd;
-    static std::mt19937_64 engine(rd());
-    static std::uniform_real_distribution<> dist(0, 1.0);
+inline double randomDouble(double min, double max) {
+    static std::mt19937_64 engine{std::random_device{}()};
+    static std::uniform_real_distribution<> dist(0.0, 1.0);
     return min + (max - min) * dist(engine);
 }
 
 /**
- * \brief generates random point vector from center of sphere to a point within using rejection algorithm
- * \returns unit vector satisfying location within sphere
+ * \brief Random point inside the unit sphere
  */
-inline vec3 randomInSphere(){
-    vec3 p;
-    do {
-        p = 2.0 * vec3(randomDouble(0.0,1.0), randomDouble(0.0,1.0), randomDouble(0.0,1.0)) - vec3(1,1,1);
-    } while (p.squared_norm() >= 1.0);
-    return p;
+inline vec3 randomInSphere() {
+    double u = randomDouble(0, 1);
+    double v = randomDouble(0, 1);
+    double w = randomDouble(0, 1);
+    double theta = 2 * M_PI * u;
+    double phi = std::acos(2 * v - 1);   // uniform on sphere
+    double r = std::cbrt(w);             // cbrt, not sqrt — volume element
+    double s = std::sin(phi);
+    return vec3(r * s * std::cos(theta), r * s * std::sin(theta), r * std::cos(phi));
 }
 
-inline vec3 randomInDisc(){
-    vec3 p;
-    do {
-        p = 2.0 * vec3(randomDouble(0.0,1.0), randomDouble(0.0,1.0), 0) - vec3(1,1,0);
-    } while(p.squared_norm() >= 1.0);
-    return p;
+/**
+ * \brief Random point inside the unit disc in the xy-plane.
+ */
+inline vec3 randomInDisc() {
+    double u = randomDouble(0,1);
+    double v = randomDouble(0,1);
+    double theta = 2*M_PI * u;
+    double r = std::sqrt(v);
+    return vec3(r * std::cos(theta), r * std::sin(theta), 0);
 }

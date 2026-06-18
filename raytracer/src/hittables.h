@@ -1,5 +1,6 @@
 #pragma once
-#include"hitable.h"
-#include"hitable_list.h"
-#include"sphere.h"
 
+/** Convenience include for scene primitives and containers. */
+#include "hitable.h"
+#include "hitable_list.h"
+#include "sphere.h"

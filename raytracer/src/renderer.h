@@ -3,21 +3,14 @@
 #include "camera.h"
 #include "framebuffer.h"
 #include "my_random.h"
+#include <cstdint>
 #include <iostream>
+#include <vector>
 
 /**
-*\brief connects the viewport to the world by shooting rays
-*\param cam Camera object to be used
-*\param i horizontal index
-*\param j vertical index
-*\param nx total pixels in x
-*\param ny total pixels in y
-*\param world collection of Hitable objects to be considered
-*\param depth max number of collisions
-*\param objCol strategy used for coloring
-*\returns color vector that is added to a framebuffer pixel \relates renderPass
-*/
-
+ * \brief Traces one stratified sample for a single pixel.
+ * \returns Estimated radiance for that pixel sample
+ */
 inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth, Camera::objectColor objCol) {
     double u = (i + randomDouble(0.0, 1.0)) / double(nx);
     double v = (j + randomDouble(0.0, 1.0)) / double(ny);
@@ -26,10 +19,8 @@ inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable
 }
 
 /**
-*\brief writes color samples to a framebuffer entry
-*\param fb framebuffer that is written to
-*\relates samplePixel
-*/
+ * \brief Adds one sample per pixel across the framebuffer.
+ */
 inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth, Camera::objectColor objCol) {
     for (int j = fb.height - 1; j >= 0; j--) {
         for (int i = 0; i < fb.width; i++) {
@@ -39,9 +30,8 @@ inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth, 
 }
 
 /**
-*\brief writes color samples across the whole framebuffer
-*\param samplesThisFrame number of passes through the framebuffer
-*/
+ * \brief Runs \p samplesThisFrame independent passes over the framebuffer.
+ */
 inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth, Camera::objectColor objCol) {
     for (int s = 0; s < samplesThisFrame; s++) {
         renderPass(cam, world, fb, depth, objCol);
@@ -49,9 +39,27 @@ inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int sample
 }
 
 /**
-*\brief takes the color vectors stored in the framebuffer and writes to output stream in RGB format
-*\param out ostream to write to
-*/
+ * \brief Packs averaged framebuffer colors into interleaved RGB bytes (top row first) laid out as [R,G,B,R,G,B], for SDL's SDL_PIXELFORMAT_RGB24
+ * \sa SDL_View::present
+ */
+inline void framebufferToRgb(const Framebuffer& fb, std::vector<uint8_t>& rgb) {
+    rgb.resize(fb.width * fb.height * 3);
+    for (int row = 0; row < fb.height; ++row) {
+        const int j = fb.height - 1 - row;
+        for (int i = 0; i < fb.width; ++i) {
+            vec3 col = fb.pixel(i, j);
+            const int idx = (row * fb.width + i) * 3;
+            rgb[idx] = static_cast<uint8_t>(255.99 * col[0]);
+            rgb[idx + 1] = static_cast<uint8_t>(255.99 * col[1]);
+            rgb[idx + 2] = static_cast<uint8_t>(255.99 * col[2]);
+        }
+    }
+}
+
+/**
+ * \brief Writes the framebuffer as an ASCII PPM image.
+ * \param out output stream
+ */
 inline void writePpm(const Framebuffer& fb, std::ostream& out) {
     out << "P3\n" << fb.width << " " << fb.height << "\n255\n";
     for (int j = fb.height - 1; j >= 0; j--) {

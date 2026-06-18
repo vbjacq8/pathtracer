@@ -1,17 +1,33 @@
 # pathtracer
 
-A header-only CPU ray tracer written in C++ (no external dependencies, no services, no network). Source lives in `raytracer/src/*.h`; the runnable entry point is `raytracer/test/cpp/camera.cpp`, which renders a 200×100 scene and writes a PPM image to stdout.
+A header-only CPU path tracer in C++ (no external dependencies for batch rendering). Core source lives in `raytracer/src/*.h`; batch entry points are under `raytracer/test/cpp/`.
 
 ## Cursor Cloud specific instructions
 
-- This is a standalone C++ CLI program. There are **no long-running services**, databases, or ports — "running the app" means compiling the entry point and rendering an image.
-- No package manager or dependency manifest exists; the only requirement is a C++ compiler (`g++` is preinstalled on the VM). Nothing needs to be installed.
-- Build and run (the headers are included via relative paths, so the output binary location does not matter):
-  ```
-  cd raytracer
-  g++ -std=c++11 -O2 test/cpp/camera.cpp -o test/exec/camera
-  ./test/exec/camera > test/out/camera.ppm
-  ```
-- `raytracer/test/**` and `*.out` are gitignored, so build artifacts and rendered `.ppm` output are not tracked.
-- Gotcha: the VM has no image viewer/`convert`/Pillow by default. To turn the `.ppm` into a viewable PNG, use a small Python stdlib script (`zlib` + `struct`) rather than relying on ImageMagick or PIL.
-- There is no test framework or lint config; `camera.cpp` under `test/` is a manual render/demo, not an automated test suite.
+- This is a standalone C++ CLI program. There are **no long-running services**, databases, or ports — "running the app" means compiling an entry point and rendering an image.
+- Batch mode needs only a C++ compiler (`g++`). Interactive mode additionally requires **SDL2** (`brew install sdl2` on macOS).
+- `raytracer/test/**` and `*.out` are gitignored, so build artifacts and rendered output are not tracked.
+- Gotcha: the VM has no image viewer by default. Use `scripts/ppm_to_png.py` (stdlib only) to convert `.ppm` output to PNG.
+- There is no test framework; files under `raytracer/test/cpp/` are manual demos.
+
+### Batch render (PPM → PNG)
+
+```bash
+./run_cpp_test.sh random_scene.cpp --width 400 --samples 50
+```
+
+Output: `raytracer/test/out/<name>.ppm` and `.png`.
+
+### Interactive render (SDL2 window, progressive accumulation)
+
+```bash
+brew install sdl2   # once, on macOS
+./run_interactive.sh interactive_camera.cpp --width 640 --height 360   # small scene, fast
+./run_interactive.sh interactive_scene.cpp --width 800 --height 450    # full random scene
+```
+
+Architecture: `raytracer/src/mvc/` — model (`RenderModel`), view (`SdlView`), controller (`RenderController`).
+
+Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, R reset accumulation, Esc quit.
+
+CLI options (`--lookfrom`, `--vfov`, `--depth`, etc.) are shared with batch mode via `parseOptions`.
