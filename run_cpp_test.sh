@@ -90,7 +90,7 @@ for lib_file in parse.cpp render.cpp; do
     fi
 done
 
-"${CXX:-g++}" -std=c++20 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR" "$source_file" "${lib_sources[@]}" -o "$executable"
+"${CXX:-g++}" -std=c++20 -O2 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR" "$source_file" "${lib_sources[@]}" -o "$executable"
 
 for arg in ${program_args[@]+"${program_args[@]}"}; do
     if [[ "$arg" == "--help" || "$arg" == "-?" ]]; then

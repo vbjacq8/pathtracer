@@ -17,7 +17,7 @@ static void printUsage(const char* prog) {
         << "  --aperture A            Lens aperture (default 0.1, 0 for pinhole)\n"
         << "  --focus-dist D          Focus distance (default 10)\n"
         << "  --samples, -s N         Samples per pixel (default 100)\n"
-        << "  --depth, -d N           Max ray bounce depth (default 500)\n"
+        << "  --depth, -d N           Max ray bounce depth (default 50)\n"
         << "  --help                  Show this help\n"
         << "\nExample:\n"
         << "  " << prog << " --width 400 --samples 50 --lookfrom 13 2 3 --lookat 0 0 0\n";

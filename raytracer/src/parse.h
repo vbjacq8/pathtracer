@@ -2,6 +2,9 @@
 
 #include "vec3.h"
 
+/**
+ * \brief Command-line render settings shared by batch and interactive modes.
+ */
 struct RenderOptions {
     int width = 200;
     int height = 0;
@@ -13,8 +16,11 @@ struct RenderOptions {
     double aperture = 0.1;
     double focusDist = 10.0;
     int samples = 100;
-    int depth = 500;
+    int depth = 50;
 };
 
-/** Returns 0 on success, 1 on error, 2 when --help was requested. */
+/**
+ * \brief Parses CLI options into \p opts.
+ * \returns 0 on success, 1 on error, 2 when --help was requested
+ */
 int parseOptions(int argc, char** argv, RenderOptions& opts);
