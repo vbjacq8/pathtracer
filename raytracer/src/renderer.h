@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera.h"
+#include "color.h"
 #include "framebuffer.h"
 #include "my_random.h"
 #include <cstdint>
@@ -11,30 +12,26 @@
  * \brief Traces one stratified sample for a single pixel.
  * \returns Estimated radiance for that pixel sample
  */
-inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth, Camera::objectColor objCol) {
+inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth) {
     double u = (i + randomDouble(0.0, 1.0)) / double(nx);
     double v = (j + randomDouble(0.0, 1.0)) / double(ny);
     Ray r = cam.getRay(u, v);
-    return objCol(r, world, depth, 0);
+    return pathTrace(r, world, depth);
 }
 
-/**
- * \brief Adds one sample per pixel across the framebuffer.
- */
-inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth, Camera::objectColor objCol) {
+/** \brief Adds one sample per pixel across the framebuffer. */
+inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth) {
     for (int j = fb.height - 1; j >= 0; j--) {
         for (int i = 0; i < fb.width; i++) {
-            fb.addSample(i, j, samplePixel(cam, i, j, fb.width, fb.height, world, depth, objCol));
+            fb.addSample(i, j, samplePixel(cam, i, j, fb.width, fb.height, world, depth));
         }
     }
 }
 
-/**
- * \brief Runs \p samplesThisFrame independent passes over the framebuffer.
- */
-inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth, Camera::objectColor objCol) {
+/** \brief Runs \p samplesThisFrame independent passes over the framebuffer. */
+inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth) {
     for (int s = 0; s < samplesThisFrame; s++) {
-        renderPass(cam, world, fb, depth, objCol);
+        renderPass(cam, world, fb, depth);
     }
 }
 

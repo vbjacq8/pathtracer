@@ -1,7 +1,6 @@
 #include "render.h"
 
 #include "camera.h"
-#include "color.h"
 #include "renderer.h"
 
 #include <iostream>
@@ -27,7 +26,7 @@ int render(int argc, char** argv, Hitable* world) {
     Camera cam(opts.lookfrom, opts.lookat, opts.vup, opts.vfov, aspect, opts.aperture, opts.focusDist);
 
     Framebuffer fb(nx, ny);
-    renderFrame(cam, world, fb, opts.samples, opts.depth, metalColor);
+    renderFrame(cam, world, fb, opts.samples, opts.depth);
     writePpm(fb, std::cout);
 
     return 0;

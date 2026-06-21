@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../camera.h"
-#include "../color.h"
 #include "../framebuffer.h"
 #include "../hitable.h"
 #include "../parse.h"
@@ -13,10 +12,9 @@
  */
 class RenderModel {
 public:
-    RenderModel(Hitable* world, const RenderOptions& opts, Camera::objectColor colorFn = metalColor)
+    RenderModel(Hitable* world, const RenderOptions& opts)
         : opts_(opts),
           world_(world),
-          colorFn_(colorFn),
           fb_(opts.width, renderHeight(opts)),
           cam_(makeCamera(opts)) {}
 
@@ -32,7 +30,7 @@ public:
 
     /** \brief Adds one sample per pixel. */
     void accumulatePass() {
-        renderPass(cam_, world_, fb_, opts_.depth, colorFn_);
+        renderPass(cam_, world_, fb_, opts_.depth);
     }
 
     const Framebuffer& framebuffer() const {
@@ -68,7 +66,6 @@ public:
 private:
     RenderOptions opts_;
     Hitable* world_;
-    Camera::objectColor colorFn_;
     Framebuffer fb_;
     Camera cam_;
     bool cameraDirty_ = false;

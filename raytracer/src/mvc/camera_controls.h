@@ -75,7 +75,7 @@ inline void panCamera(RenderOptions& opts, double dx, double dy) {
 /** \brief Moves \p lookfrom and \p lookat along the view forward and right axes. */
 inline void flyCamera(RenderOptions& opts, double forwardAmt, double rightAmt) {
     vec3 forward = unit_vector(opts.lookat - opts.lookfrom);
-    vec3 right = unit_vector(cross(opts.vup, forward));
+    vec3 right = unit_vector(-1 * cross(opts.vup, forward));
     vec3 delta = forward * forwardAmt + right * rightAmt;
     opts.lookfrom += delta;
     opts.lookat += delta;

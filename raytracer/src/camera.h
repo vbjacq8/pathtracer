@@ -3,7 +3,6 @@
 
 #include "color.h"
 #include "my_random.h"
-#include <functional>
 
 /**
  * \brief Pinhole or thin-lens camera that generates primary rays through a viewport.
@@ -70,14 +69,11 @@ public:
         return Ray(origin + offset, lowerLeftCorner + s * horizontal + t * vertical - origin - offset);
     }
 
-    /** \brief Integrator callback used by the sampling helpers below. */
-    using objectColor = std::function<vec3(const Ray&, Hitable*, int, int)>;
-
     /**
      * \brief Supersamples one pixel with \p numSamples jittered rays.
      * \returns Averaged radiance for pixel (\p i, \p j)
      */
-    vec3 colorSample(int i, int j, int nx, int ny, int numSamples, Hitable* world, int depth, objectColor objCol) {
+    vec3 colorSample(int i, int j, int nx, int ny, int numSamples, Hitable* world, int depth) {
         vec3 col(0, 0, 0);
         for (int k = 0; k < numSamples; k++) {
             double randcoeff1 = randomDouble(0.0, 1.0);
@@ -85,22 +81,7 @@ public:
             double u = double(i + randcoeff1) / double(nx);
             double v = double(j + randcoeff2) / double(ny);
             Ray r = getRay(u, v);
-            col += objCol(r, world, depth, 0);
-        }
-        col /= numSamples;
-        return col;
-    }
-
-    /** \brief Like colorSample, but always uses metalColor as the integrator. */
-    vec3 metalColorSample(int i, int j, int nx, int ny, int numSamples, Hitable* world, int depth) {
-        vec3 col(0, 0, 0);
-        for (int k = 0; k < numSamples; k++) {
-            double randcoeff1 = randomDouble(0.0, 1.0);
-            double randcoeff2 = randomDouble(0.0, 1.0);
-            double u = double(i + randcoeff1) / double(nx);
-            double v = double(j + randcoeff2) / double(ny);
-            Ray r = getRay(u, v);
-            col += metalColor(r, world, depth, 0);
+            col += pathTrace(r, world, depth);
         }
         col /= numSamples;
         return col;

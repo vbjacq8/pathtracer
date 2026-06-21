@@ -1,96 +1,83 @@
 #pragma once
 
 #include "hitable_list.h"
+#include <algorithm>
 #include <float.h>
 #include "my_random.h"
 
-/**
- * Path-tracing integrators. Each function takes ray \p r, scene \p world,
- * bounce limit \p depth, and recursion index \p i.
+namespace {
+constexpr int kMinBouncesBeforeRoulette = 5;
+constexpr double kSurvivalMin = 0.05; ///< avoids throughput / survival blowing up when survival -> 0
+constexpr double kSurvivalMax = 0.95; ///< makes sure atleast 5% of rays die (useful for optimizing bright scenes)
+constexpr double kHitEps = 0.001; ///< minimum t parameter of the ray to count as a hit
+
+/** 
+ * \brief determines maximum component of a vector
+ * \sa applyRussianRoulette; used to determine throughput brightness 
  */
+inline double maxComponent(const vec3& v) {
+    return std::max(v.r(), std::max(v.g(), v.b()));
+}
+
+/**
+ * \brief Throughput-based Russian roulette after \p bounce. 
+ * \param throughput path weight updated with 1/survival when the path continues; side-effect based functionality
+ * \returns false when the path should terminate
+ */
+inline bool applyRussianRoulette(vec3& throughput, int bounce) {
+    if (bounce < kMinBouncesBeforeRoulette) {
+        return true;
+    }
+    const double survival = std::max(kSurvivalMin, std::min(maxComponent(throughput), kSurvivalMax));
+    if (randomDouble(0.0, 1.0) > survival) {
+        return false;
+    }
+    throughput /= survival;
+    return true;
+}
+}  // namespace
 
 /**
  * \brief Debug shading from surface normals.
  * \returns Normal map color on hit; sky gradient on miss.
  */
-inline vec3 color(const Ray& r, Hitable* world, int depth, int i = 0) {
+inline vec3 color(const Ray& r, Hitable* world, int depth, int bounce = 0) {
     (void)depth;
-    (void)i;
+    (void)bounce;
     HitRecord hr;
-    if (world->hit(r, 0.001, MAXFLOAT, hr)) {
+    if (world->hit(r, kHitEps, MAXFLOAT, hr)) {
         return 0.5 * vec3(hr.normal.x() + 1.0, hr.normal.y() + 1.0, hr.normal.z() + 1.0);
     }
     return colorBlueWhiteGradient(r);
 }
 
 /**
- * \brief Diffuse path tracing through Lambertian surfaces.
- * \returns Attenuated recursive color on hit; sky gradient on miss.
+ * \brief Path tracing integrator; material behavior comes from Material::scatter at each hit.
+ * \returns Estimated radiance along \p r with throughput-based Russian roulette
+ * \copydoc applyRussianRoulette
  */
-inline vec3 diffuseColor(const Ray& r, Hitable* world, int depth, int i = 0) {
-    if (i >= depth) {
-        return vec3(0, 0, 0);
-    }
-    HitRecord hr;
-    if (world->hit(r, 0.001, MAXFLOAT, hr)) {
-        Ray scattered;
-        vec3 attenuation;
-        if (hr.matPtr && hr.matPtr->scatter(r, hr, attenuation, scattered)) {
-            return attenuation * diffuseColor(scattered, world, depth, i + 1);
-        } else {
-            throw std::runtime_error("scatter returned false");
-        }
-    } else {
-        return colorBlueWhiteGradient(r);
-    }
-}
+inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth) {
+    Ray current = r;
+    vec3 throughput(1, 1, 1);
 
-/**
- * \brief Specular path tracing through metal and dielectric surfaces.
- * \returns Attenuated recursive color on hit; sky gradient on miss.
- */
-inline vec3 metalColor(const Ray& r, Hitable* world, int depth, int i = 0) {
-    if (i >= depth) {
-        return vec3(0, 0, 0);
-    }
-    HitRecord hr;
-    if (world->hit(r, 0.001, MAXFLOAT, hr)) {
+    for (int bounce = 0; bounce < maxDepth; ++bounce) {
+        HitRecord hr;
+        if (!world->hit(current, kHitEps, MAXFLOAT, hr)) {
+            return throughput * colorBlueWhiteGradient(current);
+        }
+
         Ray scattered;
         vec3 attenuation;
-        if (hr.matPtr && hr.matPtr->scatter(r, hr, attenuation, scattered)) {
-            return attenuation * metalColor(scattered, world, depth, i + 1);
-        } else {
-            if (!hr.matPtr) {
-                throw std::runtime_error("null matPtr");
-            }
+        if (!hr.matPtr || !hr.matPtr->scatter(current, hr, attenuation, scattered)) {
             return vec3(0, 0, 0);
         }
-    } else {
-        return colorBlueWhiteGradient(r);
-    }
-}
 
-/**
- * \brief Path tracing with a wider hit tolerance for thin dielectric shells.
- * \returns Attenuated recursive color on hit; sky gradient on miss.
- */
-inline vec3 dielectricColor(const Ray& r, Hitable* world, int depth, int i = 0) {
-    if (i >= depth) {
-        return vec3(0, 0, 0);
-    }
-    HitRecord hr;
-    if (world->hit(r, 0.005, MAXFLOAT, hr)) {
-        Ray scattered;
-        vec3 attenuation;
-        if (hr.matPtr && hr.matPtr->scatter(r, hr, attenuation, scattered)) {
-            return attenuation * dielectricColor(scattered, world, depth, i + 1);
-        } else {
-            if (!hr.matPtr) {
-                throw std::runtime_error("null matPtr");
-            }
+        throughput = throughput * attenuation;
+        if (!applyRussianRoulette(throughput, bounce + 1)) {
             return vec3(0, 0, 0);
         }
-    } else {
-        return colorBlueWhiteGradient(r);
+        current = scattered;
     }
+
+    return vec3(0, 0, 0);
 }
