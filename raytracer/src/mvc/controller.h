@@ -23,6 +23,8 @@ public:
                 handleEvent(event);
             }
 
+            updateHeldMovement();
+
             if (model_.isCameraDirty()) {
                 model_.rebuildCamera();
                 model_.resetAccumulation();
@@ -86,29 +88,31 @@ private:
         }
     }
 
+    void updateHeldMovement() {
+        const MovementKeyState keys = view_.movementKeyState();
+        double forward = 0.0;
+        double right = 0.0;
+        if (keys.forward) {
+            forward += kFlySpeed;
+        }
+        if (keys.back) {
+            forward -= kFlySpeed;
+        }
+        if (keys.left) {
+            right -= kFlySpeed;
+        }
+        if (keys.right) {
+            right += kFlySpeed;
+        }
+        if (forward != 0.0 || right != 0.0) {
+            flyCamera(model_.options(), forward, right);
+            model_.markCameraDirty();
+        }
+    }
+
     void handleKey(int key) {
-        switch (key) {
-            case 'w':
-                flyCamera(model_.options(), kFlySpeed, 0.0);
-                model_.markCameraDirty();
-                break;
-            case 's':
-                flyCamera(model_.options(), -kFlySpeed, 0.0);
-                model_.markCameraDirty();
-                break;
-            case 'a':
-                flyCamera(model_.options(), 0.0, -kFlySpeed);
-                model_.markCameraDirty();
-                break;
-            case 'd':
-                flyCamera(model_.options(), 0.0, kFlySpeed);
-                model_.markCameraDirty();
-                break;
-            case 'r':
-                model_.resetAccumulation();
-                break;
-            default:
-                break;
+        if (key == 'r') {
+            model_.resetAccumulation();
         }
     }
 

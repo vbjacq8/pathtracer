@@ -126,6 +126,16 @@ public:
         return out.type != ViewEventType::None;
     }
 
+    MovementKeyState movementKeyState() const override {
+        const Uint8* state = SDL_GetKeyboardState(nullptr);
+        return MovementKeyState{
+            state[SDL_SCANCODE_W] != 0,
+            state[SDL_SCANCODE_S] != 0,
+            state[SDL_SCANCODE_A] != 0,
+            state[SDL_SCANCODE_D] != 0,
+        };
+    }
+
     /**
     *\brief converts framebuffer data into a rendered SDL window that is displayed
     *\param samples \copydoc RenderModel::sampleCount

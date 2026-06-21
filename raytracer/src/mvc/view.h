@@ -3,6 +3,14 @@
 #include "../framebuffer.h"
 #include "view_events.h"
 
+/** \brief WASD movement keys currently held down. */
+struct MovementKeyState {
+    bool forward = false;
+    bool back = false;
+    bool left = false;
+    bool right = false;
+};
+
 /**
  * \brief Abstract display and input surface for the interactive renderer.
  */
@@ -15,6 +23,9 @@ public:
      * \returns false when the event queue is empty
      */
     virtual bool pollEvent(ViewEvent& out) = 0;
+
+    /** \returns Which movement keys are currently held (polled each frame). */
+    virtual MovementKeyState movementKeyState() const = 0;
 
     /**
      * \brief Shows the current accumulated image.
