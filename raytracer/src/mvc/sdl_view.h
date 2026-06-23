@@ -8,7 +8,16 @@
 /**
  * \brief Creates an SDL-backed View.
  * \param title initial window title
- * \param width window width in pixels
- * \param height window height in pixels
+ * \param renderWidth internal render width in pixels
+ * \param renderHeight internal render height in pixels
+ * \param displayWidth window width (ignored when \p fullscreen; resolved at runtime)
+ * \param displayHeight window height (ignored when \p fullscreen; resolved at runtime)
+ * \param fullscreen use borderless fullscreen desktop mode
  */
-std::unique_ptr<View> makeSdlView(const std::string& title, int width, int height);
+std::unique_ptr<View> makeSdlView(
+    const std::string& title,
+    int renderWidth,
+    int renderHeight,
+    int displayWidth,
+    int displayHeight,
+    bool fullscreen);

@@ -7,6 +7,7 @@
 
 int interactiveRender(int argc, char** argv, Hitable* world) {
     RenderOptions opts;
+    opts.samples = 1;
     switch (parseOptions(argc, argv, opts)) {
         case 0:
             break;
@@ -18,7 +19,13 @@ int interactiveRender(int argc, char** argv, Hitable* world) {
 
     const int height = renderHeight(opts);
     RenderModel model(world, opts);
-    auto view = makeSdlView("pathtracer", opts.width, height);
+    auto view = makeSdlView(
+        "pathtracer",
+        opts.width,
+        height,
+        opts.displayWidth,
+        opts.displayHeight,
+        opts.fullscreen);
     RenderController controller(model, *view);
     controller.run();
     return 0;

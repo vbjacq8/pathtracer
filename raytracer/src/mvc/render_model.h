@@ -33,6 +33,13 @@ public:
         renderPass(cam_, world_, fb_, opts_.depth);
     }
 
+    /** \brief Adds \p opts.samples passes (one sample per pixel each). */
+    void accumulateFrame() {
+        for (int i = 0; i < opts_.samples; ++i) {
+            renderPass(cam_, world_, fb_, opts_.depth);
+        }
+    }
+
     const Framebuffer& framebuffer() const {
         return fb_;
     }

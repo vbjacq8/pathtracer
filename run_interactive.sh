@@ -11,9 +11,10 @@ usage() {
     echo "Usage: $0 [source.cpp] [program args...]" >&2
     echo "Builds an interactive SDL viewer from raytracer/test/cpp and runs it." >&2
     echo "Requires SDL2 (brew install sdl2 on macOS)." >&2
-    echo "Example: $0 interactive_scene.cpp --width 800 --height 450" >&2
+    echo "Example: $0 interactive_scene.cpp --width 800 --height 450 --fullscreen" >&2
+    echo "         $0 interactive_scene.cpp --width 640 --height 360 --display-width 1920 --display-height 1080" >&2
     echo "" >&2
-    echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, R reset, Esc quit" >&2
+    echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, Space/Shift pan vertical, R reset, Esc quit" >&2
 }
 
 sdl_cflags() {
@@ -132,5 +133,5 @@ for arg in ${program_args[@]+"${program_args[@]}"}; do
 done
 
 echo "Built $executable"
-echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, R reset, Esc quit"
+echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, Space/Shift pan vertical, R reset, Esc quit"
 "$executable" ${program_args[@]+"${program_args[@]}"}

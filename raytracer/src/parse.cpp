@@ -16,8 +16,12 @@ static void printUsage(const char* prog) {
         << "  --vfov DEG              Vertical field of view (default 20)\n"
         << "  --aperture A            Lens aperture (default 0.1, 0 for pinhole)\n"
         << "  --focus-dist D          Focus distance (default 10)\n"
-        << "  --samples, -s N         Samples per pixel (default 100)\n"
+        << "  --samples, -s N         Batch: total samples per pixel (default 100).\n"
+        << "                          Interactive: samples per frame (default 1).\n"
         << "  --depth, -d N           Max ray bounce depth (default 50)\n"
+        << "  --display-width N       Window width (default: render width)\n"
+        << "  --display-height N      Window height (default: render height)\n"
+        << "  --fullscreen            Fullscreen desktop; upscale render to display\n"
         << "  --help                  Show this help\n"
         << "\nExample:\n"
         << "  " << prog << " --width 400 --samples 50 --lookfrom 13 2 3 --lookat 0 0 0\n";
@@ -126,6 +130,22 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
             }
             continue;
         }
+        if (arg == "--display-width") {
+            if (++i >= argc || !parseInt(argv[i], opts.displayWidth)) {
+                return 1;
+            }
+            continue;
+        }
+        if (arg == "--display-height") {
+            if (++i >= argc || !parseInt(argv[i], opts.displayHeight)) {
+                return 1;
+            }
+            continue;
+        }
+        if (arg == "--fullscreen") {
+            opts.fullscreen = true;
+            continue;
+        }
 
         std::cerr << "Unknown option: " << arg << "\n";
         printUsage(argv[0]);
@@ -140,6 +160,27 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
         opts.height = static_cast<int>(opts.width / opts.aspect);
         if (opts.height <= 0) {
             std::cerr << "Computed height must be positive; check width and aspect.\n";
+            return 1;
+        }
+    }
+
+    if (opts.displayWidth < 0 || opts.displayHeight < 0) {
+        std::cerr << "display-width and display-height must be non-negative.\n";
+        return 1;
+    }
+    if (!opts.fullscreen) {
+        if (opts.displayWidth == 0 && opts.displayHeight == 0) {
+            opts.displayWidth = opts.width;
+            opts.displayHeight = opts.height;
+        } else if (opts.displayWidth == 0) {
+            opts.displayWidth = static_cast<int>(
+                opts.displayHeight * static_cast<double>(opts.width) / opts.height);
+        } else if (opts.displayHeight == 0) {
+            opts.displayHeight = static_cast<int>(
+                opts.displayWidth * static_cast<double>(opts.height) / opts.width);
+        }
+        if (opts.displayWidth <= 0 || opts.displayHeight <= 0) {
+            std::cerr << "display-width and display-height must be positive.\n";
             return 1;
         }
     }

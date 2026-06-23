@@ -3,12 +3,14 @@
 #include "../framebuffer.h"
 #include "view_events.h"
 
-/** \brief WASD movement keys currently held down. */
+/** \brief Movement keys currently held down. */
 struct MovementKeyState {
     bool forward = false;
     bool back = false;
     bool left = false;
     bool right = false;
+    bool panUp = false;
+    bool panDown = false;
 };
 
 /**

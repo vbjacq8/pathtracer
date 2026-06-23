@@ -6,7 +6,8 @@
 #include <iostream>
 
 /**
-    \brief render method that takes CLI arguments, 
+    \brief render method that takes CLI arguments; entry point into batch render
+    \copydoc renderFrame (in renderer.h)
  */
 int render(int argc, char** argv, Hitable* world) {
     RenderOptions opts;

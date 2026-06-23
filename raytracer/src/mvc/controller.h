@@ -31,7 +31,7 @@ public:
                 model_.clearCameraDirty();
             }
 
-            model_.accumulatePass();
+            model_.accumulateFrame();
             view_.present(model_.framebuffer(), model_.sampleCount());
         }
     }
@@ -92,6 +92,7 @@ private:
         const MovementKeyState keys = view_.movementKeyState();
         double forward = 0.0;
         double right = 0.0;
+        double panVertical = 0.0;
         if (keys.forward) {
             forward += kFlySpeed;
         }
@@ -104,8 +105,23 @@ private:
         if (keys.right) {
             right += kFlySpeed;
         }
+        if (keys.panUp) {
+            panVertical += kFlySpeed;
+        }
+        if (keys.panDown) {
+            panVertical -= kFlySpeed;
+        }
+
+        bool moved = false;
         if (forward != 0.0 || right != 0.0) {
             flyCamera(model_.options(), forward, right);
+            moved = true;
+        }
+        if (panVertical != 0.0) {
+            panCamera(model_.options(), 0.0, panVertical);
+            moved = true;
+        }
+        if (moved) {
             model_.markCameraDirty();
         }
     }

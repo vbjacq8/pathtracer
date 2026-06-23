@@ -17,6 +17,9 @@ struct RenderOptions {
     double focusDist = 10.0;
     int samples = 100;
     int depth = 50;
+    int displayWidth = 0;
+    int displayHeight = 0;
+    bool fullscreen = false;
 };
 
 /**

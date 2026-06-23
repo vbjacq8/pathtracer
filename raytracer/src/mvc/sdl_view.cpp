@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <memory>
@@ -15,44 +16,64 @@
 
 class SdlView : public View {
 public:
-    SdlView(const std::string& title, int width, int height)
-        : width_(width), height_(height), pixels_(width * height * 3) {
+    SdlView(
+        const std::string& title,
+        int renderWidth,
+        int renderHeight,
+        int displayWidth,
+        int displayHeight,
+        bool fullscreen)
+        : renderWidth_(renderWidth),
+          renderHeight_(renderHeight),
+          displayWidth_(displayWidth),
+          displayHeight_(displayHeight),
+          pixels_(renderWidth * renderHeight * 3) {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             std::fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
             std::exit(1);
         }
 
-        //Initialize SDL window and position
+        Uint32 windowFlags = SDL_WINDOW_SHOWN;
+        if (fullscreen) {
+            windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        }
+
+        const int windowWidth = fullscreen ? renderWidth : displayWidth;
+        const int windowHeight = fullscreen ? renderHeight : displayHeight;
         window_ = SDL_CreateWindow(
             title.c_str(),
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
-            width,
-            height,
-            SDL_WINDOW_SHOWN);
+            windowWidth,
+            windowHeight,
+            windowFlags);
         if (!window_) {
             std::fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
             std::exit(1);
         }
 
-        //Initialize SDL renderer, connecting it to SDL window
+        if (fullscreen) {
+            SDL_GetWindowSize(window_, &displayWidth_, &displayHeight_);
+        }
+
         renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
         if (!renderer_) {
             std::fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
             std::exit(1);
         }
 
-        //Initialize SDL texture, connecting it to SDL renderer
         texture_ = SDL_CreateTexture(
             renderer_,
             SDL_PIXELFORMAT_RGB24,
             SDL_TEXTUREACCESS_STREAMING,
-            width,
-            height);
+            renderWidth,
+            renderHeight);
         if (!texture_) {
             std::fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
             std::exit(1);
         }
+
+        SDL_SetTextureScaleMode(texture_, SDL_ScaleModeNearest);
     }
 
     ~SdlView() override {
@@ -69,7 +90,7 @@ public:
     }
 
     /**
-    *\brief Observer that prepares the event 
+    *\brief Observer that prepares the event
     *\param out ViewEvent that is to be handled
     *\returns boolean; \sa RenderController::run() (used in while loop)
     */
@@ -88,21 +109,21 @@ public:
             case SDL_MOUSEBUTTONDOWN:
                 out.type = ViewEventType::MouseButtonDown;
                 out.button = sdlEvent.button.button;
-                out.x = sdlEvent.button.x;
-                out.y = sdlEvent.button.y;
+                out.x = mapToRenderX(sdlEvent.button.x);
+                out.y = mapToRenderY(sdlEvent.button.y);
                 break;
             case SDL_MOUSEBUTTONUP:
                 out.type = ViewEventType::MouseButtonUp;
                 out.button = sdlEvent.button.button;
-                out.x = sdlEvent.button.x;
-                out.y = sdlEvent.button.y;
+                out.x = mapToRenderX(sdlEvent.button.x);
+                out.y = mapToRenderY(sdlEvent.button.y);
                 break;
             case SDL_MOUSEMOTION:
                 out.type = ViewEventType::MouseMotion;
-                out.x = sdlEvent.motion.x;
-                out.y = sdlEvent.motion.y;
-                out.xrel = sdlEvent.motion.xrel;
-                out.yrel = sdlEvent.motion.yrel;
+                out.x = mapToRenderX(sdlEvent.motion.x);
+                out.y = mapToRenderY(sdlEvent.motion.y);
+                out.xrel = mapDeltaToRenderX(sdlEvent.motion.xrel);
+                out.yrel = mapDeltaToRenderY(sdlEvent.motion.yrel);
                 break;
             case SDL_MOUSEWHEEL:
                 out.type = ViewEventType::MouseWheel;
@@ -133,6 +154,8 @@ public:
             state[SDL_SCANCODE_S] != 0,
             state[SDL_SCANCODE_A] != 0,
             state[SDL_SCANCODE_D] != 0,
+            state[SDL_SCANCODE_SPACE] != 0,
+            state[SDL_SCANCODE_LSHIFT] != 0 || state[SDL_SCANCODE_RSHIFT] != 0,
         };
     }
 
@@ -150,8 +173,8 @@ public:
             return;
         }
 
-        const int rowBytes = width_ * 3;
-        for (int row = 0; row < height_; ++row) {
+        const int rowBytes = renderWidth_ * 3;
+        for (int row = 0; row < renderHeight_; ++row) {
             std::memcpy(
                 static_cast<char*>(pixels) + row * pitch,
                 pixels_.data() + row * rowBytes,
@@ -160,11 +183,21 @@ public:
 
         SDL_UnlockTexture(texture_);
         SDL_RenderClear(renderer_);
-        SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
+
+        SDL_Rect dst{0, 0, displayWidth_, displayHeight_};
+        SDL_RenderCopy(renderer_, texture_, nullptr, &dst);
         SDL_RenderPresent(renderer_);
 
         char title[128];
-        std::snprintf(title, sizeof(title), "pathtracer — %d samples", samples);
+        std::snprintf(
+            title,
+            sizeof(title),
+            "pathtracer — %d samples (%dx%d -> %dx%d)",
+            samples,
+            renderWidth_,
+            renderHeight_,
+            displayWidth_,
+            displayHeight_);
         SDL_SetWindowTitle(window_, title);
     }
 
@@ -173,8 +206,32 @@ public:
     }
 
 private:
-    int width_;
-    int height_;
+    int mapToRenderX(int windowX) const {
+        const int x = static_cast<int>(
+            windowX * static_cast<double>(renderWidth_) / displayWidth_);
+        return std::clamp(x, 0, renderWidth_ - 1);
+    }
+
+    int mapToRenderY(int windowY) const {
+        const int y = static_cast<int>(
+            windowY * static_cast<double>(renderHeight_) / displayHeight_);
+        return std::clamp(y, 0, renderHeight_ - 1);
+    }
+
+    int mapDeltaToRenderX(int delta) const {
+        return static_cast<int>(
+            delta * static_cast<double>(renderWidth_) / displayWidth_);
+    }
+
+    int mapDeltaToRenderY(int delta) const {
+        return static_cast<int>(
+            delta * static_cast<double>(renderHeight_) / displayHeight_);
+    }
+
+    int renderWidth_;
+    int renderHeight_;
+    int displayWidth_;
+    int displayHeight_;
     std::vector<uint8_t> pixels_;
     SDL_Window* window_ = nullptr;
     SDL_Renderer* renderer_ = nullptr;
@@ -182,6 +239,18 @@ private:
     bool shouldClose_ = false;
 };
 
-std::unique_ptr<View> makeSdlView(const std::string& title, int width, int height) {
-    return std::make_unique<SdlView>(title, width, height);
+std::unique_ptr<View> makeSdlView(
+    const std::string& title,
+    int renderWidth,
+    int renderHeight,
+    int displayWidth,
+    int displayHeight,
+    bool fullscreen) {
+    return std::make_unique<SdlView>(
+        title,
+        renderWidth,
+        renderHeight,
+        displayWidth,
+        displayHeight,
+        fullscreen);
 }
