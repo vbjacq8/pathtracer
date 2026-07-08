@@ -148,4 +148,22 @@ inline void vec3::make_unit_vector() {
     *this /= magnitude;
 }
 
+inline vec3 min3(vec3& v1, vec3& v2){
+    return vec3(
+        fminf(v1[0], v2[0]),
+        fminf(v1[1], v2[1]),
+        fminf(v1[2], v2[2])
+    );
+}
+
+inline vec3 max3(vec3& v1, vec3& v2){
+    return vec3(
+        fmaxf(v1[0], v2[0]),
+        fmaxf(v1[1], v2[1]),
+        fmaxf(v1[2], v2[2])
+    );
+}
+
+
+
 #endif

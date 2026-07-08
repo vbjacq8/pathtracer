@@ -11,7 +11,9 @@ class Sphere : public Hitable {
 public:
     Sphere() {}
     Sphere(const vec3& cen, double R, Material* const mat) : center(cen), radius(R), matPtr(mat) {}
-    virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr);
+    virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
+    AABB boundingBox() const override;
+    vec3 centroid() const override;
 
     vec3 center;
     double radius;
@@ -48,6 +50,16 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
         return true;
     }
     return false;
+}
+
+inline vec3 Sphere::centroid() const { return center; }
+
+inline AABB Sphere::boundingBox() const {
+    const vec3 r(radius, radius, radius);
+    AABB box;
+    box.min = center - r;
+    box.max = center + r;
+    return box;
 }
 
 #endif

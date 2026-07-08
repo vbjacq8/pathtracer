@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+      "name": "macos",
+      "includePath": [
+        "${workspaceFolder}/raytracer/src",
+        "${workspaceFolder}/**"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cppStandard": "c++20",
+      "intelliSenseMode": "macos-clang-arm64"
+    }
+  ],
+  "version": 4
+}

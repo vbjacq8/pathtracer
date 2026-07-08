@@ -1,0 +1,12 @@
+{
+  "editor.parameterHints.enabled": true,
+  "editor.inlayHints.enabled": "on",
+  "clangd.path": "/usr/bin/clangd",
+  "clangd.arguments": [
+    "--header-insertion=never",
+    "--query-driver=/usr/bin/clang++,/usr/bin/g++"
+  ],
+  "files.associations": {
+    "*.h": "cpp"
+  }
+}

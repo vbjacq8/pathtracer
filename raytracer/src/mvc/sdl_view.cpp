@@ -206,23 +206,44 @@ public:
     }
 
 private:
+    /**
+     * \brief Maps a window-space X coordinate to render-buffer space.
+     *
+     * Mouse events from SDL are in display/window pixels, but the path tracer
+     * framebuffer may be smaller when upscaling (e.g. render 640 wide, window
+     * 1920 wide). This scales windowX by renderWidth / displayWidth so orbit
+     * and pan deltas align with traced pixels.
+     *
+     * \param windowX horizontal position in window pixels (origin top-left)
+     * \returns corresponding X in [0, renderWidth_ - 1]
+     */
     int mapToRenderX(int windowX) const {
         const int x = static_cast<int>(
             windowX * static_cast<double>(renderWidth_) / displayWidth_);
         return std::clamp(x, 0, renderWidth_ - 1);
     }
 
+    /**
+     * \brief Maps a window-space Y coordinate to render-buffer space.
+     *
+     * Same scaling as mapToRenderX, using renderHeight / displayHeight.
+     *
+     * \param windowY vertical position in window pixels (origin top-left)
+     * \returns corresponding Y in [0, renderHeight_ - 1]
+     */
     int mapToRenderY(int windowY) const {
         const int y = static_cast<int>(
             windowY * static_cast<double>(renderHeight_) / displayHeight_);
         return std::clamp(y, 0, renderHeight_ - 1);
     }
 
+    /** \brief Scales a horizontal mouse delta from window space to render space. */
     int mapDeltaToRenderX(int delta) const {
         return static_cast<int>(
             delta * static_cast<double>(renderWidth_) / displayWidth_);
     }
 
+    /** \brief Scales a vertical mouse delta from window space to render space. */
     int mapDeltaToRenderY(int delta) const {
         return static_cast<int>(
             delta * static_cast<double>(renderHeight_) / displayHeight_);

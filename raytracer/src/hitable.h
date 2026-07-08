@@ -2,6 +2,7 @@
 #define HITABLE_H
 
 #include "ray.h"
+#include "aabb.h"
 
 class Material;
 
@@ -25,10 +26,15 @@ public:
      * \param r ray to test
      * \param tMin minimum valid hit distance
      * \param tMax maximum valid hit distance
-     * \param hr hit record updated on success
+     * \param hr hit record updated ON SUCCESS; if no hit, hitRecord not updated.
      * \returns true when a hit is found
      */
     virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) = 0;
+
+    /** \returns Axis-aligned bounds of this primitive. */
+    virtual AABB boundingBox() const = 0;
+    /** \returns Centroid used for spatial partitioning. */
+    virtual vec3 centroid() const = 0;
 };
 
 #endif
