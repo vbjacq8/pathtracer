@@ -163,7 +163,7 @@ public:
     *\brief converts framebuffer data into a rendered SDL window that is displayed
     *\param samples \copydoc RenderModel::sampleCount
     */
-    void present(const Framebuffer& fb, int samples) override {
+    void present(const Framebuffer& fb, int samples, int dt) override {
         framebufferToRgb(fb, pixels_);
 
         void* pixels = nullptr;
@@ -188,17 +188,23 @@ public:
         SDL_RenderCopy(renderer_, texture_, nullptr, &dst);
         SDL_RenderPresent(renderer_);
 
-        char title[128];
-        std::snprintf(
-            title,
-            sizeof(title),
-            "pathtracer — %d samples (%dx%d -> %dx%d)",
-            samples,
-            renderWidth_,
-            renderHeight_,
-            displayWidth_,
-            displayHeight_);
-        SDL_SetWindowTitle(window_, title);
+        const int dtMs = std::max(dt, 1);
+        const double fps = 1000.0 / dtMs;
+
+        if (++titleUpdateCounter_ % 15 == 0) {
+            char title[128];
+            std::snprintf(
+                title,
+                sizeof(title),
+                "pathtracer — %d samples — %.1f fps (%dx%d -> %dx%d)",
+                samples,
+                fps,
+                renderWidth_,
+                renderHeight_,
+                displayWidth_,
+                displayHeight_);
+            SDL_SetWindowTitle(window_, title);
+        }
     }
 
     bool shouldClose() const override {
@@ -258,6 +264,7 @@ private:
     SDL_Renderer* renderer_ = nullptr;
     SDL_Texture* texture_ = nullptr;
     bool shouldClose_ = false;
+    int titleUpdateCounter_ = 0;
 };
 
 std::unique_ptr<View> makeSdlView(
