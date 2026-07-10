@@ -5,6 +5,7 @@
 #include "view.h"
 #include "view_events.h"
 
+#include <chrono>
 #include <cmath>
 
 /**
@@ -18,6 +19,8 @@ public:
     /** \brief Runs until the view requests shutdown. */
     void run() {
         while (!view_.shouldClose()) {
+            auto start = std::chrono::steady_clock::now();
+
             ViewEvent event;
             while (view_.pollEvent(event)) {
                 handleEvent(event);
@@ -32,7 +35,9 @@ public:
             }
 
             model_.accumulateFrame();
-            view_.present(model_.framebuffer(), model_.sampleCount());
+            auto end = std::chrono::steady_clock::now();
+            const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+            view_.present(model_.framebuffer(), model_.sampleCount(), static_cast<int>(elapsedMs.count()));
         }
     }
 
@@ -138,4 +143,5 @@ private:
     bool panning_ = false;
     int lastX_ = 0;
     int lastY_ = 0;
+
 };
