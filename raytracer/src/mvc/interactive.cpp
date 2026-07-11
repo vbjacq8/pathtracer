@@ -7,7 +7,7 @@
 
 int interactiveRender(int argc, char** argv, Hitable* world) {
     RenderOptions opts;
-    opts.samples = 1;
+    //opts.samples = 1;
     switch (parseOptions(argc, argv, opts)) {
         case 0:
             break;
@@ -25,6 +25,7 @@ int interactiveRender(int argc, char** argv, Hitable* world) {
         height,
         opts.displayWidth,
         opts.displayHeight,
+        opts.gamma,
         opts.fullscreen);
     RenderController controller(model, *view);
     controller.run();

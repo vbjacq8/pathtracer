@@ -22,11 +22,13 @@ public:
         int renderHeight,
         int displayWidth,
         int displayHeight,
+        double gamma,
         bool fullscreen)
         : renderWidth_(renderWidth),
           renderHeight_(renderHeight),
           displayWidth_(displayWidth),
           displayHeight_(displayHeight),
+          gamma_(gamma),
           pixels_(renderWidth * renderHeight * 3) {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             std::fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
@@ -164,7 +166,7 @@ public:
     *\param samples \copydoc RenderModel::sampleCount
     */
     void present(const Framebuffer& fb, int samples, int dt) override {
-        framebufferToRgb(fb, pixels_);
+        framebufferToRgb(fb, pixels_, gamma_);
 
         void* pixels = nullptr;
         int pitch = 0;
@@ -259,6 +261,7 @@ private:
     int renderHeight_;
     int displayWidth_;
     int displayHeight_;
+    double gamma_;
     std::vector<uint8_t> pixels_;
     SDL_Window* window_ = nullptr;
     SDL_Renderer* renderer_ = nullptr;
@@ -273,6 +276,7 @@ std::unique_ptr<View> makeSdlView(
     int renderHeight,
     int displayWidth,
     int displayHeight,
+    double gamma,
     bool fullscreen) {
     return std::make_unique<SdlView>(
         title,
@@ -280,5 +284,6 @@ std::unique_ptr<View> makeSdlView(
         renderHeight,
         displayWidth,
         displayHeight,
+        gamma,
         fullscreen);
 }

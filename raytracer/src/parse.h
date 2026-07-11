@@ -19,6 +19,7 @@ struct RenderOptions {
     int depth = 50;
     int displayWidth = 0;
     int displayHeight = 0;
+    double gamma = 2.2;
     bool fullscreen = false;
 };
 

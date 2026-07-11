@@ -16,4 +16,8 @@ public:
      * \returns false when the ray is fully absorbed
      */
     virtual bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const = 0;
+
+    virtual bool emit() const {return false;};
+
+    virtual vec3 emitted() const {return vec3(0,0,0);};
 };

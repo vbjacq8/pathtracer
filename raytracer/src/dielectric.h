@@ -81,4 +81,5 @@ public:
 
     vec3 attenuation;
     float nt;
+    vec3 emission;
 };
