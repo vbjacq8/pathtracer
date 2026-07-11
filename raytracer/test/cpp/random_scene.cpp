@@ -34,6 +34,8 @@ Hitable* randomScene() {
     list[i++] = new Sphere(vec3(0,1,0), 1.0, new Dielectric(1.5));
     list[i++] = new Sphere(vec3(-4,1,0), 1.0, new Lambertian(vec3(0.4,0.2,0.1)));
     list[i++] = new Sphere(vec3(4,1,0), 1.0, new Metal(vec3(0.7,0.6,0.5), 0.0));
+    list[i++] = new Sphere(vec3(0, 10, 0), 2.0, new Light(vec3(4, 4, 4)));
+
 
     return new HitableList(list, i);
 }

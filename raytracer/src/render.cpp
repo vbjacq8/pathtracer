@@ -28,7 +28,7 @@ int render(int argc, char** argv, Hitable* world) {
 
     Framebuffer fb(nx, ny);
     renderFrame(cam, world, fb, opts.samples, opts.depth);
-    writePpm(fb, std::cout);
+    writePpm(fb, std::cout, opts.gamma);
 
     return 0;
 }

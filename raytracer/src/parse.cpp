@@ -21,6 +21,7 @@ static void printUsage(const char* prog) {
         << "  --depth, -d N           Max ray bounce depth (default 50)\n"
         << "  --display-width N       Window width (default: render width)\n"
         << "  --display-height N      Window height (default: render height)\n"
+        << "  --gamma G               Display gamma (default 2.2)\n"
         << "  --fullscreen            Fullscreen desktop; upscale render to display\n"
         << "  --help                  Show this help\n"
         << "\nExample:\n"
@@ -142,6 +143,14 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
             }
             continue;
         }
+
+        if (arg == "--gamma") {
+            if (++i >= argc || !parseDouble(argv[i], opts.gamma)) {
+                return 1;
+            }
+            continue;
+        }
+
         if (arg == "--fullscreen") {
             opts.fullscreen = true;
             continue;
@@ -152,8 +161,8 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
         return 1;
     }
 
-    if (opts.width <= 0 || opts.samples <= 0 || opts.depth <= 0 || opts.aspect <= 0) {
-        std::cerr << "width, samples, depth, and aspect must be positive.\n";
+    if (opts.width <= 0 || opts.samples <= 0 || opts.depth <= 0 || opts.aspect <= 0 || opts.gamma <= 0) {
+        std::cerr << "width, samples, depth, aspect, and gamma must be positive.\n";
         return 1;
     }
     if (opts.height <= 0) {

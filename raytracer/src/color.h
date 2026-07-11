@@ -68,10 +68,16 @@ inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth) {
 
         Ray scattered;
         vec3 attenuation;
-        if (!hr.matPtr || !hr.matPtr->scatter(current, hr, attenuation, scattered)) {
-            return vec3(0, 0, 0);
-        }
 
+        if (!hr.matPtr){
+            return vec3(0,0,0);
+        }
+        if (!hr.matPtr->scatter(current,hr, attenuation, scattered)){
+            if (hr.matPtr->emit()){return throughput * hr.matPtr->emitted();}
+            else {return vec3(0,0,0);}
+
+        }
+        
         throughput = throughput * attenuation;
         if (!applyRussianRoulette(throughput, bounce + 1)) {
             return vec3(0, 0, 0);

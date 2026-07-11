@@ -20,20 +20,20 @@ public:
     }
 
     /**
-     * \brief Adds one color sample to a pixel.
+     * \brief Adds one radiance sample to a pixel.
      * \param x horizontal index
      * \param y vertical index
-     * \param col sampled radiance
+     * \param radiance sampled linear radiance
      */
-    void addSample(int x, int y, const vec3& col) {
+    void addSample(int x, int y, const vec3& radiance) {
         int idx = y * width + x;
-        sum[idx] += col;
+        sum[idx] += radiance;
         count[idx]++;
     }
 
     /**
-     * \brief Returns the averaged color at a pixel.
-     * \returns black when no samples have been accumulated
+     * \brief Returns averaged linear radiance at a pixel.
+     * \returns zero radiance when no samples have been accumulated
      */
     vec3 pixel(int x, int y) const {
         int idx = y * width + x;
@@ -50,6 +50,6 @@ public:
 
     int width;
     int height;
-    std::vector<vec3> sum;   ///< Per-pixel color sums
+    std::vector<vec3> sum;   ///< Per-pixel linear radiance sums
     std::vector<int> count;  ///< Per-pixel sample counts
 };

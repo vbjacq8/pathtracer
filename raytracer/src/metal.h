@@ -33,6 +33,7 @@ public:
         return v - 2 * dot(v, n) * n;
     }
 
+
     vec3 albedo;
     float fuzz;
 };
