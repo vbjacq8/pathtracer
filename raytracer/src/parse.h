@@ -21,6 +21,7 @@ struct RenderOptions {
     int displayHeight = 0;
     double gamma = 2.2;
     bool fullscreen = false;
+    bool showFps = false;
 };
 
 /**

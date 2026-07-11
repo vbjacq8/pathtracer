@@ -33,7 +33,7 @@ public:
      * \brief Shows the current accumulated image.
      * \param fb framebuffer to display
      * \param samples sample count shown in the window title
-     * \param dt frame time in milliseconds
+     * \param dt frame time in milliseconds; ignored when FPS display is disabled
      */
     virtual void present(const Framebuffer& fb, int samples, int dt) = 0;
 

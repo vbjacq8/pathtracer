@@ -13,6 +13,7 @@
  * \param displayWidth window width (ignored when \p fullscreen; resolved at runtime)
  * \param displayHeight window height (ignored when \p fullscreen; resolved at runtime)
  * \param gamma display gamma for tonemapped output
+ * \param showFps update window title with frame rate (off by default)
  * \param fullscreen use borderless fullscreen desktop mode
  */
 std::unique_ptr<View> makeSdlView(
@@ -22,4 +23,5 @@ std::unique_ptr<View> makeSdlView(
     int displayWidth,
     int displayHeight,
     double gamma,
+    bool showFps,
     bool fullscreen);

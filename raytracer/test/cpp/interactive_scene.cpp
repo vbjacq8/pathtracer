@@ -7,8 +7,8 @@ Hitable* randomScene() {
     Hitable** list = new Hitable*[n + 1];
     list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
     int i = 1;
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
+    for (int a = -4; a < 4; a++) {
+        for (int b = -4; b < 4; b++) {
             double chooseMat = randomDouble(0.0, 1.0);
             vec3 center(a + 0.9 * randomDouble(0.0, 1.0), 0.2, b + 0.9 * randomDouble(0.0, 1.0));
             if ((center - vec3(4.0, 0.2, 0)).norm() > 0.9) {
@@ -40,8 +40,8 @@ Hitable* randomScene() {
     list[i++] = new Sphere(vec3(0, 1, 0), 1.0, new Dielectric(1.5));
     list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(vec3(0.4, 0.2, 0.1)));
     list[i++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7, 0.6, 0.5), 0.0));
-    list[i++] = new Sphere(vec3(0, 10, 0), 2.0, new Light(vec3(400, 200, 200)));
-    //list[i++] = new Sphere(vec3(-4, -2, 4), 1.5, new Light(vec3(100,200,500)));
+    //list[i++] = new Sphere(vec3(0, 10, 0), 2.0, new Light(vec3(400, 200, 200)));
+    list[i++] = new Sphere(vec3(-2, 5,0 ), 1.5, new Light(vec3(1000000000000000000,26,255)));
     return new HitableList(list, i);
 }
 

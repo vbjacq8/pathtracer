@@ -26,6 +26,7 @@ int interactiveRender(int argc, char** argv, Hitable* world) {
         opts.displayWidth,
         opts.displayHeight,
         opts.gamma,
+        opts.showFps,
         opts.fullscreen);
     RenderController controller(model, *view);
     controller.run();

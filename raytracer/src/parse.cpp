@@ -16,12 +16,12 @@ static void printUsage(const char* prog) {
         << "  --vfov DEG              Vertical field of view (default 20)\n"
         << "  --aperture A            Lens aperture (default 0.1, 0 for pinhole)\n"
         << "  --focus-dist D          Focus distance (default 10)\n"
-        << "  --samples, -s N         Batch: total samples per pixel (default 100).\n"
-        << "                          Interactive: samples per frame (default 1).\n"
+        << "  --samples, -s N         Batch only: total samples per pixel (default 100)\n"
         << "  --depth, -d N           Max ray bounce depth (default 50)\n"
         << "  --display-width N       Window width (default: render width)\n"
         << "  --display-height N      Window height (default: render height)\n"
         << "  --gamma G               Display gamma (default 2.2)\n"
+        << "  --fps                   Include FPS in the window title (off by default)\n"
         << "  --fullscreen            Fullscreen desktop; upscale render to display\n"
         << "  --help                  Show this help\n"
         << "\nExample:\n"
@@ -153,6 +153,11 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
 
         if (arg == "--fullscreen") {
             opts.fullscreen = true;
+            continue;
+        }
+
+        if (arg == "--fps") {
+            opts.showFps = true;
             continue;
         }
 

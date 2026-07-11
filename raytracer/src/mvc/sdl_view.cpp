@@ -23,12 +23,14 @@ public:
         int displayWidth,
         int displayHeight,
         double gamma,
+        bool showFps,
         bool fullscreen)
         : renderWidth_(renderWidth),
           renderHeight_(renderHeight),
           displayWidth_(displayWidth),
           displayHeight_(displayHeight),
           gamma_(gamma),
+          showFps_(showFps),
           pixels_(renderWidth * renderHeight * 3) {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             std::fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
@@ -53,6 +55,7 @@ public:
             std::fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
             std::exit(1);
         }
+        SDL_ShowWindow(window_);
 
         if (fullscreen) {
             SDL_GetWindowSize(window_, &displayWidth_, &displayHeight_);
@@ -76,6 +79,10 @@ public:
         }
 
         SDL_SetTextureScaleMode(texture_, SDL_ScaleModeNearest);
+
+        if (!showFps_) {
+            setWindowTitle(0, 0);
+        }
     }
 
     ~SdlView() override {
@@ -190,22 +197,8 @@ public:
         SDL_RenderCopy(renderer_, texture_, nullptr, &dst);
         SDL_RenderPresent(renderer_);
 
-        const int dtMs = std::max(dt, 1);
-        const double fps = 1000.0 / dtMs;
-
         if (++titleUpdateCounter_ % 15 == 0) {
-            char title[128];
-            std::snprintf(
-                title,
-                sizeof(title),
-                "pathtracer — %d samples — %.1f fps (%dx%d -> %dx%d)",
-                samples,
-                fps,
-                renderWidth_,
-                renderHeight_,
-                displayWidth_,
-                displayHeight_);
-            SDL_SetWindowTitle(window_, title);
+            setWindowTitle(samples, dt);
         }
     }
 
@@ -257,17 +250,47 @@ private:
             delta * static_cast<double>(renderHeight_) / displayHeight_);
     }
 
+    void setWindowTitle(int samples, int dtMs) {
+        char title[128];
+        if (showFps_) {
+            const int ms = std::max(dtMs, 1);
+            const double fps = 1000.0 / ms;
+            std::snprintf(
+                title,
+                sizeof(title),
+                "pathtracer — %d samples — %.1f fps (%dx%d -> %dx%d)",
+                samples,
+                fps,
+                renderWidth_,
+                renderHeight_,
+                displayWidth_,
+                displayHeight_);
+        } else {
+            std::snprintf(
+                title,
+                sizeof(title),
+                "pathtracer — %d samples (%dx%d -> %dx%d)",
+                samples,
+                renderWidth_,
+                renderHeight_,
+                displayWidth_,
+                displayHeight_);
+        }
+        SDL_SetWindowTitle(window_, title);
+    }
+
     int renderWidth_;
     int renderHeight_;
     int displayWidth_;
     int displayHeight_;
     double gamma_;
+    bool showFps_;
     std::vector<uint8_t> pixels_;
     SDL_Window* window_ = nullptr;
     SDL_Renderer* renderer_ = nullptr;
     SDL_Texture* texture_ = nullptr;
     bool shouldClose_ = false;
-    int titleUpdateCounter_ = 0;
+    int titleUpdateCounter_ = 14;
 };
 
 std::unique_ptr<View> makeSdlView(
@@ -277,6 +300,7 @@ std::unique_ptr<View> makeSdlView(
     int displayWidth,
     int displayHeight,
     double gamma,
+    bool showFps,
     bool fullscreen) {
     return std::make_unique<SdlView>(
         title,
@@ -285,5 +309,6 @@ std::unique_ptr<View> makeSdlView(
         displayWidth,
         displayHeight,
         gamma,
+        showFps,
         fullscreen);
 }

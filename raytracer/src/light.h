@@ -10,7 +10,7 @@ class Light : public Material {
     public: 
         Light(vec3 e) : emission(e) {}
 
-        bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
+        bool scatter(const Ray&, const HitRecord&, vec3&, Ray&) const override {
             return false;
         }
 

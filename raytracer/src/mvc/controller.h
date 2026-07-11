@@ -18,8 +18,14 @@ public:
 
     /** \brief Runs until the view requests shutdown. */
     void run() {
+        view_.present(model_.framebuffer(), 0, 0);
+
         while (!view_.shouldClose()) {
-            auto start = std::chrono::steady_clock::now();
+            const bool showFps = model_.options().showFps;
+            std::chrono::steady_clock::time_point start;
+            if (showFps) {
+                start = std::chrono::steady_clock::now();
+            }
 
             ViewEvent event;
             while (view_.pollEvent(event)) {
@@ -34,10 +40,15 @@ public:
                 model_.clearCameraDirty();
             }
 
-            model_.accumulateFrame();
-            auto end = std::chrono::steady_clock::now();
-            const auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            view_.present(model_.framebuffer(), model_.sampleCount(), static_cast<int>(elapsedMs.count()));
+            model_.accumulatePass();
+
+            int dtMs = 0;
+            if (showFps) {
+                const auto end = std::chrono::steady_clock::now();
+                dtMs = static_cast<int>(
+                    std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+            }
+            view_.present(model_.framebuffer(), model_.sampleCount(), dtMs);
         }
     }
 
