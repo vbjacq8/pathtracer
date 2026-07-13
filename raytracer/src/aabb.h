@@ -27,7 +27,7 @@ struct AABB {
     }
 
     /**
-     * \brief Slab test that records the nearest hit distance and outward face normal.
+     * \brief Slab test that records the nearest hit distance and face normal opposing the ray.
      */
     bool slabInterval(const Ray& r, double tMin, double tMax, double& tHit, vec3& normal) const {
         double t0s[3];
@@ -65,24 +65,16 @@ struct AABB {
         }
 
         const bool hitFromOutside = tMin > 0;
-        tHit = hitFromOutside ? tMin : tMax;
+        tHit = (hitFromOutside) ? tMin : tMax;
 
         normal = vec3(0, 0, 0);
         for (int axis = 0; axis < 3; ++axis) {
             const double faceT = hitFromOutside ? t0s[axis] : t1s[axis];
             if (std::fabs(tHit - faceT) < kSlabHitEps) {
-                if (hitFromOutside) {
-                    normal[axis] = (r.direction()[axis] > 0) ? -1.0 : 1.0;
-                } else {
-                    normal[axis] = (r.direction()[axis] > 0) ? 1.0 : -1.0;
-                }
-                if (dot(normal, r.direction()) > 0) {
-                    normal = -normal;
-                }
+                normal[axis] = (r.direction()[axis] > 0) ? -1.0 : 1.0;
                 return true;
             }
         }
-
         return false;
     }
 };
