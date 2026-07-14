@@ -5,6 +5,10 @@
 #include <math.h>
 #include <stdlib.h>
 
+namespace {
+    constexpr double nearZeroEps = 1e-8;
+}
+
 /**
  * \brief Three-component vector for positions, directions, and colors.
  */
@@ -37,9 +41,15 @@ public:
     inline double norm() const { return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
     /** \returns Squared Euclidean length. */
     inline double squared_norm() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
-
     /** Scales this vector to unit length in place. */
     inline void make_unit_vector();
+    /** Check if all dimensions are near zero */
+    inline bool near_zero() const {
+        return (e[0] < (nearZeroEps) 
+            && (e[1] < nearZeroEps) 
+            && (e[2] < nearZeroEps)
+        );
+    }
 
     double e[3];
 };

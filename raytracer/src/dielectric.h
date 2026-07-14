@@ -45,12 +45,12 @@ public:
 
         if (refract(v, outwardNormal, R, refracted)) {
             if (randomDouble(0, 1.0) < schlick(cosine, nt)) {
-                scattered = Ray(hr.p, reflected);
+                scattered = Ray(hr.p, reflected, rIn.time());
             } else {
-                scattered = Ray(hr.p, refracted);
+                scattered = Ray(hr.p, refracted, rIn.time());
             }
         } else {
-            scattered = Ray(hr.p, reflected);
+            scattered = Ray(hr.p, reflected,rIn.time());
         }
         return true;
     }
@@ -81,5 +81,4 @@ public:
 
     vec3 attenuation;
     float nt;
-    vec3 emission;
 };

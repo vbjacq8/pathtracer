@@ -5,7 +5,7 @@
 #include "render_model.h"
 #include "sdl_view.h"
 
-int interactiveRender(int argc, char** argv, Hitable* world) {
+int interactiveRender(int argc, char** argv, HitablePtr world) {
     RenderOptions opts;
     //opts.samples = 1;
     switch (parseOptions(argc, argv, opts)) {

@@ -4,6 +4,8 @@
 #include "ray.h"
 #include "aabb.h"
 
+#include <memory>
+
 class Material;
 
 /**
@@ -13,7 +15,7 @@ struct HitRecord {
     double t;
     vec3 p;
     vec3 normal;
-    Material* matPtr;
+    std::shared_ptr<Material> matPtr;
 };
 
 /**
@@ -21,6 +23,8 @@ struct HitRecord {
  */
 class Hitable {
 public:
+    virtual ~Hitable() = default;
+
     /**
      * \brief Tests whether \p r hits this surface within (\p tMin, \p tMax).
      * \param r ray to test
@@ -36,5 +40,7 @@ public:
     /** \returns Centroid used for spatial partitioning. */
     virtual vec3 centroid() const = 0;
 };
+
+using HitablePtr = std::shared_ptr<Hitable>;
 
 #endif

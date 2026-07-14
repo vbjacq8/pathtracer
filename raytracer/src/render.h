@@ -3,9 +3,11 @@
 #include "hitable.h"
 #include "parse.h"
 
+#include <memory>
+
 /**
  * \brief Batch renderer entry point: parses options, renders, and writes PPM to stdout.
- * \param world scene to trace (caller retains ownership)
+ * \param world scene to trace (kept alive for the duration of the render)
  * \returns process exit code
  */
-int render(int argc, char** argv, Hitable* world);
+int render(int argc, char** argv, HitablePtr world);

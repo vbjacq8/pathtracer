@@ -9,7 +9,7 @@
     \brief render method that takes CLI arguments; entry point into batch render
     \copydoc renderFrame (in renderer.h)
  */
-int render(int argc, char** argv, Hitable* world) {
+int render(int argc, char** argv, HitablePtr world) {
     RenderOptions opts;
     switch (parseOptions(argc, argv, opts)) {
         case 0:
@@ -27,7 +27,7 @@ int render(int argc, char** argv, Hitable* world) {
     Camera cam(opts.lookfrom, opts.lookat, opts.vup, opts.vfov, aspect, opts.aperture, opts.focusDist);
 
     Framebuffer fb(nx, ny);
-    renderFrame(cam, world, fb, opts.samples, opts.depth);
+    renderFrame(cam, world.get(), fb, opts.samples, opts.depth);
     writePpm(fb, std::cout, opts.gamma);
 
     return 0;
