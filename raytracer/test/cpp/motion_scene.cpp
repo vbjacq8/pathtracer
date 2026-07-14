@@ -1,8 +1,11 @@
 #include "../../src/materials.h"
-#include "../../src/mvc/interactive.h"
 #include "../../src/hittables.h"
 #include "../../src/my_random.h"
 #include "../../src/bvh_weekend.h"
+#include "../../src/bvh_jacco.h"
+
+//#include "../../src/mvc/interactive.h"
+#include "../../src/render.h"
 
 #include <memory>
 #include <vector>
@@ -12,8 +15,8 @@ HitablePtr motionScene() {
     auto groundMaterial = std::make_shared<Lambertian>(vec3(0.5, 0.5, 0.5));
     objects.push_back(std::make_shared<Sphere>(vec3(0, -1000, 0), 1000, groundMaterial));
 
-    for (int i = -4; i < 4; ++i) {
-        for (int j = -4; j < 4; ++j) {
+    for (int i = -11; i < 11; ++i) {
+        for (int j = -11; j < 11; ++j) {
             auto chooseMat = randomDouble(0, 1);
             vec3 cen(i + 0.9 * randomDouble(0, 1), 0.2, j + 0.9 * randomDouble(0, 1));
             if ((cen - vec3(4, 0.2, 0)).norm() > 0.9) {
@@ -42,11 +45,11 @@ HitablePtr motionScene() {
         }
     }
 
+    //return std::make_shared<BVHJacco>(std::move(objects));
     return std::make_shared<BVHWeekend>(std::move(objects));
-    //return std::make_shared<BVHWeekend>(std::move(objects));
     //return make_shared<HitableList>(std::move(objects));
 }
 
 int main(int argc, char** argv) {
-    return interactiveRender(argc, argv, motionScene());
+    return render(argc, argv, motionScene());
 }
