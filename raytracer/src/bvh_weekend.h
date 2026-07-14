@@ -1,19 +1,20 @@
 #pragma once
+#include <algorithm>
 #include <utility>
 #include <vector>
 #include "bvh_node.h"
 #include "hitable.h"
 
 /**
- * \brief Bounding Volume Hierarchy implementation to speed up Ray-Hitable collision detections
+ * \brief Bounding Volume Hierarchy with object-median splits (RTIOW-style).
  */
-class BVH : public Hitable{
+class BVHWeekend : public Hitable{
 
     public: 
         /**
          * \param primitives primitives to place in the tree (shared ownership retained)
          */
-        explicit BVH(std::vector<HitablePtr> primitives) : primList(std::move(primitives)) {
+        explicit BVHWeekend(std::vector<HitablePtr> primitives) : primList(std::move(primitives)) {
             const int count = static_cast<int>(primList.size());
             if (count <= 0){return;}
             bvhNodes.resize(count * 2 - 1);
@@ -61,57 +62,62 @@ class BVH : public Hitable{
          */
         void updateBounds(int nodeIdx){
             BVHNode& node = bvhNodes[nodeIdx];
-            AABB nodeAabb;
-            nodeAabb.min = vec3(1e30f, 1e30f, 1e30f);
-            nodeAabb.max = -1 * nodeAabb.min;
-            for (int first = node.firstPrimIdx, i = 0; i < node.primCount; i++){
+            if (node.primCount <= 0) {
+                return;
+            }
+            int idx0 = primIdxList[node.firstPrimIdx];
+            AABB nodeAabb = primList[idx0]->boundingBox();
+            for (int i = 1; i < node.primCount; i++){
                 //indirection because we don't want to switch around primitives in the primList, just their indices.
-                int idx = primIdxList[first + i];
-                const HitablePtr& primitive = primList[idx];
-                AABB primBox = primitive->boundingBox();
-                nodeAabb.min = min3(nodeAabb.min, primBox.min);
-                nodeAabb.max = max3(nodeAabb.max, primBox.max);
+                int idx = primIdxList[node.firstPrimIdx + i];
+                nodeAabb = AABB(nodeAabb, primList[idx]->boundingBox());
             }
             node.aabb = nodeAabb;
         }
 
         /**
-         * \brief Takes non-leaf nodes and recursively partitions their primitives in-place towards left and right nodes
+         * \brief Object-median split: nth_element on longest axis, then recurse on both halves.
         */
         void subdivide(int nodeIdx){
             BVHNode& node = bvhNodes[nodeIdx];
             if (node.primCount <= 2){return;}
-            AABB nodeAabb = node.aabb;
+
+            const AABB& nodeAabb = node.aabb;
             vec3 extent = nodeAabb.max - nodeAabb.min;
             int axis = 0;
             if (extent.y() > extent.x()) axis = 1;
             if (extent.z() > extent[axis]) axis = 2;
-            double splitPos = (nodeAabb.min[axis] + extent[axis]) * 0.5f;
 
-            int i = node.firstPrimIdx;
-            int j = node.firstPrimIdx + node.primCount - 1;
-            while (i <= j){
-                if (primList[primIdxList[i]]->centroid()[axis] > splitPos){
-                    std::swap(primIdxList[i], primIdxList[j--]);
-                }
-                else {i++;}
-            }
-            int leftCount = i - node.firstPrimIdx;
-            if (leftCount == 0 || leftCount == node.primCount){return;}
-            int leftChildIdx = nodesUsed++; int rightChildIdx = nodesUsed++;
-            bvhNodes[leftChildIdx].firstPrimIdx = node.firstPrimIdx;
+            const int first = node.firstPrimIdx;
+            const int count = node.primCount;
+            const int mid = first + count / 2;
+
+            auto byCentroid = [this, axis](int a, int b) {
+                return primList[a]->centroid()[axis] < primList[b]->centroid()[axis];
+            };
+            std::nth_element(
+                primIdxList.begin() + first,
+                primIdxList.begin() + mid,
+                primIdxList.begin() + first + count,
+                byCentroid);
+
+            const int leftCount = mid - first;
+            const int rightCount = count - leftCount;
+            // Guaranteed for count >= 3: leftCount >= 1 and rightCount >= 1.
+
+            const int leftChildIdx = nodesUsed++;
+            const int rightChildIdx = nodesUsed++;
+            bvhNodes[leftChildIdx].firstPrimIdx = first;
             bvhNodes[leftChildIdx].primCount = leftCount;
-            bvhNodes[rightChildIdx].firstPrimIdx = i;
-            bvhNodes[rightChildIdx].primCount = node.primCount - leftCount;
+            bvhNodes[rightChildIdx].firstPrimIdx = mid;
+            bvhNodes[rightChildIdx].primCount = rightCount;
             node.left = leftChildIdx;
-            //set to 0 so that BVHNode::triCount() returns correctly. 
+            //set to 0 so that BVHNode::isLeaf() returns false.
             node.primCount = 0;
             updateBounds(leftChildIdx);
             updateBounds(rightChildIdx);
-            //recurse: 
             subdivide(leftChildIdx);
             subdivide(rightChildIdx);
-
         }
 
         /**
@@ -159,12 +165,5 @@ class BVH : public Hitable{
 
         /** \brief Next unused node index; incremented by two on each split (left/right pair). */
         int nodesUsed = 1;
-
-        
-
-
-    
-
-
 
     };
