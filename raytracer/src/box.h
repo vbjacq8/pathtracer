@@ -9,15 +9,16 @@
  */
 class Box : public Hitable {
 public:
-    Box(const AABB& b, Material* mPtr) : bounds(b), matPtr(mPtr) {}
-    Box(const vec3& min, const vec3& max, Material* mPtr) : bounds(AABB{min, max}), matPtr(mPtr) {}
+    Box(const AABB& b, MaterialPtr mPtr) : bounds(b), matPtr(std::move(mPtr)) {}
+    Box(const vec3& min, const vec3& max, MaterialPtr mPtr)
+        : bounds(AABB{min, max}), matPtr(std::move(mPtr)) {}
 
     bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
     vec3 centroid() const override;
 
     AABB bounds;
-    Material* matPtr;
+    MaterialPtr matPtr;
 };
 
 /**

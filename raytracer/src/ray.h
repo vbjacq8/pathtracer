@@ -9,12 +9,15 @@
 class Ray {
 public:
     Ray() {}
-    Ray(const vec3& a, const vec3& b) : A(a), B(b) {}
+    Ray(const vec3& a, const vec3& b, double T) : A(a), B(b), T(T) {}
+    Ray(const vec3& a, const vec3& b) : Ray(a,b,0) {}
 
     /** \returns Ray origin. */
     vec3 origin() const { return A; }
     /** \returns Ray direction (not necessarily unit length). */
     vec3 direction() const { return B; }
+    
+    double time() const {return T;}
     /**
      * \brief Evaluates the ray at parameter \p t.
      * \returns \p origin + t * direction
@@ -24,6 +27,7 @@ public:
 private:
     vec3 A;
     vec3 B;
+    double T;
 };
 
 /**

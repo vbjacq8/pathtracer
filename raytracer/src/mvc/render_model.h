@@ -12,9 +12,9 @@
  */
 class RenderModel {
 public:
-    RenderModel(Hitable* world, const RenderOptions& opts)
+    RenderModel(HitablePtr world, const RenderOptions& opts)
         : opts_(opts),
-          world_(world),
+          world_(std::move(world)),
           fb_(opts.width, renderHeight(opts)),
           cam_(makeCamera(opts)) {}
 
@@ -30,13 +30,13 @@ public:
 
     /** \brief Adds one sample per pixel. */
     void accumulatePass() {
-        renderPass(cam_, world_, fb_, opts_.depth);
+        renderPass(cam_, world_.get(), fb_, opts_.depth);
     }
 
     /** \brief Adds \p opts.samples passes (one sample per pixel each). */
     void accumulateFrame() {
         for (int i = 0; i < opts_.samples; ++i) {
-            renderPass(cam_, world_, fb_, opts_.depth);
+            renderPass(cam_, world_.get(), fb_, opts_.depth);
         }
     }
 
@@ -72,7 +72,7 @@ public:
 
 private:
     RenderOptions opts_;
-    Hitable* world_;
+    HitablePtr world_;
     Framebuffer fb_;
     Camera cam_;
     bool cameraDirty_ = false;

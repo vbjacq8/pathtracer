@@ -10,14 +10,21 @@
 class Sphere : public Hitable {
 public:
     Sphere() {}
-    Sphere(const vec3& cen, double R, Material* const mat) : center(cen), radius(R), matPtr(mat) {}
+
+    Sphere(const vec3& staticCenter, double R, MaterialPtr mat)
+        : center(staticCenter, vec3(0, 0, 0)), radius(R), matPtr(std::move(mat)) {}
+
+    Sphere(const vec3& center1, const vec3& center2, double R, MaterialPtr mat)
+        : center(center1, center2 - center1), radius(R), matPtr(std::move(mat)) {}
+
     virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
     vec3 centroid() const override;
 
-    vec3 center;
+private:
+    Ray center;
     double radius;
-    Material* matPtr;
+    MaterialPtr matPtr;
 };
 
 /**
@@ -25,7 +32,9 @@ public:
  * \copydoc Hitable::hit
  */
 inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
-    vec3 oc = r.origin() - center;
+    // Use the *incoming* ray's shutter time, not center.time() (which is always 0).
+    vec3 currentCenter = center.point_at_parameter(r.time());
+    vec3 oc = r.origin() - currentCenter;
     double b = 2.0 * dot(oc, r.direction());
     double a = dot(r.direction(), r.direction());
     double c = dot(oc, oc) - radius * radius;
@@ -37,7 +46,7 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
     if (temp > tMin && temp < tMax) {
         hr.t = temp;
         hr.p = r.point_at_parameter(temp);
-        hr.normal = (r.point_at_parameter(temp) - center) / radius;
+        hr.normal = (r.point_at_parameter(temp) - currentCenter) / radius;
         hr.matPtr = matPtr;
         return true;
     }
@@ -45,20 +54,23 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
     if (temp > tMin && temp < tMax) {
         hr.t = temp;
         hr.p = r.point_at_parameter(temp);
-        hr.normal = (r.point_at_parameter(temp) - center) / radius;
+        hr.normal = (r.point_at_parameter(temp) - currentCenter) / radius;
         hr.matPtr = matPtr;
         return true;
     }
     return false;
 }
 
-inline vec3 Sphere::centroid() const { return center; }
+inline vec3 Sphere::centroid() const {
+    return center.point_at_parameter(center.time());
+}
 
 inline AABB Sphere::boundingBox() const {
+    const vec3 c = center.point_at_parameter(center.time());
     const vec3 r(radius, radius, radius);
     AABB box;
-    box.min = center - r;
-    box.max = center + r;
+    box.min = c - r;
+    box.max = c + r;
     return box;
 }
 

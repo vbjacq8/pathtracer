@@ -1,7 +1,8 @@
 #pragma once
-#include<utility>
-#include"bvh_node.h"
-#include"hitable.h"
+#include <utility>
+#include <vector>
+#include "bvh_node.h"
+#include "hitable.h"
 
 /**
  * \brief Bounding Volume Hierarchy implementation to speed up Ray-Hitable collision detections
@@ -10,10 +11,10 @@ class BVH : public Hitable{
 
     public: 
         /**
-         * \param primitives pointer to the first Hitable pointer; 
-         * \param count number of total primitives to place in tree and detect
+         * \param primitives primitives to place in the tree (shared ownership retained)
          */
-        BVH(Hitable** primitives, int count){
+        explicit BVH(std::vector<HitablePtr> primitives) : primList(std::move(primitives)) {
+            const int count = static_cast<int>(primList.size());
             if (count <= 0){return;}
             bvhNodes.resize(count * 2 - 1);
             BVHNode& root = bvhNodes[0];
@@ -21,7 +22,6 @@ class BVH : public Hitable{
             root.firstPrimIdx = 0; 
             root.primCount = count;
 
-            primList.assign(primitives, primitives + count);
             primIdxList.resize(count);
             for (int i = 0; i < count; ++i){
                 primIdxList[i] = i;
@@ -67,7 +67,7 @@ class BVH : public Hitable{
             for (int first = node.firstPrimIdx, i = 0; i < node.primCount; i++){
                 //indirection because we don't want to switch around primitives in the primList, just their indices.
                 int idx = primIdxList[first + i];
-                Hitable* primitive = primList[idx];
+                const HitablePtr& primitive = primList[idx];
                 AABB primBox = primitive->boundingBox();
                 nodeAabb.min = min3(nodeAabb.min, primBox.min);
                 nodeAabb.max = max3(nodeAabb.max, primBox.max);
@@ -145,8 +145,8 @@ class BVH : public Hitable{
         }
 
 
-        /** \brief Primitive pointers copied from the constructor argument; never reordered. */
-        std::vector<Hitable*> primList;
+        /** \brief Owned primitive references; never reordered. */
+        std::vector<HitablePtr> primList;
 
         /** \brief Permutation of indices into primList; partitioned in-place during subdivide(). */
         std::vector<int> primIdxList;

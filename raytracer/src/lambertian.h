@@ -15,9 +15,10 @@ public:
      * \copydoc Material::scatter
      */
     bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
-        (void)rIn;
-        vec3 target = hr.p + hr.normal + randomInSphere();
-        scattered = Ray(hr.p, target - hr.p);
+        //(void)rIn;
+        vec3 newDirection = hr.normal + randomInSphere();
+        if (newDirection.near_zero()){newDirection = hr.normal;}
+        scattered = Ray(hr.p, newDirection, rIn.time());
         attenuation = albedo;
         return true;
     }

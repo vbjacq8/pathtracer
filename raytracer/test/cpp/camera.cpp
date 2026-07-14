@@ -1,22 +1,18 @@
-#include "../../src/camera.h"
 #include "../../src/materials.h"
-#include "../../src/renderer.h"
 #include "../../src/render.h"
+#include "../../src/hittables.h"
 
+#include <memory>
 
-using namespace std;
+HitablePtr cameraScene() {
+    auto world = std::make_shared<HitableList>();
+    world->add(std::make_shared<Sphere>(
+        vec3(0, 0, 0), 1, std::make_shared<Metal>(vec3(0.9, 0.9, 0.9), 0.1)));
+    world->add(std::make_shared<Sphere>(
+        vec3(0, 1, 0), 1, std::make_shared<Lambertian>(vec3(0.5, 0.5, 0.5))));
+    return world;
+}
 
-
-    Hitable* cameraScene(){
-        Hitable** list = new Hitable*[2];
-        list[0] = new Sphere(vec3(0,0,0), 1, new Metal(vec3(0.9,0.9,0.9), 0.1));
-        list[1] = new Sphere(vec3(0,1,0), 1, new Lambertian(vec3(0.5,0.5,0.5)));
-        Hitable* world = new HitableList(list, 2);
-        return world;
-
-    }
-
-int main(int argc, char** argv){
-    render(argc, argv, cameraScene());
-    return 0;
+int main(int argc, char** argv) {
+    return render(argc, argv, cameraScene());
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hitable_list.h"
+#include "material.h"
 #include <algorithm>
 #include <float.h>
 #include "my_random.h"
