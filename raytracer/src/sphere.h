@@ -62,16 +62,15 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
 }
 
 inline vec3 Sphere::centroid() const {
-    return center.point_at_parameter(center.time());
+    // Midpoint of the shutter interval (t = 0 and t = 1).
+    return 0.5 * (center.point_at_parameter(0) + center.point_at_parameter(1));
 }
 
 inline AABB Sphere::boundingBox() const {
-    const vec3 c = center.point_at_parameter(center.time());
     const vec3 r(radius, radius, radius);
-    AABB box;
-    box.min = c - r;
-    box.max = c + r;
-    return box;
+    const AABB at0(center.point_at_parameter(0) - r, center.point_at_parameter(0) + r);
+    const AABB at1(center.point_at_parameter(1) - r, center.point_at_parameter(1) + r);
+    return AABB(at0, at1);
 }
 
 #endif

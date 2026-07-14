@@ -12,10 +12,24 @@ constexpr double kSlabHitEps = 1e-8;
 
 /**
  * \brief Axis-aligned bounding box defined by two corners.
+ *
+ * Corners may be passed in any order; constructors normalize so min <= max per axis.
  */
 struct AABB {
     vec3 min;
     vec3 max;
+
+    AABB() = default;
+
+    /** \brief Builds a box from two opposite corners (order does not matter). */
+    AABB(const vec3& a, const vec3& b)
+        : min(std::fmin(a[0], b[0]), std::fmin(a[1], b[1]), std::fmin(a[2], b[2])),
+          max(std::fmax(a[0], b[0]), std::fmax(a[1], b[1]), std::fmax(a[2], b[2])) {}
+
+    /** \brief Union of two boxes. */
+    AABB(const AABB& a, const AABB& b)
+        : min(std::fmin(a.min[0], b.min[0]), std::fmin(a.min[1], b.min[1]), std::fmin(a.min[2], b.min[2])),
+          max(std::fmax(a.max[0], b.max[0]), std::fmax(a.max[1], b.max[1]), std::fmax(a.max[2], b.max[2])) {}
 
     /**
      * \brief Slab test for whether \p r intersects this box within (\p tMin, \p tMax).
