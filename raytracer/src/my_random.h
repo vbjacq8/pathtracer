@@ -4,7 +4,7 @@
 #include "vec3.h"
 
 /**
- * \brief Uniform random double in [\p min, \p max).
+ * \brief Uniform random numbers in [\p min, \p max).
  * \param min inclusive lower bound
  * \param max exclusive upper bound
  */
@@ -13,6 +13,13 @@ inline double randomDouble(double min, double max) {
     static std::uniform_real_distribution<> dist(0.0, 1.0);
     return min + (max - min) * dist(engine);
 }
+
+inline double randomInt(int min, int max){
+    static std::mt19937_64 engine{std::random_device{}()};
+    static std::uniform_int_distribution<> dist(0, 1);
+    return min + (max - min) * dist(engine);
+}
+
 
 /**
  * \brief Random point inside the unit sphere

@@ -40,31 +40,33 @@ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
 
 /**
  * \brief Debug shading from surface normals.
- * \returns Normal map color on hit; sky gradient on miss.
+ * \returns Normal map color on hit; \p background on miss.
  */
-inline vec3 color(const Ray& r, Hitable* world, int depth, int bounce = 0) {
+inline vec3 color(const Ray& r, Hitable* world, int depth,
+                  BackgroundFn background = colorBlueWhiteGradient) {
     (void)depth;
-    (void)bounce;
     HitRecord hr;
     if (world->hit(r, kHitEps, MAXFLOAT, hr)) {
         return 0.5 * vec3(hr.normal.x() + 1.0, hr.normal.y() + 1.0, hr.normal.z() + 1.0);
     }
-    return colorBlueWhiteGradient(r);
+    return background(r);
 }
 
 /**
  * \brief Path tracing integrator; material behavior comes from Material::scatter at each hit.
+ * \param background miss-ray radiance strategy (\p colorBlueWhiteGradient, \p colorVoid, …)
  * \returns Estimated radiance along \p r with throughput-based Russian roulette
  * \copydoc applyRussianRoulette
  */
-inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth) {
+inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
+                      BackgroundFn background = colorBlueWhiteGradient) {
     Ray current = r;
     vec3 throughput(1, 1, 1);
 
     for (int bounce = 0; bounce < maxDepth; ++bounce) {
         HitRecord hr;
         if (!world->hit(current, kHitEps, MAXFLOAT, hr)) {
-            return throughput * colorBlueWhiteGradient(current);
+            return throughput * background(current);
         }
 
         Ray scattered;

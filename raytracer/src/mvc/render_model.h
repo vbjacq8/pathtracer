@@ -30,13 +30,13 @@ public:
 
     /** \brief Adds one sample per pixel. */
     void accumulatePass() {
-        renderPass(cam_, world_.get(), fb_, opts_.depth);
+        renderPass(cam_, world_.get(), fb_, opts_.depth, opts_.background);
     }
 
     /** \brief Adds \p opts.samples passes (one sample per pixel each). */
     void accumulateFrame() {
         for (int i = 0; i < opts_.samples; ++i) {
-            renderPass(cam_, world_.get(), fb_, opts_.depth);
+            renderPass(cam_, world_.get(), fb_, opts_.depth, opts_.background);
         }
     }
 

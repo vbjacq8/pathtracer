@@ -13,26 +13,29 @@
  * \brief Traces one stratified sample for a single pixel.
  * \returns Estimated radiance for that pixel sample
  */
-inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth) {
+inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth,
+                        BackgroundFn background = colorBlueWhiteGradient) {
     double u = (i + randomDouble(0.0, 1.0)) / double(nx);
     double v = (j + randomDouble(0.0, 1.0)) / double(ny);
     Ray r = cam.getRay(u, v);
-    return pathTrace(r, world, depth);
+    return pathTrace(r, world, depth, background);
 }
 
 /** \brief Adds one sample per pixel across the framebuffer. */
-inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth) {
+inline void renderPass(Camera& cam, Hitable* world, Framebuffer& fb, int depth,
+                       BackgroundFn background = colorBlueWhiteGradient) {
     for (int j = fb.height - 1; j >= 0; j--) {
         for (int i = 0; i < fb.width; i++) {
-            fb.addSample(i, j, samplePixel(cam, i, j, fb.width, fb.height, world, depth));
+            fb.addSample(i, j, samplePixel(cam, i, j, fb.width, fb.height, world, depth, background));
         }
     }
 }
 
 /** \brief Runs \p samplesThisFrame independent passes over the framebuffer. */
-inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth) {
+inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int samplesThisFrame, int depth,
+                        BackgroundFn background = colorBlueWhiteGradient) {
     for (int s = 0; s < samplesThisFrame; s++) {
-        renderPass(cam, world, fb, depth);
+        renderPass(cam, world, fb, depth, background);
     }
 }
 

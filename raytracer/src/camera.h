@@ -66,7 +66,7 @@ public:
     Ray getRay(double s, double t) const {
         vec3 rd = lensRadius * randomInDisc();
         vec3 offset = rd.x() * u + rd.y() * v;
-        double rayTime = randomDouble(0,1);
+        double rayTime = randomDouble(0,5);
         return Ray(origin + offset, lowerLeftCorner + s * horizontal + t * vertical - origin - offset, rayTime);
     }
 
@@ -74,7 +74,8 @@ public:
      * \brief Supersamples one pixel with \p numSamples jittered rays.
      * \returns Averaged radiance for pixel (\p i, \p j)
      */
-    vec3 colorSample(int i, int j, int nx, int ny, int numSamples, Hitable* world, int depth) {
+    vec3 colorSample(int i, int j, int nx, int ny, int numSamples, Hitable* world, int depth,
+                     BackgroundFn background = colorBlueWhiteGradient) {
         vec3 col(0, 0, 0);
         for (int k = 0; k < numSamples; k++) {
             double randcoeff1 = randomDouble(0.0, 1.0);
@@ -82,7 +83,7 @@ public:
             double u = double(i + randcoeff1) / double(nx);
             double v = double(j + randcoeff2) / double(ny);
             Ray r = getRay(u, v);
-            col += pathTrace(r, world, depth);
+            col += pathTrace(r, world, depth, background);
         }
         col /= numSamples;
         return col;

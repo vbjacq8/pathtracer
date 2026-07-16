@@ -10,7 +10,7 @@
     \brief render method that takes CLI arguments; entry point into batch render
     \copydoc renderFrame (in renderer.h)
  */
-int render(int argc, char** argv, HitablePtr world) {
+int render(int argc, char** argv, HitablePtr world, BackgroundFn background) {
     RenderOptions opts;
     switch (parseOptions(argc, argv, opts)) {
         case 0:
@@ -20,6 +20,7 @@ int render(int argc, char** argv, HitablePtr world) {
         default:
             return 1;
     }
+    opts.background = background;
 
     const int nx = opts.width;
     const int ny = opts.height;
@@ -31,7 +32,7 @@ int render(int argc, char** argv, HitablePtr world) {
 
     
     const auto t0 = std::chrono::steady_clock::now();
-    renderFrame(cam, world.get(), fb, opts.samples, opts.depth);
+    renderFrame(cam, world.get(), fb, opts.samples, opts.depth, opts.background);
     const auto t1 = std::chrono::steady_clock::now();
     auto renderElapsedNs = t1-t0;
     auto renderElapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(renderElapsedNs).count();
