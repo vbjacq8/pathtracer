@@ -31,6 +31,12 @@ private:
 };
 
 /**
+ * \brief Miss-ray background strategy: radiance when a ray hits no geometry.
+ * \sa colorBlueWhiteGradient, colorVoid
+ */
+using BackgroundFn = vec3 (*)(const Ray&);
+
+/**
  * \brief Sky color for rays that miss geometry.
  * \returns Blue-white gradient from the ray direction.
  */
@@ -38,6 +44,11 @@ inline vec3 colorBlueWhiteGradient(const Ray& r) {
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+}
+
+/** \brief Black background for rays that miss geometry. */
+inline vec3 colorVoid(const Ray&) {
+    return vec3(0, 0, 0);
 }
 
 /**

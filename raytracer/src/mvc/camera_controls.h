@@ -30,8 +30,10 @@ inline double renderAspect(const RenderOptions& opts) {
 
 /** \brief Builds a Camera from render options. */
 inline Camera makeCamera(const RenderOptions& opts) {
+    // Keep focus on the lookat point so orbit/pan/fly don't leave everything defocused.
+    const double focusDist = (opts.lookfrom - opts.lookat).norm();
     return Camera(opts.lookfrom, opts.lookat, opts.vup, opts.vfov,
-                  renderAspect(opts), opts.aperture, opts.focusDist);
+                  renderAspect(opts), opts.aperture, focusDist > 1e-6 ? focusDist : opts.focusDist);
 }
 
 /**

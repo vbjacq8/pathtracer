@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <cmath>
 #include <stdlib.h>
 
 namespace {
@@ -43,12 +44,11 @@ public:
     inline double squared_norm() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
     /** Scales this vector to unit length in place. */
     inline void make_unit_vector();
-    /** Check if all dimensions are near zero */
+    /** True if all components are near 0 (uses abs; negatives are not "near zero"). */
     inline bool near_zero() const {
-        return (e[0] < (nearZeroEps) 
-            && (e[1] < nearZeroEps) 
-            && (e[2] < nearZeroEps)
-        );
+        return (fabs(e[0]) < nearZeroEps)
+            && (fabs(e[1]) < nearZeroEps)
+            && (fabs(e[2]) < nearZeroEps);
     }
 
     double e[3];

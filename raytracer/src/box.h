@@ -31,6 +31,8 @@ inline bool Box::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
     }
     hr.p = r.point_at_parameter(hr.t);
     hr.matPtr = matPtr;
+    hr.u = 0;
+    hr.v = 0;
     return true;
 }
 

@@ -32,20 +32,45 @@ struct AABB {
           max(std::fmax(a.max[0], b.max[0]), std::fmax(a.max[1], b.max[1]), std::fmax(a.max[2], b.max[2])) {}
 
     /**
-     * \brief Slab test for whether \p r intersects this box within (\p tMin, \p tMax).
+     * \brief True if the ray overlaps this box in (\p tMin, \p tMax).
+     * Used for BVH culling — must succeed when the ray origin is inside the box.
      */
     bool intersects(const Ray& r, double tMin, double tMax) const {
-        double tHit = 0;
-        vec3 normal;
-        return slabInterval(r, tMin, tMax, tHit, normal);
+        for (int axis = 0; axis < 3; ++axis) {
+            const double origin = r.origin()[axis];
+            const double direction = r.direction()[axis];
+
+            if (std::fabs(direction) < kAxisParallelEps) {
+                if (origin < min[axis] || origin > max[axis]) {
+                    return false;
+                }
+                continue;
+            }
+
+            double t0 = (min[axis] - origin) / direction;
+            double t1 = (max[axis] - origin) / direction;
+            if (t0 > t1) {
+                std::swap(t0, t1);
+            }
+            tMin = std::max(tMin, t0);
+            tMax = std::min(tMax, t1);
+            if (tMax <= tMin) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
-     * \brief Slab test that records the nearest hit distance and face normal opposing the ray.
+     * \brief Slab test that records the nearest forward surface hit and opposing face normal.
+     * Used by the Box primitive. Geometric enter/exit are tracked separately from the
+     * caller's clipped ray window so interior origins use the exit face.
      */
-    bool slabInterval(const Ray& r, double tMin, double tMax, double& tHit, vec3& normal) const {
+    bool slabInterval(const Ray& r, double rayTMin, double rayTMax, double& tHit, vec3& normal) const {
         double t0s[3];
         double t1s[3];
+        double tEnter = -1e30;  // geometric entry (max of per-axis t0)
+        double tExit = 1e30;    // geometric exit  (min of per-axis t1)
 
         for (int axis = 0; axis < 3; ++axis) {
             const double origin = r.origin()[axis];
@@ -67,19 +92,20 @@ struct AABB {
             }
             t0s[axis] = t0;
             t1s[axis] = t1;
-            tMin = std::max(tMin, t0);
-            tMax = std::min(tMax, t1);
-            if (tMax <= tMin) {
+            tEnter = std::max(tEnter, t0);
+            tExit = std::min(tExit, t1);
+            if (tExit <= tEnter) {
                 return false;
             }
         }
 
-        if (tMax < 0) {
+        // Outside: hit entry face. Inside (tEnter <= 0): hit exit face ahead of the origin.
+        const bool hitFromOutside = tEnter > 0;
+        tHit = hitFromOutside ? tEnter : tExit;
+
+        if (tHit <= rayTMin || tHit >= rayTMax) {
             return false;
         }
-
-        const bool hitFromOutside = tMin > 0;
-        tHit = (hitFromOutside) ? tMin : tMax;
 
         normal = vec3(0, 0, 0);
         for (int axis = 0; axis < 3; ++axis) {

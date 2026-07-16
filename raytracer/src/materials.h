@@ -6,3 +6,4 @@
 #include "light.h"
 #include "material.h"
 #include "metal.h"
+#include "texture.h"

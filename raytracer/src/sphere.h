@@ -3,6 +3,9 @@
 
 #include "hitable.h"
 #include "material.h"
+#include <numbers>
+
+constexpr double PI = std::numbers::pi;
 
 /**
  * \brief Sphere primitive with an attached material.
@@ -20,11 +23,27 @@ public:
     virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
     vec3 centroid() const override;
+    
 
 private:
     Ray center;
     double radius;
     MaterialPtr matPtr;
+
+    /**
+     * \brief Maps a unit-sphere direction to texture (u, v) in [0, 1].
+     * \param p unit vector from sphere center to the hit (same as outward normal)
+     * \param u azimuth in [0, 1], starting at -x
+     * \param v zenith in [0, 1], starting at -y
+     */
+    static void getSphereUV(const vec3& p, double& u, double& v) {
+        // p must be a unit vector; acos domain is [-1, 1].
+        const double theta = std::acos(-p.y());
+        const double phi = std::atan2(-p.z(), p.x()) + PI;
+        u = phi / (2 * PI);
+        v = theta / PI;
+    }
+    
 };
 
 /**
@@ -46,16 +65,18 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
     if (temp > tMin && temp < tMax) {
         hr.t = temp;
         hr.p = r.point_at_parameter(temp);
-        hr.normal = (r.point_at_parameter(temp) - currentCenter) / radius;
+        hr.normal = (hr.p - currentCenter) / radius;
         hr.matPtr = matPtr;
+        getSphereUV(hr.normal, hr.u, hr.v);
         return true;
     }
     temp = (-b + sqrt(discriminant)) / (2.0 * a);
     if (temp > tMin && temp < tMax) {
         hr.t = temp;
         hr.p = r.point_at_parameter(temp);
-        hr.normal = (r.point_at_parameter(temp) - currentCenter) / radius;
+        hr.normal = (hr.p - currentCenter) / radius;
         hr.matPtr = matPtr;
+        getSphereUV(hr.normal, hr.u, hr.v);
         return true;
     }
     return false;
@@ -72,5 +93,7 @@ inline AABB Sphere::boundingBox() const {
     const AABB at1(center.point_at_parameter(1) - r, center.point_at_parameter(1) + r);
     return AABB(at0, at1);
 }
+
+
 
 #endif

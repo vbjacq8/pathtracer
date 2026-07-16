@@ -5,7 +5,7 @@
 #include "render_model.h"
 #include "sdl_view.h"
 
-int interactiveRender(int argc, char** argv, HitablePtr world) {
+int interactiveRender(int argc, char** argv, HitablePtr world, BackgroundFn background) {
     RenderOptions opts;
     //opts.samples = 1;
     switch (parseOptions(argc, argv, opts)) {
@@ -16,6 +16,7 @@ int interactiveRender(int argc, char** argv, HitablePtr world) {
         default:
             return 1;
     }
+    opts.background = background;
 
     const int height = renderHeight(opts);
     RenderModel model(world, opts);
