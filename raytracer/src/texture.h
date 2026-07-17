@@ -2,6 +2,7 @@
 
 #include "vec3.h"
 #include "rtw_image.h"
+#include "perlin.h"
 
 #include <cmath>
 #include <memory>
@@ -77,5 +78,19 @@ class Wallpaper : public Texture {
 
     private:
         RTWImage image;        
+
+};
+
+/** \brief Perlin noise texture */
+class Noise : public Texture {
+    public: 
+        Noise() {}
+
+        vec3 value(double u, double v, const vec3& p) const override {
+            return vec3(1,1,1) * perlin.noise(p);
+        }
+
+    private:
+        Perlin perlin;
 
 };
