@@ -6,7 +6,8 @@
 class Perlin {
     public:
         Perlin() {
-            for (int i =0 ; i < pointCount; ++i){randDouble[i] = randomDouble(0, 1);}
+            for (int i =0 ; i < pointCount; ++i){
+                randVec[i] = randomInSphere();}
 
             perlinGeneratePerm(permX);
             perlinGeneratePerm(permY);
@@ -19,19 +20,18 @@ class Perlin {
             auto u = p.x() - std::floor(p.x());
             auto v = p.y() - std::floor(p.y());
             auto w = p.z() - std::floor(p.z());
-
-
+            
             //"whole" integer coordinates
             auto i = static_cast<int>(std::floor(p.x()));
             auto j = static_cast<int>(std::floor(p.y()));
             auto k = static_cast<int>(std::floor(p.z()));
-            double c[2][2][2];
+            vec3 c[2][2][2];
 
             //creates a 2x2x2 3D array of the integer coordinates + perturbation then mapped by modulo 256 
             for (int di = 0; di < 2; ++di){
                 for (int dj = 0; dj < 2; ++dj){
                     for (int dk = 0; dk < 2; ++dk){
-                        c[di][dj][dk] = randDouble[
+                        c[di][dj][dk] = randVec[
                             permX[(i + di) & 255] ^
                             permY[(j + dj) & 255] ^
                             permZ[(k + dk) & 255]
@@ -43,6 +43,19 @@ class Perlin {
 
             return triLinearInterp(c, u, v, w);
 
+        }
+
+        double turb(const vec3& p, int depth) const {
+            double accum = 0;
+            double weight = 1.0;
+            vec3 temp = p;
+            for (int i = 0; i < depth; ++i){
+                accum += weight * noise(temp);
+                weight *= 0.5;
+                temp *= 2;
+            }
+
+            return std::fabs(accum);
         }
 
 
@@ -68,17 +81,21 @@ class Perlin {
             }
         }
 
-        double triLinearInterp(double c[2][2][2], double u, double v, double w) const {
+        double triLinearInterp(vec3 c[2][2][2], double u, double v, double w) const {
+            double uu = u * u * (3-2*u);
+            double vv = v * v * (3-2*v);
+            double ww = w * w * (3-2*w);
+
             double accum = 0;
             for (int i = 0; i < 2; ++i){
                 for (int j = 0; j < 2; ++j){
                     for (int k = 0; k < 2; ++k){
+                        vec3 weightv(u - i, v-j, w-k);
                         accum += 
-                            (i * u + (1-i)*(1-u)) *
-                            (j * v + (1-j)*(1-v)) * 
-                            (k * w + (1-k)*(1-w)) * c[i][j][k];
-
-
+                            (i * uu + (1-i)*(1-uu)) *
+                            (j * vv + (1-j)*(1-vv)) * 
+                            (k * ww + (1-k)*(1-ww)) * 
+                            dot(c[i][j][k], weightv);
                     }
                 }
             }
@@ -88,7 +105,7 @@ class Perlin {
 
 
         static const int pointCount = 256;
-        double randDouble[pointCount];
+        vec3 randVec[pointCount];
         int permX[pointCount];
         int permY[pointCount];
         int permZ[pointCount];

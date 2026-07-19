@@ -12,7 +12,7 @@
 HitablePtr perlinSceneOne(){
     std::vector<HitablePtr> objects;
 
-    auto pertext = std::make_shared<Noise>();
+    auto pertext = std::make_shared<Noise>(4);
     objects.push_back(std::make_shared<Sphere>(
         vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(
             pertext)));
