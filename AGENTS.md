@@ -8,7 +8,16 @@ A header-only CPU path tracer in C++ (no external dependencies for batch renderi
 - Batch mode needs only a C++ compiler (`g++`). Interactive mode additionally requires **SDL2** (`brew install sdl2` on macOS).
 - `raytracer/test/**` and `*.out` are gitignored, so build artifacts and rendered output are not tracked.
 - Gotcha: the VM has no image viewer by default. Use `scripts/ppm_to_png.py` (stdlib only) to convert `.ppm` output to PNG.
-- There is no test framework; files under `raytracer/test/cpp/` are manual demos.
+- Manual render demos live under `raytracer/test/cpp/`. GoogleTest unit tests live under `raytracer/test/unit/` (`./run_unit_tests.sh`; needs `cmake` + `googletest`).
+
+### Unit tests (GoogleTest)
+
+```bash
+brew install cmake googletest   # once, on macOS
+./run_unit_tests.sh
+```
+
+Sources: `raytracer/test/unit/` (`vec3_test.cpp`, `hit_test.cpp`). Build artifacts go under `raytracer/test/unit/build/` (gitignored).
 
 ### Batch render (PPM → PNG)
 

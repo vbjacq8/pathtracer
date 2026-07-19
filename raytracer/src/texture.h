@@ -84,13 +84,17 @@ class Wallpaper : public Texture {
 /** \brief Perlin noise texture */
 class Noise : public Texture {
     public: 
-        Noise() {}
+        Noise(double scale) : scale(scale) {}
+
 
         vec3 value(double u, double v, const vec3& p) const override {
-            return vec3(1,1,1) * perlin.noise(p);
+            //double pn = (perlin.noise(scale * p) + 1) * 0.5;
+            //double pn = perlin.turb(p,7);
+            return vec3(.5, .5, .5) * (1 + std::sin(scale * p.z() * p.x() + 10 * perlin.turb(p, 7)));
         }
 
     private:
         Perlin perlin;
+        double scale;
 
 };
