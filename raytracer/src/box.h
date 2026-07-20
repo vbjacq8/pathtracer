@@ -15,7 +15,6 @@ public:
 
     bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
-    vec3 centroid() const override;
 
     AABB bounds;
     MaterialPtr matPtr;
@@ -26,18 +25,16 @@ public:
  * \copydoc Hitable::hit
  */
 inline bool Box::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
-    if (!bounds.slabInterval(r, tMin, tMax, hr.t, hr.normal)) {
+    vec3 outwardNormal;
+    if (!bounds.slabInterval(r, tMin, tMax, hr.t, outwardNormal)) {
         return false;
     }
     hr.p = r.point_at_parameter(hr.t);
+    hr.setFaceNormal(r, outwardNormal);
     hr.matPtr = matPtr;
     hr.u = 0;
     hr.v = 0;
     return true;
-}
-
-inline vec3 Box::centroid() const {
-    return (bounds.min + bounds.max) * 0.5;
 }
 
 inline AABB Box::boundingBox() const {

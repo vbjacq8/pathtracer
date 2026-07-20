@@ -54,7 +54,7 @@ public:
     }
 
     /**
-     * \returns Average of child centroids.
+     * \returns Average of child centroids (better for BVH than the union-AABB center).
      */
     vec3 centroid() const override {
         vec3 sum(0, 0, 0);

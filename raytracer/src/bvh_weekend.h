@@ -41,13 +41,6 @@ class BVHWeekend : public Hitable{
         }
 
         /**
-         * \returns the middle of the root's bounding box 
-         */
-        vec3 centroid() const override {
-            return (bvhNodes[0].aabb.min + bvhNodes[0].aabb.max) / 2;
-        }
-
-        /**
          * \returns the root's bounding box 
          */
          AABB boundingBox() const override {

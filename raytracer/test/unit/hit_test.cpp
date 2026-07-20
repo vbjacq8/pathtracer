@@ -2,6 +2,7 @@
 #include "hitable.h"
 #include "hitable_list.h"
 #include "metal.h"
+#include "quad.h"
 #include "ray.h"
 #include "sphere.h"
 #include "vec3.h"
@@ -142,4 +143,23 @@ TEST(HitableHit, HitableListUsesPolymorphicHitThroughHitablePtr) {
     // Starts past the sphere so only the box is ahead.
     ASSERT_TRUE(scene->hit(Ray(vec3(2, 0, 0), vec3(1, 0, 0)), kHitEps, 1e30, hr));
     EXPECT_NEAR(hr.p.x(), 5.0, kGeomEps);
+}
+
+TEST(HitableHit, QuadIsVisibleFromBothSidesOfThePlane) {
+    // Unit square in the xz plane at y = 0; cross(u,v) gives geometric normal -y.
+    HitablePtr quad = std::make_shared<Quad>(
+        vec3(0, 0, 0),
+        vec3(1, 0, 0),
+        vec3(0, 0, 1),
+        dummyMat());
+
+    HitRecord hrFromAbove;
+    ASSERT_TRUE(quad->hit(Ray(vec3(0.5, 1, 0.5), vec3(0, -1, 0)), kHitEps, 1e30, hrFromAbove));
+
+    HitRecord hrFromBelow;
+    ASSERT_TRUE(quad->hit(Ray(vec3(0.5, -1, 0.5), vec3(0, 1, 0)), kHitEps, 1e30, hrFromBelow));
+
+    // Both sides register a hit; shading normal always points toward the ray.
+    EXPECT_LT(dot(vec3(0, -1, 0), hrFromAbove.normal), 0.0);
+    EXPECT_LT(dot(vec3(0, 1, 0), hrFromBelow.normal), 0.0);
 }
