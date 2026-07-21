@@ -78,5 +78,5 @@ HitablePtr globeScene(){
 
 
 int main(int argc, char** argv){
-    return interactiveRender(argc, argv, globeScene(), colorVoid);
+    return interactiveRender(argc, argv, globeScene());
 }

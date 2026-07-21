@@ -8,6 +8,7 @@
 namespace {
 constexpr double kAxisParallelEps = 1e-8;
 constexpr double kSlabHitEps = 1e-8;
+constexpr double kPadEps = 1e-4;
 }  // namespace
 
 /**
@@ -24,12 +25,26 @@ struct AABB {
     /** \brief Builds a box from two opposite corners (order does not matter). */
     AABB(const vec3& a, const vec3& b)
         : min(std::fmin(a[0], b[0]), std::fmin(a[1], b[1]), std::fmin(a[2], b[2])),
-          max(std::fmax(a[0], b[0]), std::fmax(a[1], b[1]), std::fmax(a[2], b[2])) {}
+          max(std::fmax(a[0], b[0]), std::fmax(a[1], b[1]), std::fmax(a[2], b[2])) {
+            padToMinimums();
+          }
 
     /** \brief Union of two boxes. */
     AABB(const AABB& a, const AABB& b)
         : min(std::fmin(a.min[0], b.min[0]), std::fmin(a.min[1], b.min[1]), std::fmin(a.min[2], b.min[2])),
-          max(std::fmax(a.max[0], b.max[0]), std::fmax(a.max[1], b.max[1]), std::fmax(a.max[2], b.max[2])) {}
+          max(std::fmax(a.max[0], b.max[0]), std::fmax(a.max[1], b.max[1]), std::fmax(a.max[2], b.max[2])) 
+          {
+            padToMinimums();
+          }
+
+
+
+    void padToMinimums(){
+        vec3 range = max - min;
+        if (range.x() < kPadEps){max[0] = min.x() + kPadEps;}
+        if (range.y() < kPadEps){max[1] = min.y() + kPadEps;}
+        if (range.z() < kPadEps){max[2] = min.z() + kPadEps;}
+    }
 
     /**
      * \brief True if the ray overlaps this box in (\p tMin, \p tMax).

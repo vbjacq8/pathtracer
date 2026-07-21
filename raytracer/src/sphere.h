@@ -52,38 +52,40 @@ private:
  */
 inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
     // Use the *incoming* ray's shutter time, not center.time() (which is always 0).
-    vec3 currentCenter = center.point_at_parameter(r.time());
-    vec3 oc = r.origin() - currentCenter;
-    double b = 2.0 * dot(oc, r.direction());
-    double a = dot(r.direction(), r.direction());
-    double c = dot(oc, oc) - radius * radius;
-    double discriminant = b * b - 4 * a * c;
+    const vec3 currentCenter = center.point_at_parameter(r.time());
+    const vec3 oc = r.origin() - currentCenter;
+    const double b = 2.0 * dot(oc, r.direction());
+    const double a = dot(r.direction(), r.direction());
+    const double c = dot(oc, oc) - radius * radius;
+    const double discriminant = b * b - 4 * a * c;
     if (discriminant < 0) {
         return false;
     }
+
+    auto recordHit = [&](double t) {
+        hr.t = t;
+        hr.p = r.point_at_parameter(t);
+        const vec3 outwardNormal = (hr.p - currentCenter) / radius;
+        hr.setFaceNormal(r, outwardNormal);
+        hr.matPtr = matPtr;
+        getSphereUV(outwardNormal, hr.u, hr.v);
+    };
+
     double temp = (-b - sqrt(discriminant)) / (2.0 * a);
     if (temp > tMin && temp < tMax) {
-        hr.t = temp;
-        hr.p = r.point_at_parameter(temp);
-        hr.normal = (hr.p - currentCenter) / radius;
-        hr.matPtr = matPtr;
-        getSphereUV(hr.normal, hr.u, hr.v);
+        recordHit(temp);
         return true;
     }
     temp = (-b + sqrt(discriminant)) / (2.0 * a);
     if (temp > tMin && temp < tMax) {
-        hr.t = temp;
-        hr.p = r.point_at_parameter(temp);
-        hr.normal = (hr.p - currentCenter) / radius;
-        hr.matPtr = matPtr;
-        getSphereUV(hr.normal, hr.u, hr.v);
+        recordHit(temp);
         return true;
     }
     return false;
 }
 
 inline vec3 Sphere::centroid() const {
-    // Midpoint of the shutter interval (t = 0 and t = 1).
+    // Motion blur: midpoint of the shutter path, not the union-AABB center.
     return 0.5 * (center.point_at_parameter(0) + center.point_at_parameter(1));
 }
 

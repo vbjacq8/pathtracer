@@ -18,6 +18,13 @@ struct HitRecord {
     std::shared_ptr<Material> matPtr;
     double u;
     double v;
+    bool frontFace;
+
+    /** Sets \p normal to point against \p r; records whether the geometric normal faced the ray. */
+    void setFaceNormal(const Ray& r, const vec3& outwardNormal) {
+        frontFace = dot(r.direction(), outwardNormal) < 0;
+        normal = frontFace ? outwardNormal : (-1.0 * outwardNormal);
+    }
     
 };
 
@@ -40,8 +47,15 @@ public:
 
     /** \returns Axis-aligned bounds of this primitive. */
     virtual AABB boundingBox() const = 0;
-    /** \returns Centroid used for spatial partitioning. */
-    virtual vec3 centroid() const = 0;
+
+    /**
+     * \returns Centroid used for spatial partitioning.
+     * Default: midpoint of \p boundingBox(); override for motion or multi-primitive shapes.
+     */
+    virtual vec3 centroid() const {
+        const AABB box = boundingBox();
+        return 0.5 * (box.min + box.max);
+    }
 };
 
 using HitablePtr = std::shared_ptr<Hitable>;

@@ -61,32 +61,38 @@ inline vec3 color(const Ray& r, Hitable* world, int depth,
 inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
                       BackgroundFn background = colorBlueWhiteGradient) {
     Ray current = r;
-    vec3 throughput(1, 1, 1);
+    vec3 radiance(0, 0, 0);   // accumulated outgoing light toward the camera
+    vec3 throughput(1, 1, 1); // product of attenuations along the path so far
 
     for (int bounce = 0; bounce < maxDepth; ++bounce) {
         HitRecord hr;
         if (!world->hit(current, kHitEps, MAXFLOAT, hr)) {
-            return throughput * background(current);
+            // Miss: sky/void contributes, scaled by how much of the path weight remains.
+            radiance += throughput * background(current);
+            return radiance;
         }
+
+        if (!hr.matPtr) {
+            return radiance;
+        }
+
+        // Emitters add light here (DiffuseLight / Light); ordinary materials add 0.
+        radiance += throughput * hr.matPtr->emit(hr.u, hr.v, hr.p);
 
         Ray scattered;
         vec3 attenuation;
-
-        if (!hr.matPtr){
-            return vec3(0,0,0);
+        if (!hr.matPtr->scatter(current, hr, attenuation, scattered)) {
+            // Absorbed / pure emitter: no further bounces.
+            return radiance;
         }
-        if (!hr.matPtr->scatter(current,hr, attenuation, scattered)){
-            if (hr.matPtr->emit()){return throughput * hr.matPtr->emitted();}
-            else {return vec3(0,0,0);}
 
-        }
-        
+        // Throughput stays multiplicative only — never add emission into it.
         throughput = throughput * attenuation;
         if (!applyRussianRoulette(throughput, bounce + 1)) {
-            return vec3(0, 0, 0);
+            return radiance;
         }
         current = scattered;
     }
 
-    return vec3(0, 0, 0);
+    return radiance;
 }

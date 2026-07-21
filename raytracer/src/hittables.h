@@ -5,3 +5,4 @@
 #include "hitable_list.h"
 #include "sphere.h"
 #include "box.h"
+#include "quad.h"

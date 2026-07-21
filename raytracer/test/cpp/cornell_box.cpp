@@ -1,0 +1,36 @@
+#include "../../src/materials.h"
+#include "../../src/hittables.h"
+#include "../../src/my_random.h"
+#include "../../src/bvh_weekend.h"
+//#include "../../src/bvh_jacco.h"
+#include "../../src/mvc/interactive.h"
+
+#include <memory>
+#include <vector>
+
+/** 
+ * \brief Cornell Box scene; reccomended CLI arguments: --lookfrom 278 278 -800 --lookat 278 278 0 --vfov 40
+
+*/
+
+HitablePtr cornellBox(){
+    std::vector<HitablePtr> objects;
+    auto red   = std::make_shared<Lambertian>(vec3(.65, .05, .05));
+    auto white =std::make_shared<Lambertian>(vec3(.73, .73, .73));
+    auto green =std::make_shared<Lambertian>(vec3(.12, .45, .15));
+    auto light =std::make_shared<DiffuseLight>(vec3(15, 15, 15));
+
+    objects.push_back(make_shared<Quad>(vec3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    objects.push_back(make_shared<Quad>(vec3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    objects.push_back(make_shared<Quad>(vec3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light));
+    objects.push_back(make_shared<Quad>(vec3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    objects.push_back(make_shared<Quad>(vec3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    objects.push_back(make_shared<Quad>(vec3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+
+    return std::make_shared<BVHWeekend>(std::move(objects));
+}
+
+int main (int argc, char** argv){
+    return interactiveRender(argc,argv, cornellBox(), colorVoid);
+}
+
