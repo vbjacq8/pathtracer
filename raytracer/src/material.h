@@ -21,9 +21,10 @@ public:
      */
     virtual bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const = 0;
 
-    virtual bool emit() const { return false; };
-
-    virtual vec3 emitted() const { return vec3(0, 0, 0); };
+    /**
+     * \brief returns black as a base class
+     */
+    virtual vec3 emit(double u, double v, const vec3& p) const {return vec3(0,0,0);}
 };
 
 using MaterialPtr = std::shared_ptr<Material>;

@@ -4,6 +4,7 @@
 #include "dielectric.h"
 #include "lambertian.h"
 #include "light.h"
+#include "diffuse_light.h"
 #include "material.h"
 #include "metal.h"
 #include "texture.h"
