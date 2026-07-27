@@ -1,10 +1,11 @@
 #pragma once
 
+#include "constants.h"
 #include "hitable_list.h"
 #include "material.h"
-#include <algorithm>
-#include <float.h>
 #include "my_random.h"
+
+#include <algorithm>
 
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
@@ -46,7 +47,7 @@ inline vec3 color(const Ray& r, Hitable* world, int depth,
                   BackgroundFn background = colorBlueWhiteGradient) {
     (void)depth;
     HitRecord hr;
-    if (world->hit(r, kHitEps, MAXFLOAT, hr)) {
+    if (world->hit(r, kHitEps, infinity, hr)) {
         return 0.5 * vec3(hr.normal.x() + 1.0, hr.normal.y() + 1.0, hr.normal.z() + 1.0);
     }
     return background(r);
@@ -66,7 +67,7 @@ inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
 
     for (int bounce = 0; bounce < maxDepth; ++bounce) {
         HitRecord hr;
-        if (!world->hit(current, kHitEps, MAXFLOAT, hr)) {
+        if (!world->hit(current, kHitEps, infinity, hr)) {
             // Miss: sky/void contributes, scaled by how much of the path weight remains.
             radiance += throughput * background(current);
             return radiance;

@@ -1,11 +1,9 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include "constants.h"
 #include "hitable.h"
 #include "material.h"
-#include <numbers>
-
-constexpr double PI = std::numbers::pi;
 
 /**
  * \brief Sphere primitive with an attached material.
@@ -39,9 +37,9 @@ private:
     static void getSphereUV(const vec3& p, double& u, double& v) {
         // p must be a unit vector; acos domain is [-1, 1].
         const double theta = std::acos(-p.y());
-        const double phi = std::atan2(-p.z(), p.x()) + PI;
-        u = phi / (2 * PI);
-        v = theta / PI;
+        const double phi = std::atan2(-p.z(), p.x()) + pi;
+        u = phi / (2 * pi);
+        v = theta / pi;
     }
     
 };

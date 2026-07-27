@@ -13,7 +13,7 @@
 
 */
 
-HitablePtr cornellBox(){
+HitablePtr cornellSmoke(){
     std::vector<HitablePtr> objects;
     auto red   = std::make_shared<Lambertian>(vec3(.65, .05, .05));
     auto white =std::make_shared<Lambertian>(vec3(.73, .73, .73));
@@ -36,6 +36,10 @@ HitablePtr cornellBox(){
     box1 = std::make_shared<Translate>(box1, vec3(265, 0, 295));
     box2 = std::make_shared<Translate>(box2, vec3(130,0,65));
 
+    box1 = std::make_shared<ConstantMedium>(box1, 0.01, vec3(0,0,0));
+    box2 = std::make_shared<ConstantMedium>(box2, 0.01, vec3(1,1,1));
+
+
     objects.push_back(box1);
     objects.push_back(box2);
 
@@ -43,6 +47,6 @@ HitablePtr cornellBox(){
 }
 
 int main (int argc, char** argv){
-    return interactiveRender(argc,argv, cornellBox(), colorVoid);
+    return interactiveRender(argc,argv, cornellSmoke(), colorVoid);
 }
 

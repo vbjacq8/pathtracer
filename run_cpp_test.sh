@@ -8,14 +8,16 @@ OUT_DIR="$ROOT_DIR/raytracer/test/out"
 PPM_TO_PNG="$ROOT_DIR/scripts/ppm_to_png.py"
 
 usage() {
-    echo "Usage: $0 [source.cpp] [program args...]" >&2
+    echo "Usage: $0 [--debug] [source.cpp] [program args...]" >&2
     echo "Builds a C++ file from raytracer/test/cpp, runs it, writes PPM to raytracer/test/out," >&2
     echo "and converts the result to PNG." >&2
+    echo "  --debug   Build with -O0 -g and AddressSanitizer (stack traces on crashes)." >&2
     echo "Example: $0 random_scene.cpp --samples 50 --width 400" >&2
 }
 
 source_file=""
 program_args=()
+debug_build=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -25,6 +27,10 @@ while [[ $# -gt 0 ]]; do
                 exit 0
             fi
             program_args+=("$1")
+            shift
+            ;;
+        --debug)
+            debug_build=1
             shift
             ;;
         --)
@@ -90,7 +96,15 @@ for lib_file in parse.cpp render.cpp; do
     fi
 done
 
-"${CXX:-g++}" -std=c++20 -O2 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR" "$source_file" "${lib_sources[@]}" -o "$executable"
+cxx_flags=(-std=c++20 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR")
+if [[ "$debug_build" -eq 1 ]]; then
+    cxx_flags+=(-O0 -g -fno-omit-frame-pointer -fsanitize=address,undefined)
+    echo "Debug build: -O0 -g -fsanitize=address,undefined" >&2
+else
+    cxx_flags+=(-O2 -g)
+fi
+
+"${CXX:-g++}" "${cxx_flags[@]}" "$source_file" "${lib_sources[@]}" -o "$executable"
 
 for arg in ${program_args[@]+"${program_args[@]}"}; do
     if [[ "$arg" == "--help" || "$arg" == "-?" ]]; then
@@ -98,6 +112,11 @@ for arg in ${program_args[@]+"${program_args[@]}"}; do
         exit 0
     fi
 done
+
+if [[ "$debug_build" -eq 1 ]]; then
+    export ASAN_OPTIONS="${ASAN_OPTIONS:-abort_on_error=1:halt_on_error=1}"
+    export UBSAN_OPTIONS="${UBSAN_OPTIONS:-print_stacktrace=1:halt_on_error=1}"
+fi
 
 "$executable" ${program_args[@]+"${program_args[@]}"} > "$output_file"
 python3 "$PPM_TO_PNG" "$output_file" > /dev/null

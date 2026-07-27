@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "ray.h"
 
 #include <algorithm>
@@ -36,8 +37,6 @@ struct AABB {
           {
             padToMinimums();
           }
-
-
 
     void padToMinimums(){
         vec3 range = max - min;
@@ -84,8 +83,8 @@ struct AABB {
     bool slabInterval(const Ray& r, double rayTMin, double rayTMax, double& tHit, vec3& normal) const {
         double t0s[3];
         double t1s[3];
-        double tEnter = -1e30;  // geometric entry (max of per-axis t0)
-        double tExit = 1e30;    // geometric exit  (min of per-axis t1)
+        double tEnter = -infinity;  // geometric entry (max of per-axis t0)
+        double tExit = +infinity;   // geometric exit  (min of per-axis t1)
 
         for (int axis = 0; axis < 3; ++axis) {
             const double origin = r.origin()[axis];
@@ -95,8 +94,8 @@ struct AABB {
                 if (origin < min[axis] || origin > max[axis]) {
                     return false;
                 }
-                t0s[axis] = -1e30;
-                t1s[axis] = 1e30;
+                t0s[axis] = -infinity;
+                t1s[axis] = +infinity;
                 continue;
             }
 
@@ -132,4 +131,9 @@ struct AABB {
         }
         return false;
     }
+
+    AABB operator+(const vec3& v1){
+        return AABB(min + v1, max+v1);
+    }
+
 };

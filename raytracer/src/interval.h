@@ -1,35 +1,27 @@
 #pragma once
-#include<cmath>
+
+#include "constants.h"
+
+#include <cmath>
 
 class Interval {
-    public:
-        double min, max;
-        Interval() : min(std::numeric_limits<double>::infinity())
-            , max(-std::numeric_limits<double>::infinity()) {}
-        
-        Interval(double min, double max) : min(min), max(max) {}
+public:
+    double min, max;
 
-        Interval(const Interval& a, const Interval& b){
-            min = std::fminf(a.min, b.min);
-            max = std::fmaxf(a.max,b.max);
-        }
+    Interval() : min(+infinity), max(-infinity) {}
 
-        double length() const {return max - min;}
+    Interval(double min, double max) : min(min), max(max) {}
 
-        bool contains(double x) const {
-            return (
-                (x >= min) && (x <= max)
-            );
-        }
+    Interval(const Interval& a, const Interval& b) {
+        min = std::fmin(a.min, b.min);
+        max = std::fmax(a.max, b.max);
+    }
 
-        bool surrounds(double x) const {
-            return (
-                (x > min) && (x < max)
-            );
-        }
+    double length() const { return max - min; }
 
+    bool contains(double x) const { return (x >= min) && (x <= max); }
 
+    bool surrounds(double x) const { return (x > min) && (x < max); }
 
-        static const Interval empty, universe;
-
+    static const Interval empty, universe;
 };

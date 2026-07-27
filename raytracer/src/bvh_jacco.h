@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 #include "bvh_node.h"
+#include "constants.h"
 #include "hitable.h"
 
 /**
@@ -55,7 +56,7 @@ class BVHJacco : public Hitable{
         void updateBounds(int nodeIdx){
             BVHNode& node = bvhNodes[nodeIdx];
             AABB nodeAabb;
-            nodeAabb.min = vec3(1e30f, 1e30f, 1e30f);
+            nodeAabb.min = vec3(+infinity, +infinity, +infinity);
             nodeAabb.max = -1 * nodeAabb.min;
             for (int first = node.firstPrimIdx, i = 0; i < node.primCount; i++){
                 //indirection because we don't want to switch around primitives in the primList, just their indices.

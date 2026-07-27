@@ -8,11 +8,13 @@ LIB_SRC_DIR="$ROOT_DIR/raytracer/src"
 MVC_DIR="$LIB_SRC_DIR/mvc"
 
 usage() {
-    echo "Usage: $0 [source.cpp] [program args...]" >&2
+    echo "Usage: $0 [--debug] [source.cpp] [program args...]" >&2
     echo "Builds an interactive SDL viewer from raytracer/test/cpp and runs it." >&2
     echo "Requires SDL2 (brew install sdl2 on macOS)." >&2
+    echo "  --debug   Build with -O0 -g and AddressSanitizer (stack traces on crashes)." >&2
     echo "Example: $0 interactive_scene.cpp --width 800 --height 450 --fullscreen" >&2
     echo "         $0 interactive_scene.cpp --width 640 --height 360 --display-width 1920 --display-height 1080" >&2
+    echo "         $0 --debug final_scene.cpp --lookfrom 478 278 -600 --lookat 278 278 0 --vfov 40" >&2
     echo "" >&2
     echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, Space/Shift pan vertical, R reset, Esc quit" >&2
 }
@@ -55,12 +57,17 @@ sdl_libs() {
 
 source_file=""
 program_args=()
+debug_build=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
             usage
             exit 0
+            ;;
+        --debug)
+            debug_build=1
+            shift
             ;;
         --)
             shift
@@ -121,8 +128,18 @@ lib_sources=(
     "$MVC_DIR/sdl_view.cpp"
 )
 
+cxx_flags=(-std=c++20 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR")
+if [[ "$debug_build" -eq 1 ]]; then
+    # -g: DWARF symbols; ASan/UBSan print full stacks on memory / UB failures.
+    cxx_flags+=(-O0 -g -fno-omit-frame-pointer -fsanitize=address,undefined)
+    echo "Debug build: -O0 -g -fsanitize=address,undefined" >&2
+else
+    # Keep -g so crashes can be inspected with lldb even on optimized builds.
+    cxx_flags+=(-O2 -g)
+fi
+
 # shellcheck disable=SC2086
-"${CXX:-g++}" -std=c++20 -O2 -Wall -Wextra -pedantic -I"$LIB_SRC_DIR" $SDL_CFLAGS \
+"${CXX:-g++}" "${cxx_flags[@]}" $SDL_CFLAGS \
     "$source_file" "${lib_sources[@]}" $SDL_LIBS -o "$executable"
 
 for arg in ${program_args[@]+"${program_args[@]}"}; do
@@ -134,4 +151,8 @@ done
 
 echo "Built $executable"
 echo "Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, Space/Shift pan vertical, R reset, Esc quit"
+if [[ "$debug_build" -eq 1 ]]; then
+    export ASAN_OPTIONS="${ASAN_OPTIONS:-abort_on_error=1:halt_on_error=1}"
+    export UBSAN_OPTIONS="${UBSAN_OPTIONS:-print_stacktrace=1:halt_on_error=1}"
+fi
 "$executable" ${program_args[@]+"${program_args[@]}"}

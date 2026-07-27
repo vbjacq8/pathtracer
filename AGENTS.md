@@ -6,6 +6,7 @@ A header-only CPU path tracer in C++ (no external dependencies for batch renderi
 
 - This is a standalone C++ CLI program. There are **no long-running services**, databases, or ports — "running the app" means compiling an entry point and rendering an image.
 - Batch mode needs only a C++ compiler (`g++`). Interactive mode additionally requires **SDL2** (`brew install sdl2` on macOS).
+- Debug crashes: `./run_interactive.sh --debug <scene>.cpp ...` (or `./run_cpp_test.sh --debug ...`) builds with `-g` + AddressSanitizer so runtime errors print stack traces. Default builds also pass `-g` for `lldb ./raytracer/test/exec/<name>`.
 - `raytracer/test/**` and `*.out` are gitignored, so build artifacts and rendered output are not tracked.
 - Gotcha: the VM has no image viewer by default. Use `scripts/ppm_to_png.py` (stdlib only) to convert `.ppm` output to PNG.
 - Manual render demos live under `raytracer/test/cpp/`. GoogleTest unit tests live under `raytracer/test/unit/` (`./run_unit_tests.sh`; needs `cmake` + `googletest`).
