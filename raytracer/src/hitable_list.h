@@ -1,6 +1,7 @@
 #ifndef HITABLE_LIST_H
 #define HITABLE_LIST_H
 
+#include "constants.h"
 #include "hitable.h"
 
 #include <memory>
@@ -43,8 +44,8 @@ public:
      */
     AABB boundingBox() const override {
         AABB box;
-        box.min = vec3(1e30, 1e30, 1e30);
-        box.max = vec3(-1e30, -1e30, -1e30);
+        box.min = vec3(+infinity, +infinity, +infinity);
+        box.max = vec3(-infinity, -infinity, -infinity);
         for (const auto& object : objects_) {
             AABB childBox = object->boundingBox();
             box.min = min3(box.min, childBox.min);
