@@ -21,9 +21,19 @@ brew install sdl2
 
 Use `interactive_scene.cpp` for the full random scene. Camera controls: orbit (left drag), pan (right drag), dolly (scroll), fly (WASD), reset (R), quit (Esc).
 
+## CUDA (Longleaf / NVIDIA)
+
+```bash
+source raytracer/cuda/env/longleaf_modules.sh   # OnDemand GPU session
+./run_cuda.sh
+```
+
+See `raytracer/cuda/README.md`.
+
 ## Layout
 
 - `raytracer/src/` — tracer headers (camera, materials, framebuffer, renderer)
 - `raytracer/src/mvc/` — interactive model/view/controller layer
+- `raytracer/cuda/` — GPU backend skeleton (device kernels + host launch)
 - `raytracer/test/cpp/` — demo entry points
-- `run_cpp_test.sh` / `run_interactive.sh` — build and run helpers
+- `run_cpp_test.sh` / `run_interactive.sh` / `run_cuda.sh` — build and run helpers

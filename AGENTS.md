@@ -41,3 +41,16 @@ Architecture: `raytracer/src/mvc/` — model (`RenderModel`), view (`SdlView`), 
 Controls: left-drag orbit, right-drag pan, scroll dolly, WASD fly, R reset accumulation, Esc quit.
 
 CLI options (`--lookfrom`, `--vfov`, `--depth`, etc.) are shared with batch mode via `parseOptions`.
+
+### CUDA backend (Longleaf / NVIDIA)
+
+Sources: `raytracer/cuda/` (`device/` kernels, `host/` launch + I/O). Not a rewire of `raytracer/src/` — flat device types, separate smoke binary.
+
+On UNC Longleaf OnDemand (GPU session):
+
+```bash
+source raytracer/cuda/env/longleaf_modules.sh
+./run_cuda.sh
+```
+
+Output: `raytracer/test/out/cuda_smoke.ppm`. Use `./run_cuda.sh --arch 80` (etc.) to pin SM arch. macOS/Apple Silicon cannot build/run this locally.

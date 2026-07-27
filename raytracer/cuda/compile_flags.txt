@@ -1,0 +1,12 @@
+# IntelliSense-only (Mac has no CUDA toolkit).
+# Force C++ so clangd gets exactly one compile job (CUDA mode spawns host+device).
+# Kernel launch syntax <<<>>> may still squiggle locally; it compiles with nvcc on Longleaf.
+-x
+c++
+-std=c++17
+-c
+-D__CUDACC__
+-I.
+-Idevice
+-Ihost
+-Iintellisense

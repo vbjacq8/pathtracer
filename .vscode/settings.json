@@ -7,6 +7,8 @@
     "--query-driver=/usr/bin/clang++,/usr/bin/g++"
   ],
   "files.associations": {
-    "*.h": "cpp"
+    "*.h": "cpp",
+    "*.cu": "cpp",
+    "*.cuh": "cpp"
   }
 }
