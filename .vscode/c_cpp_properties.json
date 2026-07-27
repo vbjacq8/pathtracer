@@ -9,6 +9,28 @@
       "compilerPath": "/usr/bin/clang++",
       "cppStandard": "c++20",
       "intelliSenseMode": "macos-clang-arm64"
+    },
+    {
+      "name": "CUDA",
+      "includePath": [
+        "${workspaceFolder}/raytracer/cuda/device",
+        "${workspaceFolder}/raytracer/cuda/host",
+        "${workspaceFolder}/raytracer/cuda/intellisense",
+        "${workspaceFolder}/raytracer/src"
+      ],
+      "defines": [
+        "__CUDACC__",
+        "__CUDA_ARCH__=800"
+      ],
+      "compilerPath": "/usr/bin/clang++",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "macos-clang-arm64",
+      "browse": {
+        "path": [
+          "${workspaceFolder}/raytracer/cuda"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
     }
   ],
   "version": 4

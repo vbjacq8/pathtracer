@@ -3,5 +3,6 @@ raytracer/temp/**
 raytracer/test/exec/**
 raytracer/test/out/**
 raytracer/test/unit/build/**
+raytracer/cuda/build/**
 raytracer/exec/
 raytracer/out/

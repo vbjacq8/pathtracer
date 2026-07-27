@@ -90,6 +90,7 @@ class Noise : public Texture {
         vec3 value(double u, double v, const vec3& p) const override {
             //double pn = (perlin.noise(scale * p) + 1) * 0.5;
             //double pn = perlin.turb(p,7);
+            //return vec3(1,1,1) * pn;
             return vec3(.5, .5, .5) * (1 + std::sin(scale * p.z() * p.x() + 10 * perlin.turb(p, 7)));
         }
 
