@@ -1,5 +1,11 @@
-#include"check_cuda.cuh"
-#include"render.cuh"
+#include"../../cuda/host/check_cuda.cuh"
+#include"../../cuda/device/render.cuh"
+
+/**
+ * \brief first image generated using CUDA. Use nvcc color_gradient.cu -o color_gradient and pipe to exec/cuda
+ 
+
+*/
 
 int main(){
     int nx = 200;
