@@ -15,7 +15,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CUDA_DIR="$ROOT_DIR/raytracer/cuda"
 BUILD_DIR="$CUDA_DIR/build"
-OUT_DIR="$ROOT_DIR/raytracer/test/out"
+OUT_DIR="$ROOT_DIR/raytracer/test/out/cuda"
 PPM_TO_PNG="$ROOT_DIR/scripts/ppm_to_png.py"
 
 rebuild=0
