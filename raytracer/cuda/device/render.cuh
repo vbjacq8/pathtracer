@@ -5,7 +5,7 @@
 __global__ void render(float* fb, int maxX, int maxY){
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if (i >= maxX || j >= maxY){return;}
+    if ((i >= maxX) || (j >= maxY)){return;}
 
     int pixelIdx = j*maxX*3 + i*3;
     fb[pixelIdx] = float(i) / maxX;
