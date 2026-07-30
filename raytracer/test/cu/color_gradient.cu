@@ -3,7 +3,7 @@
 
 /**
  * \brief first image generated using CUDA. Use nvcc color_gradient.cu -o color_gradient and pipe to exec/cuda
- 
+
 
 */
 
@@ -23,6 +23,9 @@ int main(){
     dim3 threads(tx, ty);
 
     render<<<blocks, threads>>>(fb, nx, ny);
+
+    cudaDeviceSynchronize();
+
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     for (int j = ny-1; j >=0; --j){
