@@ -12,23 +12,25 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "")
     set(CMAKE_CUDA_ARCHITECTURES "70;80;90" CACHE STRING "CUDA arches to build for" FORCE)
 endif()
 
-add_executable(cuda_smoke
-    host/main.cu
-    device/render_kernel.cu
+set(PATHTRACER_TEST_CU "${CMAKE_CURRENT_SOURCE_DIR}/../test/cu")
+set(PATHTRACER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../src")
+
+add_executable(color_gradient
+    "${PATHTRACER_TEST_CU}/color_gradient.cu"
 )
 
-target_include_directories(cuda_smoke PRIVATE
+target_include_directories(color_gradient PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/host"
     "${CMAKE_CURRENT_SOURCE_DIR}/device"
+    "${PATHTRACER_SRC}"
 )
 
-set_target_properties(cuda_smoke PROPERTIES
+set_target_properties(color_gradient PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-# Useful warnings without being noisy on device code.
-target_compile_options(cuda_smoke PRIVATE
+target_compile_options(color_gradient PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra>
     $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>
 )

@@ -1,16 +1,17 @@
 # CUDA path tracer (Longleaf / NVIDIA)
 
-GPU backend lives here. It is **not** a drop-in of `raytracer/src/`; device code uses
-flat structs / enums. The smoke binary verifies the toolchain after `git pull`.
+GPU backend lives here. Demos live under `raytracer/test/cu/`.
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `device/` | Kernels + `__device__` types (`vec3`, `ray`, material enums) |
-| `host/` | Launch, CUDA error checks, PPM output |
+| `device/` | Kernels (`render.cuh`, …) |
+| `host/` | Host helpers (`check_cuda.cuh`) |
 | `env/longleaf_modules.sh` | `module load` helper for UNC Longleaf |
 | `build/` | CMake output (gitignored) |
+| `../test/cu/` | CUDA demos (e.g. `color_gradient.cu`) |
+| `../test/out/cuda/` | PPM/PNG from CUDA demos |
 
 ## Longleaf OnDemand
 
@@ -19,24 +20,19 @@ flat structs / enums. The smoke binary verifies the toolchain after `git pull`.
 
 ```bash
 source raytracer/cuda/env/longleaf_modules.sh
-./run_cuda.sh
+./run_cuda.sh color_gradient.cu
 ```
 
-Output: `raytracer/test/out/cuda_smoke.ppm` (+ `.png` if `scripts/ppm_to_png.py` runs).
+Output: `raytracer/test/out/cuda/color_gradient.ppm` (+ `.png`).
 
-Pin a GPU arch if fatbin size matters:
+Pin a GPU arch if needed:
 
 ```bash
-./run_cuda.sh --rebuild --arch 80    # A100
+./run_cuda.sh --rebuild --arch 80 color_gradient.cu    # A100
 nvidia-smi --query-gpu=compute_cap --format=csv
 ```
 
 ## IntelliSense (local Mac, no CUDA toolkit)
 
-`intellisense/cuda_runtime.h` stubs `__global__`, `blockIdx`, `cudaMalloc`, etc. so
-clangd works without `nvcc`. Real Longleaf builds use the module's headers instead
-(they come first on the include path from `nvcc`/`cmake`).
-
-Reload the window or run **clangd: Restart language server** after pulling these
-config changes. Kernel-launch syntax `<<<grid, block>>>` may still squiggle — that
-is CUDA-only and clangd treats `.cu` as C++; it still compiles on Longleaf.
+`intellisense/cuda_runtime.h` stubs CUDA APIs for clangd. Real Longleaf builds use the
+module toolkit headers. Kernel-launch syntax `<<<>>>` may still squiggle locally.

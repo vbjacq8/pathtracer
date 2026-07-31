@@ -50,7 +50,7 @@ On UNC Longleaf OnDemand (GPU session):
 
 ```bash
 source raytracer/cuda/env/longleaf_modules.sh
-./run_cuda.sh
+./run_cuda.sh color_gradient.cu
 ```
 
-Output: `raytracer/test/out/cuda_smoke.ppm`. Use `./run_cuda.sh --arch 80` (etc.) to pin SM arch. macOS/Apple Silicon cannot build/run this locally.
+Output: `raytracer/test/out/cuda/color_gradient.ppm`. Use `./run_cuda.sh --arch 80` (etc.) to pin SM arch. macOS/Apple Silicon cannot build/run this locally.

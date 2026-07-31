@@ -25,7 +25,7 @@ Use `interactive_scene.cpp` for the full random scene. Camera controls: orbit (l
 
 ```bash
 source raytracer/cuda/env/longleaf_modules.sh   # OnDemand GPU session
-./run_cuda.sh
+./run_cuda.sh color_gradient.cu
 ```
 
 See `raytracer/cuda/README.md`.
