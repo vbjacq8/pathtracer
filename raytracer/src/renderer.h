@@ -15,8 +15,8 @@
  */
 inline vec3 samplePixel(const Camera& cam, int i, int j, int nx, int ny, Hitable* world, int depth,
                         BackgroundFn background = colorBlueWhiteGradient) {
-    double u = (i + randomDouble(0.0, 1.0)) / double(nx);
-    double v = (j + randomDouble(0.0, 1.0)) / double(ny);
+    float u = (i + randomFloat(0.0, 1.0)) / float(nx);
+    float v = (j + randomFloat(0.0, 1.0)) / float(ny);
     Ray r = cam.getRay(u, v);
     return pathTrace(r, world, depth, background);
 }
@@ -44,7 +44,7 @@ inline void renderFrame(Camera& cam, Hitable* world, Framebuffer& fb, int sample
  * laid out as [R,G,B,R,G,B], for SDL's SDL_PIXELFORMAT_RGB24
  * \sa SDL_View::present
  */
-inline void framebufferToRgb(const Framebuffer& fb, std::vector<uint8_t>& rgb, const double gamma) {
+inline void framebufferToRgb(const Framebuffer& fb, std::vector<uint8_t>& rgb, const float gamma) {
     rgb.resize(fb.width * fb.height * 3);
     for (int row = 0; row < fb.height; ++row) {
         const int j = fb.height - 1 - row;
@@ -62,7 +62,7 @@ inline void framebufferToRgb(const Framebuffer& fb, std::vector<uint8_t>& rgb, c
  * \brief Writes tonemapped framebuffer radiance as an ASCII PPM image.
  * \param out output stream
  */
-inline void writePpm(const Framebuffer& fb, std::ostream& out, const double gamma) {
+inline void writePpm(const Framebuffer& fb, std::ostream& out, const float gamma) {
     out << "P3\n" << fb.width << " " << fb.height << "\n255\n";
     for (int j = fb.height - 1; j >= 0; j--) {
         for (int i = 0; i < fb.width; i++) {

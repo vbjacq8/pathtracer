@@ -36,7 +36,7 @@ class BVHWeekend : public Hitable{
         /**
          * \brief Hitable::hit implementation; delegates to intersectBVH
          */
-        bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
+        bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
             return intersectBVH(0, r, tMin, tMax, hr);
         }
 
@@ -116,11 +116,11 @@ class BVHWeekend : public Hitable{
         /**
          * \brief BVH traversal method delegated to by \sa Hit
         */
-        bool intersectBVH(int nodeIdx, const Ray& r, double tMin, double tMax, HitRecord& hr){
+        bool intersectBVH(int nodeIdx, const Ray& r, float tMin, float tMax, HitRecord& hr){
             BVHNode& node = bvhNodes[nodeIdx];
             if (!node.aabb.intersects(r, tMin, tMax)){return false;}
             bool hitAnything = false;
-            double closestSoFar = tMax;
+            float closestSoFar = tMax;
             if (node.isLeaf()){
                 for (int i =0; i < node.primCount; ++i){
                     int idx = primIdxList[node.firstPrimIdx + i];

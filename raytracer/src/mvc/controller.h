@@ -53,10 +53,10 @@ public:
     }
 
 private:
-    static constexpr double kOrbitSensitivity = 0.005;
-    static constexpr double kPanSensitivity = 0.01;
-    static constexpr double kDollySensitivity = 0.5;
-    static constexpr double kFlySpeed = 0.2;
+    static constexpr float kOrbitSensitivity = 0.005;
+    static constexpr float kPanSensitivity = 0.01;
+    static constexpr float kDollySensitivity = 0.5;
+    static constexpr float kFlySpeed = 0.2;
 
     void handleEvent(const ViewEvent& event) {
         switch (event.type) {
@@ -80,8 +80,8 @@ private:
                 break;
             case ViewEventType::MouseMotion:
                 if (orbiting_ || panning_) {
-                    const double dx = event.x - lastX_;
-                    const double dy = event.y - lastY_;
+                    const float dx = event.x - lastX_;
+                    const float dy = event.y - lastY_;
                     if (orbiting_) {
                         orbitCamera(model_.options(), dx * kOrbitSensitivity, dy * kOrbitSensitivity);
                     } else {
@@ -106,9 +106,9 @@ private:
 
     void updateHeldMovement() {
         const MovementKeyState keys = view_.movementKeyState();
-        double forward = 0.0;
-        double right = 0.0;
-        double panVertical = 0.0;
+        float forward = 0.0;
+        float right = 0.0;
+        float panVertical = 0.0;
         if (keys.forward) {
             forward += kFlySpeed;
         }

@@ -8,13 +8,13 @@
 
 class ConstantMedium : public Hitable {
     public:
-        ConstantMedium(std::shared_ptr<Hitable> boundary, double density, std::shared_ptr<Texture> tex) :
+        ConstantMedium(std::shared_ptr<Hitable> boundary, float density, std::shared_ptr<Texture> tex) :
             boundary(boundary), negInvDensity(-1/density), phaseFunction(std::make_shared<Isotropic>(tex)) {}
 
-        ConstantMedium(std::shared_ptr<Hitable> boundary, double density, const vec3& albedo) :
+        ConstantMedium(std::shared_ptr<Hitable> boundary, float density, const vec3& albedo) :
         boundary(boundary), negInvDensity(-1/density), phaseFunction(std::make_shared<Isotropic>(albedo)) {}
 
-        bool hit(const Ray& rIn, double tMin, double tMax, HitRecord& hr) override {
+        bool hit(const Ray& rIn, float tMin, float tMax, HitRecord& hr) override {
             HitRecord hr1, hr2;
             if (!boundary->hit(rIn, -infinity, infinity, hr1)){return false;}
             if (!boundary->hit(rIn, hr1.t+ 0.001, infinity, hr2)){return false;}
@@ -26,9 +26,9 @@ class ConstantMedium : public Hitable {
 
             if (hr1.t < 0){hr1.t = 0;}
 
-            double rayLength = rIn.direction().norm();
-            double distanceInBoundary = rayLength * (hr2.t - hr1.t);
-            double hitDistance = negInvDensity * std::log(randomDouble(0, 1));
+            float rayLength = rIn.direction().norm();
+            float distanceInBoundary = rayLength * (hr2.t - hr1.t);
+            float hitDistance = negInvDensity * std::log(randomFloat(0, 1));
 
             if (hitDistance > distanceInBoundary){return false;}
 
@@ -45,6 +45,6 @@ class ConstantMedium : public Hitable {
 
     private:
         std::shared_ptr<Hitable> boundary;
-        double negInvDensity;
+        float negInvDensity;
         std::shared_ptr<Material> phaseFunction;
 };

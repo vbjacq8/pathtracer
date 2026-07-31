@@ -24,7 +24,7 @@ public:
     /**
      * \brief returns black as a base class
      */
-    virtual vec3 emit(double /*u*/, double /*v*/, const vec3& /*p*/) const {
+    virtual vec3 emit(float /*u*/, float /*v*/, const vec3& /*p*/) const {
         return vec3(0, 0, 0);
     }
 };

@@ -24,10 +24,10 @@ public:
      * \brief Finds the nearest hit among all children.
      * \copydoc Hitable::hit
      */
-    bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
+    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
         HitRecord tempRec;
         bool hitAnything = false;
-        double closestSoFar = tMax;
+        float closestSoFar = tMax;
 
         for (const auto& object : objects_) {
             if (object->hit(r, tMin, closestSoFar, tempRec)) {
@@ -65,7 +65,7 @@ public:
         for (const auto& object : objects_) {
             sum += object->centroid();
         }
-        return sum / static_cast<double>(objects_.size());
+        return sum / static_cast<float>(objects_.size());
     }
 
     std::vector<HitablePtr>& objects() { return objects_; }

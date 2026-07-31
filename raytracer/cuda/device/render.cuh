@@ -2,15 +2,23 @@
 
 #include <cuda_runtime.h>
 
-#include "../../src/vec3.h"
+#include "../../src/ray.h"
 
-__global__ void render(vec3* fb, int maxX, int maxY) {
+/**
+ * \brief Primary-ray sky gradient: one thread per pixel.
+ * Direction is (viewport point - origin), matching the CPU Camera ray setup.
+ */
+__global__ void render(vec3* fb, int maxX, int maxY, vec3 lowerLeftCorner, vec3 horizontal,
+                       vec3 vertical, vec3 origin) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= maxX) || (j >= maxY)) {
         return;
     }
-
+    float u = float(i) / float(maxX);
+    float v = float(j) / float(maxY);
     int pixelIdx = j * maxX + i;
-    fb[pixelIdx] = vec3(float(i) / maxX, float(j) / maxY, 0.2);
+    vec3 direction = lowerLeftCorner + u * horizontal + v * vertical - origin;
+    Ray r(origin, direction);
+    fb[pixelIdx] = colorBlueWhiteGradient(r);
 }

@@ -23,13 +23,13 @@ HitablePtr finalScene() {
     constexpr int boxesPerSide = 20;
     for (int i = 0; i < boxesPerSide; ++i) {
         for (int j = 0; j < boxesPerSide; ++j) {
-            const double w = 100.0;
-            const double x0 = -1000.0 + i * w;
-            const double z0 = -1000.0 + j * w;
-            const double y0 = 0.0;
-            const double x1 = x0 + w;
-            const double y1 = randomDouble(1, 101);
-            const double z1 = z0 + w;
+            const float w = 100.0;
+            const float x0 = -1000.0 + i * w;
+            const float z0 = -1000.0 + j * w;
+            const float y0 = 0.0;
+            const float x1 = x0 + w;
+            const float y1 = randomFloat(1, 101);
+            const float z1 = z0 + w;
 
             boxPrims.push_back(
                 std::make_shared<BoxQuadImpl>(vec3(x0, y0, z0), vec3(x1, y1, z1), ground));
@@ -64,7 +64,7 @@ HitablePtr finalScene() {
     constexpr int ns = 1000;
     for (int j = 0; j < ns; ++j) {
         boxPrims2.push_back(std::make_shared<Sphere>(
-            vec3(165 * randomDouble(0, 1), 165 * randomDouble(0, 1), 165 * randomDouble(0, 1)),
+            vec3(165 * randomFloat(0, 1), 165 * randomFloat(0, 1), 165 * randomFloat(0, 1)),
             10,
             white));
     }

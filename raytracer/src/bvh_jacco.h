@@ -36,7 +36,7 @@ class BVHJacco : public Hitable{
         /**
          * \brief Hitable::hit implementation; delegates to intersectBVH
          */
-        bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
+        bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
             return intersectBVH(0, r, tMin, tMax, hr);
         }
 
@@ -80,7 +80,7 @@ class BVHJacco : public Hitable{
             int axis = 0;
             if (extent.y() > extent.x()) axis = 1;
             if (extent.z() > extent[axis]) axis = 2;
-            double splitPos = (nodeAabb.min[axis] + extent[axis]) * 0.5f;
+            float splitPos = (nodeAabb.min[axis] + extent[axis]) * 0.5f;
 
             int i = node.firstPrimIdx;
             int j = node.firstPrimIdx + node.primCount - 1;
@@ -111,11 +111,11 @@ class BVHJacco : public Hitable{
         /**
          * \brief BVH traversal method delegated to by \sa Hit
         */
-        bool intersectBVH(int nodeIdx, const Ray& r, double tMin, double tMax, HitRecord& hr){
+        bool intersectBVH(int nodeIdx, const Ray& r, float tMin, float tMax, HitRecord& hr){
             BVHNode& node = bvhNodes[nodeIdx];
             if (!node.aabb.intersects(r, tMin, tMax)){return false;}
             bool hitAnything = false;
-            double closestSoFar = tMax;
+            float closestSoFar = tMax;
             if (node.isLeaf()){
                 for (int i =0; i < node.primCount; ++i){
                     int idx = primIdxList[node.firstPrimIdx + i];

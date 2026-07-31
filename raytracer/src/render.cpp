@@ -24,7 +24,7 @@ int render(int argc, char** argv, HitablePtr world, BackgroundFn background) {
 
     const int nx = opts.width;
     const int ny = opts.height;
-    const double aspect = double(nx) / double(ny);
+    const float aspect = float(nx) / float(ny);
 
     Camera cam(opts.lookfrom, opts.lookat, opts.vup, opts.vfov, aspect, opts.aperture, opts.focusDist);
 

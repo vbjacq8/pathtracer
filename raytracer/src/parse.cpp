@@ -37,10 +37,10 @@ static std::string sanitizeNumberToken(const char* text) {
     return cleaned;
 }
 
-static bool parseDouble(const char* text, double& out) {
+static bool parseFloat(const char* text, float& out) {
     const std::string cleaned = sanitizeNumberToken(text);
     char* end = nullptr;
-    out = std::strtod(cleaned.c_str(), &end);
+    out = std::strtof(cleaned.c_str(), &end);
     return end != cleaned.c_str() && *end == '\0';
 }
 
@@ -60,12 +60,12 @@ static bool parseVec3(int& i, int argc, char** argv, vec3& out, const char* flag
         std::cerr << "Option " << flag << " needs three numbers (got fewer).\n";
         return false;
     }
-    double x = 0;
-    double y = 0;
-    double z = 0;
-    if (!parseDouble(argv[i + 1], x) ||
-        !parseDouble(argv[i + 2], y) ||
-        !parseDouble(argv[i + 3], z)) {
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    if (!parseFloat(argv[i + 1], x) ||
+        !parseFloat(argv[i + 2], y) ||
+        !parseFloat(argv[i + 3], z)) {
         std::cerr << "Option " << flag << " expects three numbers, got: '"
                   << argv[i + 1] << "' '" << argv[i + 2] << "' '" << argv[i + 3] << "'\n";
         return false;
@@ -84,8 +84,8 @@ static bool requireInt(int& i, int argc, char** argv, int& out, const char* flag
     return true;
 }
 
-static bool requireDouble(int& i, int argc, char** argv, double& out, const char* flag) {
-    if (++i >= argc || !parseDouble(argv[i], out)) {
+static bool requireDouble(int& i, int argc, char** argv, float& out, const char* flag) {
+    if (++i >= argc || !parseFloat(argv[i], out)) {
         std::cerr << "Option " << flag << " needs a number"
                   << (i < argc ? std::string(" (got '") + argv[i] + "')" : "") << ".\n";
         return false;
@@ -221,10 +221,10 @@ int parseOptions(int argc, char** argv, RenderOptions& opts) {
             opts.displayHeight = opts.height;
         } else if (opts.displayWidth == 0) {
             opts.displayWidth = static_cast<int>(
-                opts.displayHeight * static_cast<double>(opts.width) / opts.height);
+                opts.displayHeight * static_cast<float>(opts.width) / opts.height);
         } else if (opts.displayHeight == 0) {
             opts.displayHeight = static_cast<int>(
-                opts.displayWidth * static_cast<double>(opts.height) / opts.width);
+                opts.displayWidth * static_cast<float>(opts.height) / opts.width);
         }
         if (opts.displayWidth <= 0 || opts.displayHeight <= 0) {
             std::cerr << "display-width and display-height must be positive.\n";

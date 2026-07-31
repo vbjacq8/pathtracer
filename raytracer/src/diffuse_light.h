@@ -7,7 +7,7 @@ class DiffuseLight : public Material {
         DiffuseLight(std::shared_ptr<Texture> tex) : tex(tex) {}
         DiffuseLight(const vec3& emit) : tex(std::make_shared<SolidColor>(emit)) {}
 
-        vec3 emit(double u, double v, const vec3& p) const override {
+        vec3 emit(float u, float v, const vec3& p) const override {
             return tex->value(u, v, p);
         }
 

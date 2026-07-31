@@ -16,14 +16,14 @@ HitablePtr randomScene() {
 
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
-            double chooseMat = randomDouble(0.0, 1.0);
-            vec3 center(a + 0.9 * randomDouble(0.0, 1.0), 0.2, b + 0.9 * randomDouble(0.0, 1.0));
+            float chooseMat = randomFloat(0.0, 1.0);
+            vec3 center(a + 0.9 * randomFloat(0.0, 1.0), 0.2, b + 0.9 * randomFloat(0.0, 1.0));
             if ((center - vec3(4.0, 0.2, 0)).norm() > 0.9) {
                 if (chooseMat < 0.8) {
                     auto albedo = std::make_shared<SolidColor>(vec3(
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0),
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0),
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0)));
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0),
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0),
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0)));
                     objects.push_back(std::make_shared<Sphere>(
                         center, 0.2, std::make_shared<Lambertian>(albedo)));
                 } else if (chooseMat < 0.95) {
@@ -32,10 +32,10 @@ HitablePtr randomScene() {
                         0.2,
                         std::make_shared<Metal>(
                             vec3(
-                                0.5 * (1 + randomDouble(0.0, 1.0)),
-                                0.5 * (1 + randomDouble(0.0, 1.0)),
-                                0.5 * (1 + randomDouble(0.0, 1.0))),
-                            0.5 * randomDouble(0.0, 1.0))));
+                                0.5 * (1 + randomFloat(0.0, 1.0)),
+                                0.5 * (1 + randomFloat(0.0, 1.0)),
+                                0.5 * (1 + randomFloat(0.0, 1.0))),
+                            0.5 * randomFloat(0.0, 1.0))));
                 } else {
                     objects.push_back(std::make_shared<Sphere>(
                         center, 0.2, std::make_shared<Dielectric>(1.5)));

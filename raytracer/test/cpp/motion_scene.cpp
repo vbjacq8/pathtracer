@@ -17,15 +17,15 @@ HitablePtr motionScene() {
 
     for (int i = -11; i < 11; ++i) {
         for (int j = -11; j < 11; ++j) {
-            auto chooseMat = randomDouble(0, 1);
-            vec3 cen(i + 0.9 * randomDouble(0, 1), 0.2, j + 0.9 * randomDouble(0, 1));
+            auto chooseMat = randomFloat(0, 1);
+            vec3 cen(i + 0.9 * randomFloat(0, 1), 0.2, j + 0.9 * randomFloat(0, 1));
             if ((cen - vec3(4, 0.2, 0)).norm() > 0.9) {
                 if (chooseMat < 0.8) {
                     auto albedo = std::make_shared<SolidColor>(vec3(
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0),
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0),
-                        randomDouble(0.0, 1.0) * randomDouble(0.0, 1.0)));
-                    auto cen2 = cen + vec3(0, randomDouble(0, 0.5), 0);
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0),
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0),
+                        randomFloat(0.0, 1.0) * randomFloat(0.0, 1.0)));
+                    auto cen2 = cen + vec3(0, randomFloat(0, 0.5), 0);
                     objects.push_back(std::make_shared<Sphere>(
                         cen, cen2, 0.2, std::make_shared<Lambertian>(albedo)));
                 } else if (chooseMat < 0.95) {
@@ -34,10 +34,10 @@ HitablePtr motionScene() {
                         0.2,
                         std::make_shared<Metal>(
                             vec3(
-                                0.5 * (1 + randomDouble(0.0, 1.0)),
-                                0.5 * (1 + randomDouble(0.0, 1.0)),
-                                0.5 * (1 + randomDouble(0.0, 1.0))),
-                            0.5 * randomDouble(0.0, 1.0))));
+                                0.5 * (1 + randomFloat(0.0, 1.0)),
+                                0.5 * (1 + randomFloat(0.0, 1.0)),
+                                0.5 * (1 + randomFloat(0.0, 1.0))),
+                            0.5 * randomFloat(0.0, 1.0))));
                 } else {
                     objects.push_back(std::make_shared<Sphere>(
                         cen, 0.2, std::make_shared<Dielectric>(1.5)));

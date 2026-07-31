@@ -7,9 +7,9 @@
 #include <cmath>
 
 namespace {
-constexpr double kAxisParallelEps = 1e-8;
-constexpr double kSlabHitEps = 1e-8;
-constexpr double kPadEps = 1e-4;
+constexpr float kAxisParallelEps = 1e-8;
+constexpr float kSlabHitEps = 1e-8;
+constexpr float kPadEps = 1e-4;
 }  // namespace
 
 /**
@@ -49,10 +49,10 @@ struct AABB {
      * \brief True if the ray overlaps this box in (\p tMin, \p tMax).
      * Used for BVH culling — must succeed when the ray origin is inside the box.
      */
-    bool intersects(const Ray& r, double tMin, double tMax) const {
+    bool intersects(const Ray& r, float tMin, float tMax) const {
         for (int axis = 0; axis < 3; ++axis) {
-            const double origin = r.origin()[axis];
-            const double direction = r.direction()[axis];
+            const float origin = r.origin()[axis];
+            const float direction = r.direction()[axis];
 
             if (std::fabs(direction) < kAxisParallelEps) {
                 if (origin < min[axis] || origin > max[axis]) {
@@ -61,8 +61,8 @@ struct AABB {
                 continue;
             }
 
-            double t0 = (min[axis] - origin) / direction;
-            double t1 = (max[axis] - origin) / direction;
+            float t0 = (min[axis] - origin) / direction;
+            float t1 = (max[axis] - origin) / direction;
             if (t0 > t1) {
                 std::swap(t0, t1);
             }
@@ -80,15 +80,15 @@ struct AABB {
      * Used by the Box primitive. Geometric enter/exit are tracked separately from the
      * caller's clipped ray window so interior origins use the exit face.
      */
-    bool slabInterval(const Ray& r, double rayTMin, double rayTMax, double& tHit, vec3& normal) const {
-        double t0s[3];
-        double t1s[3];
-        double tEnter = -infinity;  // geometric entry (max of per-axis t0)
-        double tExit = +infinity;   // geometric exit  (min of per-axis t1)
+    bool slabInterval(const Ray& r, float rayTMin, float rayTMax, float& tHit, vec3& normal) const {
+        float t0s[3];
+        float t1s[3];
+        float tEnter = -infinity;  // geometric entry (max of per-axis t0)
+        float tExit = +infinity;   // geometric exit  (min of per-axis t1)
 
         for (int axis = 0; axis < 3; ++axis) {
-            const double origin = r.origin()[axis];
-            const double direction = r.direction()[axis];
+            const float origin = r.origin()[axis];
+            const float direction = r.direction()[axis];
 
             if (std::fabs(direction) < kAxisParallelEps) {
                 if (origin < min[axis] || origin > max[axis]) {
@@ -99,8 +99,8 @@ struct AABB {
                 continue;
             }
 
-            double t0 = (min[axis] - origin) / direction;
-            double t1 = (max[axis] - origin) / direction;
+            float t0 = (min[axis] - origin) / direction;
+            float t1 = (max[axis] - origin) / direction;
             if (t0 > t1) {
                 std::swap(t0, t1);
             }
@@ -123,7 +123,7 @@ struct AABB {
 
         normal = vec3(0, 0, 0);
         for (int axis = 0; axis < 3; ++axis) {
-            const double faceT = hitFromOutside ? t0s[axis] : t1s[axis];
+            const float faceT = hitFromOutside ? t0s[axis] : t1s[axis];
             if (std::fabs(tHit - faceT) < kSlabHitEps) {
                 normal[axis] = (r.direction()[axis] > 0) ? -1.0 : 1.0;
                 return true;

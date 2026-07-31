@@ -5,16 +5,22 @@
 #include <iostream>
 
 /**
- * \brief First image generated with CUDA (UV color gradient).
+ * \brief Blue-white sky gradient via CUDA (RTIOW early camera setup).
  *
  * Build/run via repo root:
  *   source raytracer/cuda/env/longleaf_modules.sh
- *   ./run_cuda.sh color_gradient.cu
+ *   ./run_cuda.sh --rebuild color_gradient.cu
  */
 
 int main() {
     int nx = 200;
     int ny = 100;
+
+    // Classic RTIOW viewport (camera at origin looking down -z).
+    vec3 lowerLeftCorner(-2.0f, -1.0f, -1.0f);
+    vec3 horizontal(4.0f, 0.0f, 0.0f);
+    vec3 vertical(0.0f, 2.0f, 0.0f);
+    vec3 origin(0.0f, 0.0f, 0.0f);
 
     int numPixels = nx * ny;
     size_t fbSize = size_t(numPixels) * sizeof(vec3);
@@ -24,11 +30,10 @@ int main() {
 
     int tx = 8;
     int ty = 8;
-
     dim3 blocks(nx / tx + 1, ny / ty + 1);
     dim3 threads(tx, ty);
 
-    render<<<blocks, threads>>>(fb, nx, ny);
+    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 
@@ -36,9 +41,9 @@ int main() {
     for (int j = ny - 1; j >= 0; --j) {
         for (int i = 0; i < nx; ++i) {
             size_t pixelIdx = size_t(j * nx + i);
-            float r = static_cast<float>(fb[pixelIdx][0]);
-            float g = static_cast<float>(fb[pixelIdx][1]);
-            float b = static_cast<float>(fb[pixelIdx][2]);
+            float r = fb[pixelIdx][0];
+            float g = fb[pixelIdx][1];
+            float b = fb[pixelIdx][2];
             int ir = int(r * 255.99f);
             int ig = int(g * 255.99f);
             int ib = int(b * 255.99f);

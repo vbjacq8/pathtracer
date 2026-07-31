@@ -12,7 +12,7 @@ HitablePtr globeScene(){
     std::vector<HitablePtr> objects;
 
     // AU-ish coords scaled up so spheres clear the sun and orbits read as separate.
-    constexpr double kOrbitScale = 50.0;
+    constexpr float kOrbitScale = 50.0;
 
     auto earthTexture  = std::make_shared<Wallpaper>("earthmap.jpg");
     auto earthSurface = std::make_shared<Lambertian>(earthTexture);

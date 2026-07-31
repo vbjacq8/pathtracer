@@ -17,7 +17,7 @@ public:
         aabb = this->object->boundingBox() + offset;
     }
 
-    bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
+    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
         // Move the ray into object space (translation does not change direction).
         const Ray offsetRay(r.origin() - offset, r.direction(), r.time());
         if (!object->hit(offsetRay, tMin, tMax, hr)) {
@@ -41,8 +41,8 @@ private:
  */
 class RotateY : public Hitable {
 public:
-    RotateY(HitablePtr object, double angle) : object(std::move(object)) {
-        const double radians = degreesToRadians(angle);
+    RotateY(HitablePtr object, float angle) : object(std::move(object)) {
+        const float radians = degreesToRadians(angle);
         cosTheta = std::cos(radians);
         sinTheta = std::sin(radians);
         bounds = this->object->boundingBox();
@@ -54,12 +54,12 @@ public:
         for (int i = 0; i < 2; ++i) {
             for (int j = 0; j < 2; ++j) {
                 for (int k = 0; k < 2; ++k) {
-                    const double x = i * bounds.max[0] + (1 - i) * bounds.min[0];
-                    const double y = j * bounds.max[1] + (1 - j) * bounds.min[1];
-                    const double z = k * bounds.max[2] + (1 - k) * bounds.min[2];
+                    const float x = i * bounds.max[0] + (1 - i) * bounds.min[0];
+                    const float y = j * bounds.max[1] + (1 - j) * bounds.min[1];
+                    const float z = k * bounds.max[2] + (1 - k) * bounds.min[2];
 
-                    const double newX = cosTheta * x + sinTheta * z;
-                    const double newZ = -sinTheta * x + cosTheta * z;
+                    const float newX = cosTheta * x + sinTheta * z;
+                    const float newZ = -sinTheta * x + cosTheta * z;
                     const vec3 tester(newX, y, newZ);
 
                     for (int c = 0; c < 3; ++c) {
@@ -73,7 +73,7 @@ public:
         bounds = AABB(min, max);
     }
 
-    bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
+    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
         // World -> object space (inverse rotation).
         const vec3 origin(
             cosTheta * r.origin().x() - sinTheta * r.origin().z(),
@@ -106,7 +106,7 @@ public:
 
 private:
     HitablePtr object;
-    double cosTheta = 0;
-    double sinTheta = 0;
+    float cosTheta = 0;
+    float sinTheta = 0;
     AABB bounds;
 };

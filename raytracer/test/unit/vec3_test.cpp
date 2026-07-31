@@ -6,7 +6,7 @@
 
 namespace {
 
-constexpr double kEps = 1e-9;
+constexpr float kEps = 1e-5f;
 
 }  // namespace
 
@@ -19,23 +19,23 @@ TEST(Vec3, DefaultConstructLeavesUnspecifiedComponents) {
 
 TEST(Vec3, ComponentAccessors) {
     const vec3 v(1.5, -2.0, 3.25);
-    EXPECT_DOUBLE_EQ(v.x(), 1.5);
-    EXPECT_DOUBLE_EQ(v.y(), -2.0);
-    EXPECT_DOUBLE_EQ(v.z(), 3.25);
-    EXPECT_DOUBLE_EQ(v.r(), 1.5);
-    EXPECT_DOUBLE_EQ(v.g(), -2.0);
-    EXPECT_DOUBLE_EQ(v.b(), 3.25);
-    EXPECT_DOUBLE_EQ(v[0], 1.5);
-    EXPECT_DOUBLE_EQ(v[1], -2.0);
-    EXPECT_DOUBLE_EQ(v[2], 3.25);
+    EXPECT_FLOAT_EQ(v.x(), 1.5);
+    EXPECT_FLOAT_EQ(v.y(), -2.0);
+    EXPECT_FLOAT_EQ(v.z(), 3.25);
+    EXPECT_FLOAT_EQ(v.r(), 1.5);
+    EXPECT_FLOAT_EQ(v.g(), -2.0);
+    EXPECT_FLOAT_EQ(v.b(), 3.25);
+    EXPECT_FLOAT_EQ(v[0], 1.5);
+    EXPECT_FLOAT_EQ(v[1], -2.0);
+    EXPECT_FLOAT_EQ(v[2], 3.25);
 }
 
 TEST(Vec3, UnaryMinus) {
     vec3 v(1.0, -2.0, 3.0);
     const vec3 n = -v;
-    EXPECT_DOUBLE_EQ(n.x(), -1.0);
-    EXPECT_DOUBLE_EQ(n.y(), 2.0);
-    EXPECT_DOUBLE_EQ(n.z(), -3.0);
+    EXPECT_FLOAT_EQ(n.x(), -1.0);
+    EXPECT_FLOAT_EQ(n.y(), 2.0);
+    EXPECT_FLOAT_EQ(n.z(), -3.0);
 }
 
 TEST(Vec3, AdditionAndSubtraction) {
@@ -44,12 +44,12 @@ TEST(Vec3, AdditionAndSubtraction) {
     const vec3 sum = a + b;
     const vec3 diff = b - a;
 
-    EXPECT_DOUBLE_EQ(sum.x(), 5.0);
-    EXPECT_DOUBLE_EQ(sum.y(), 7.0);
-    EXPECT_DOUBLE_EQ(sum.z(), 9.0);
-    EXPECT_DOUBLE_EQ(diff.x(), 3.0);
-    EXPECT_DOUBLE_EQ(diff.y(), 3.0);
-    EXPECT_DOUBLE_EQ(diff.z(), 3.0);
+    EXPECT_FLOAT_EQ(sum.x(), 5.0);
+    EXPECT_FLOAT_EQ(sum.y(), 7.0);
+    EXPECT_FLOAT_EQ(sum.z(), 9.0);
+    EXPECT_FLOAT_EQ(diff.x(), 3.0);
+    EXPECT_FLOAT_EQ(diff.y(), 3.0);
+    EXPECT_FLOAT_EQ(diff.z(), 3.0);
 }
 
 TEST(Vec3, ElementWiseAndScalarMultiply) {
@@ -59,15 +59,15 @@ TEST(Vec3, ElementWiseAndScalarMultiply) {
     const vec3 scaled = a * 2.0;
     const vec3 scaledLeft = 3.0 * a;
 
-    EXPECT_DOUBLE_EQ(hadamard.x(), 10.0);
-    EXPECT_DOUBLE_EQ(hadamard.y(), 18.0);
-    EXPECT_DOUBLE_EQ(hadamard.z(), 28.0);
-    EXPECT_DOUBLE_EQ(scaled.x(), 4.0);
-    EXPECT_DOUBLE_EQ(scaled.y(), 6.0);
-    EXPECT_DOUBLE_EQ(scaled.z(), 8.0);
-    EXPECT_DOUBLE_EQ(scaledLeft.x(), 6.0);
-    EXPECT_DOUBLE_EQ(scaledLeft.y(), 9.0);
-    EXPECT_DOUBLE_EQ(scaledLeft.z(), 12.0);
+    EXPECT_FLOAT_EQ(hadamard.x(), 10.0);
+    EXPECT_FLOAT_EQ(hadamard.y(), 18.0);
+    EXPECT_FLOAT_EQ(hadamard.z(), 28.0);
+    EXPECT_FLOAT_EQ(scaled.x(), 4.0);
+    EXPECT_FLOAT_EQ(scaled.y(), 6.0);
+    EXPECT_FLOAT_EQ(scaled.z(), 8.0);
+    EXPECT_FLOAT_EQ(scaledLeft.x(), 6.0);
+    EXPECT_FLOAT_EQ(scaledLeft.y(), 9.0);
+    EXPECT_FLOAT_EQ(scaledLeft.z(), 12.0);
 }
 
 TEST(Vec3, Division) {
@@ -76,52 +76,52 @@ TEST(Vec3, Division) {
     const vec3 elementWise = a / b;
     const vec3 scaled = a / 2.0;
 
-    EXPECT_DOUBLE_EQ(elementWise.x(), 1.0);
-    EXPECT_DOUBLE_EQ(elementWise.y(), 2.0);
-    EXPECT_DOUBLE_EQ(elementWise.z(), 4.0);
-    EXPECT_DOUBLE_EQ(scaled.x(), 1.0);
-    EXPECT_DOUBLE_EQ(scaled.y(), 2.0);
-    EXPECT_DOUBLE_EQ(scaled.z(), 4.0);
+    EXPECT_FLOAT_EQ(elementWise.x(), 1.0);
+    EXPECT_FLOAT_EQ(elementWise.y(), 2.0);
+    EXPECT_FLOAT_EQ(elementWise.z(), 4.0);
+    EXPECT_FLOAT_EQ(scaled.x(), 1.0);
+    EXPECT_FLOAT_EQ(scaled.y(), 2.0);
+    EXPECT_FLOAT_EQ(scaled.z(), 4.0);
 }
 
 TEST(Vec3, CompoundAssignment) {
     vec3 v(1.0, 2.0, 3.0);
     v += vec3(1.0, 1.0, 1.0);
-    EXPECT_DOUBLE_EQ(v.x(), 2.0);
-    EXPECT_DOUBLE_EQ(v.y(), 3.0);
-    EXPECT_DOUBLE_EQ(v.z(), 4.0);
+    EXPECT_FLOAT_EQ(v.x(), 2.0);
+    EXPECT_FLOAT_EQ(v.y(), 3.0);
+    EXPECT_FLOAT_EQ(v.z(), 4.0);
 
     v -= vec3(0.5, 0.5, 0.5);
-    EXPECT_DOUBLE_EQ(v.x(), 1.5);
-    EXPECT_DOUBLE_EQ(v.y(), 2.5);
-    EXPECT_DOUBLE_EQ(v.z(), 3.5);
+    EXPECT_FLOAT_EQ(v.x(), 1.5);
+    EXPECT_FLOAT_EQ(v.y(), 2.5);
+    EXPECT_FLOAT_EQ(v.z(), 3.5);
 
     v *= 2.0;
-    EXPECT_DOUBLE_EQ(v.x(), 3.0);
-    EXPECT_DOUBLE_EQ(v.y(), 5.0);
-    EXPECT_DOUBLE_EQ(v.z(), 7.0);
+    EXPECT_FLOAT_EQ(v.x(), 3.0);
+    EXPECT_FLOAT_EQ(v.y(), 5.0);
+    EXPECT_FLOAT_EQ(v.z(), 7.0);
 
     v /= 2.0;
-    EXPECT_DOUBLE_EQ(v.x(), 1.5);
-    EXPECT_DOUBLE_EQ(v.y(), 2.5);
-    EXPECT_DOUBLE_EQ(v.z(), 3.5);
+    EXPECT_FLOAT_EQ(v.x(), 1.5);
+    EXPECT_FLOAT_EQ(v.y(), 2.5);
+    EXPECT_FLOAT_EQ(v.z(), 3.5);
 }
 
 TEST(Vec3, NormAndSquaredNorm) {
     const vec3 v(3.0, 4.0, 0.0);
-    EXPECT_DOUBLE_EQ(v.squared_norm(), 25.0);
-    EXPECT_DOUBLE_EQ(v.norm(), 5.0);
+    EXPECT_FLOAT_EQ(v.squared_norm(), 25.0);
+    EXPECT_FLOAT_EQ(v.norm(), 5.0);
 
     const vec3 w(1.0, 2.0, 2.0);
     EXPECT_NEAR(w.norm(), std::sqrt(9.0), kEps);
-    EXPECT_DOUBLE_EQ(w.squared_norm(), 9.0);
+    EXPECT_FLOAT_EQ(w.squared_norm(), 9.0);
 }
 
 TEST(Vec3, DotAndCross) {
     const vec3 a(1.0, 0.0, 0.0);
     const vec3 b(0.0, 1.0, 0.0);
-    EXPECT_DOUBLE_EQ(dot(a, b), 0.0);
-    EXPECT_DOUBLE_EQ(dot(a, a), 1.0);
+    EXPECT_FLOAT_EQ(dot(a, b), 0.0);
+    EXPECT_FLOAT_EQ(dot(a, a), 1.0);
 
     const vec3 c = cross(a, b);
     EXPECT_NEAR(c.x(), 0.0, kEps);

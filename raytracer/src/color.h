@@ -9,15 +9,15 @@
 
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
-constexpr double kSurvivalMin = 0.05; ///< avoids throughput / survival blowing up when survival -> 0
-constexpr double kSurvivalMax = 0.95; ///< makes sure atleast 5% of rays die (useful for optimizing bright scenes)
-constexpr double kHitEps = 0.001; ///< minimum t parameter of the ray to count as a hit
+constexpr float kSurvivalMin = 0.05; ///< avoids throughput / survival blowing up when survival -> 0
+constexpr float kSurvivalMax = 0.95; ///< makes sure atleast 5% of rays die (useful for optimizing bright scenes)
+constexpr float kHitEps = 0.001; ///< minimum t parameter of the ray to count as a hit
 
 /** 
  * \brief determines maximum component of a vector
  * \sa applyRussianRoulette; used to determine throughput brightness 
  */
-inline double maxComponent(const vec3& v) {
+inline float maxComponent(const vec3& v) {
     return std::max(v.r(), std::max(v.g(), v.b()));
 }
 
@@ -30,8 +30,8 @@ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
     if (bounce < kMinBouncesBeforeRoulette) {
         return true;
     }
-    const double survival = std::max(kSurvivalMin, std::min(maxComponent(throughput), kSurvivalMax));
-    if (randomDouble(0.0, 1.0) > survival) {
+    const float survival = std::max(kSurvivalMin, std::min(maxComponent(throughput), kSurvivalMax));
+    if (randomFloat(0.0, 1.0) > survival) {
         return false;
     }
     throughput /= survival;

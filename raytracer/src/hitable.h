@@ -12,12 +12,12 @@ class Material;
  * \brief Intersection data written by Hitable::hit.
  */
 struct HitRecord {
-    double t;
+    float t;
     vec3 p;
     vec3 normal;
     std::shared_ptr<Material> matPtr;
-    double u;
-    double v;
+    float u;
+    float v;
     bool frontFace;
 
     /** Sets \p normal to point against \p r; records whether the geometric normal faced the ray. */
@@ -43,7 +43,7 @@ public:
      * \param hr hit record updated ON SUCCESS; if no hit, hitRecord not updated.
      * \returns true when a hit is found
      */
-    virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) = 0;
+    virtual bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) = 0;
 
     /** \returns Axis-aligned bounds of this primitive. */
     virtual AABB boundingBox() const = 0;

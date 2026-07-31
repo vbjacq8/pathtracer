@@ -22,7 +22,7 @@ public:
         int renderHeight,
         int displayWidth,
         int displayHeight,
-        double gamma,
+        float gamma,
         bool showFps,
         bool fullscreen)
         : renderWidth_(renderWidth),
@@ -220,7 +220,7 @@ private:
      */
     int mapToRenderX(int windowX) const {
         const int x = static_cast<int>(
-            windowX * static_cast<double>(renderWidth_) / displayWidth_);
+            windowX * static_cast<float>(renderWidth_) / displayWidth_);
         return std::clamp(x, 0, renderWidth_ - 1);
     }
 
@@ -234,27 +234,27 @@ private:
      */
     int mapToRenderY(int windowY) const {
         const int y = static_cast<int>(
-            windowY * static_cast<double>(renderHeight_) / displayHeight_);
+            windowY * static_cast<float>(renderHeight_) / displayHeight_);
         return std::clamp(y, 0, renderHeight_ - 1);
     }
 
     /** \brief Scales a horizontal mouse delta from window space to render space. */
     int mapDeltaToRenderX(int delta) const {
         return static_cast<int>(
-            delta * static_cast<double>(renderWidth_) / displayWidth_);
+            delta * static_cast<float>(renderWidth_) / displayWidth_);
     }
 
     /** \brief Scales a vertical mouse delta from window space to render space. */
     int mapDeltaToRenderY(int delta) const {
         return static_cast<int>(
-            delta * static_cast<double>(renderHeight_) / displayHeight_);
+            delta * static_cast<float>(renderHeight_) / displayHeight_);
     }
 
     void setWindowTitle(int samples, int dtMs) {
         char title[128];
         if (showFps_) {
             const int ms = std::max(dtMs, 1);
-            const double fps = 1000.0 / ms;
+            const float fps = 1000.0 / ms;
             std::snprintf(
                 title,
                 sizeof(title),
@@ -283,7 +283,7 @@ private:
     int renderHeight_;
     int displayWidth_;
     int displayHeight_;
-    double gamma_;
+    float gamma_;
     bool showFps_;
     std::vector<uint8_t> pixels_;
     SDL_Window* window_ = nullptr;
@@ -299,7 +299,7 @@ std::unique_ptr<View> makeSdlView(
     int renderHeight,
     int displayWidth,
     int displayHeight,
-    double gamma,
+    float gamma,
     bool showFps,
     bool fullscreen) {
     return std::make_unique<SdlView>(

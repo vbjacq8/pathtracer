@@ -40,7 +40,7 @@ public:
         if (count[idx] == 0) {
             return vec3(0, 0, 0);
         }
-        return sum[idx] / double(count[idx]);
+        return sum[idx] / float(count[idx]);
     }
 
     /** \returns Number of samples accumulated at a pixel. */

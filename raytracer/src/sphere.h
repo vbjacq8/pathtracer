@@ -12,20 +12,20 @@ class Sphere : public Hitable {
 public:
     Sphere() {}
 
-    Sphere(const vec3& staticCenter, double R, MaterialPtr mat)
+    Sphere(const vec3& staticCenter, float R, MaterialPtr mat)
         : center(staticCenter, vec3(0, 0, 0)), radius(R), matPtr(std::move(mat)) {}
 
-    Sphere(const vec3& center1, const vec3& center2, double R, MaterialPtr mat)
+    Sphere(const vec3& center1, const vec3& center2, float R, MaterialPtr mat)
         : center(center1, center2 - center1), radius(R), matPtr(std::move(mat)) {}
 
-    virtual bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
+    virtual bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
     vec3 centroid() const override;
     
 
 private:
     Ray center;
-    double radius;
+    float radius;
     MaterialPtr matPtr;
 
     /**
@@ -34,10 +34,10 @@ private:
      * \param u azimuth in [0, 1], starting at -x
      * \param v zenith in [0, 1], starting at -y
      */
-    static void getSphereUV(const vec3& p, double& u, double& v) {
+    static void getSphereUV(const vec3& p, float& u, float& v) {
         // p must be a unit vector; acos domain is [-1, 1].
-        const double theta = std::acos(-p.y());
-        const double phi = std::atan2(-p.z(), p.x()) + pi;
+        const float theta = std::acos(-p.y());
+        const float phi = std::atan2(-p.z(), p.x()) + pi;
         u = phi / (2 * pi);
         v = theta / pi;
     }
@@ -48,19 +48,19 @@ private:
  * \brief Ray-sphere intersection for Sphere.
  * \copydoc Hitable::hit
  */
-inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
+inline bool Sphere::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
     // Use the *incoming* ray's shutter time, not center.time() (which is always 0).
     const vec3 currentCenter = center.point_at_parameter(r.time());
     const vec3 oc = r.origin() - currentCenter;
-    const double b = 2.0 * dot(oc, r.direction());
-    const double a = dot(r.direction(), r.direction());
-    const double c = dot(oc, oc) - radius * radius;
-    const double discriminant = b * b - 4 * a * c;
+    const float b = 2.0 * dot(oc, r.direction());
+    const float a = dot(r.direction(), r.direction());
+    const float c = dot(oc, oc) - radius * radius;
+    const float discriminant = b * b - 4 * a * c;
     if (discriminant < 0) {
         return false;
     }
 
-    auto recordHit = [&](double t) {
+    auto recordHit = [&](float t) {
         hr.t = t;
         hr.p = r.point_at_parameter(t);
         const vec3 outwardNormal = (hr.p - currentCenter) / radius;
@@ -69,7 +69,7 @@ inline bool Sphere::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
         getSphereUV(outwardNormal, hr.u, hr.v);
     };
 
-    double temp = (-b - sqrt(discriminant)) / (2.0 * a);
+    float temp = (-b - sqrt(discriminant)) / (2.0 * a);
     if (temp > tMin && temp < tMax) {
         recordHit(temp);
         return true;

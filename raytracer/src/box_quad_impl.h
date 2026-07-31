@@ -35,7 +35,7 @@ public:
              ),
              mPtr) {}
 
-    bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override;
+    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
 
 
@@ -49,7 +49,7 @@ public:
  * \brief Ray-box intersection via AABB slab test.
  * \copydoc Hitable::hit
  */
-inline bool BoxQuadImpl::hit(const Ray& r, double tMin, double tMax, HitRecord& hr) {
+inline bool BoxQuadImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
     return sides->hit(r, tMin, tMax, hr);
 }
 

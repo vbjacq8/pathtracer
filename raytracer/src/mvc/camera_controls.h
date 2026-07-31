@@ -7,10 +7,10 @@
 #include <cmath>
 
 /** \brief Rotates \p v around unit axis \p axis by \p angle radians. */
-inline vec3 rotateAroundAxis(const vec3& v, const vec3& axis, double angle) {
+inline vec3 rotateAroundAxis(const vec3& v, const vec3& axis, float angle) {
     vec3 k = unit_vector(axis);
-    double c = std::cos(angle);
-    double s = std::sin(angle);
+    float c = std::cos(angle);
+    float s = std::sin(angle);
     return v * c + cross(k, v) * s + k * dot(k, v) * (1.0 - c);
 }
 
@@ -23,15 +23,15 @@ inline int renderHeight(const RenderOptions& opts) {
 }
 
 /** \returns Width / height for \p opts. */
-inline double renderAspect(const RenderOptions& opts) {
+inline float renderAspect(const RenderOptions& opts) {
     const int ny = renderHeight(opts);
-    return double(opts.width) / double(ny);
+    return float(opts.width) / float(ny);
 }
 
 /** \brief Builds a Camera from render options. */
 inline Camera makeCamera(const RenderOptions& opts) {
     // Keep focus on the lookat point so orbit/pan/fly don't leave everything defocused.
-    const double focusDist = (opts.lookfrom - opts.lookat).norm();
+    const float focusDist = (opts.lookfrom - opts.lookat).norm();
     return Camera(opts.lookfrom, opts.lookat, opts.vup, opts.vfov,
                   renderAspect(opts), opts.aperture, focusDist > 1e-6 ? focusDist : opts.focusDist);
 }
@@ -41,7 +41,7 @@ inline Camera makeCamera(const RenderOptions& opts) {
  * \param dx yaw delta in radians (caller scales from pixels)
  * \param dy pitch delta in radians
  */
-inline void orbitCamera(RenderOptions& opts, double dx, double dy) {
+inline void orbitCamera(RenderOptions& opts, float dx, float dy) {
     vec3 offset = opts.lookfrom - opts.lookat;
     if (offset.squared_norm() < 1e-12) {
         return;
@@ -57,15 +57,15 @@ inline void orbitCamera(RenderOptions& opts, double dx, double dy) {
 }
 
 /** \brief Moves \p lookfrom toward or away from \p lookat by \p delta. */
-inline void dollyCamera(RenderOptions& opts, double delta) {
+inline void dollyCamera(RenderOptions& opts, float delta) {
     vec3 dir = unit_vector(opts.lookfrom - opts.lookat);
-    double dist = (opts.lookfrom - opts.lookat).norm();
+    float dist = (opts.lookfrom - opts.lookat).norm();
     dist = std::max(0.1, dist + delta);
     opts.lookfrom = opts.lookat + dir * dist;
 }
 
 /** \brief Translates both \p lookfrom and \p lookat in the view plane. */
-inline void panCamera(RenderOptions& opts, double dx, double dy) {
+inline void panCamera(RenderOptions& opts, float dx, float dy) {
     vec3 forward = unit_vector(opts.lookat - opts.lookfrom);
     vec3 right = unit_vector(cross(opts.vup, forward));
     vec3 up = cross(forward, right);
@@ -75,7 +75,7 @@ inline void panCamera(RenderOptions& opts, double dx, double dy) {
 }
 
 /** \brief Moves \p lookfrom and \p lookat along the view forward and right axes. */
-inline void flyCamera(RenderOptions& opts, double forwardAmt, double rightAmt) {
+inline void flyCamera(RenderOptions& opts, float forwardAmt, float rightAmt) {
     vec3 forward = unit_vector(opts.lookat - opts.lookfrom);
     vec3 right = unit_vector(-1 * cross(opts.vup, forward));
     vec3 delta = forward * forwardAmt + right * rightAmt;

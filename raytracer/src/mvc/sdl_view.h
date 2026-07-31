@@ -22,6 +22,6 @@ std::unique_ptr<View> makeSdlView(
     int renderHeight,
     int displayWidth,
     int displayHeight,
-    double gamma,
+    float gamma,
     bool showFps,
     bool fullscreen);

@@ -7,7 +7,7 @@
 #include "material.h"
 
 namespace {
-    constexpr double kPlaneParallelEps = 1e-8;
+    constexpr float kPlaneParallelEps = 1e-8;
 } //namespace
 
 /**
@@ -28,21 +28,21 @@ public:
 
     }
 
-    bool hit(const Ray& r, double tMin, double tMax, HitRecord& hr) override {
-        const double denom = dot(normal, r.direction());
+    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
+        const float denom = dot(normal, r.direction());
         // Reject only grazing rays; accept both sides of the plane (RTIOW).
         if (std::fabs(denom) < kPlaneParallelEps) {
             return false;
         }
-        const double t = (d - dot(normal, r.origin())) / denom;
+        const float t = (d - dot(normal, r.origin())) / denom;
 
         if (t < tMin || t > tMax) {
             return false;
         }
         const vec3 intersection = r.point_at_parameter(t);
         const vec3 planarHit = intersection - q;
-        const double alpha = dot(w, cross(planarHit, v));
-        const double beta = dot(w, cross(u, planarHit));
+        const float alpha = dot(w, cross(planarHit, v));
+        const float beta = dot(w, cross(u, planarHit));
 
         if (!inInterior(alpha, beta, hr)) {
             return false;
@@ -66,7 +66,7 @@ private:
     }
 
     /** \brief Sets \p hr.u/\p hr.v when \p a and \p b lie in [0,1]. */
-    bool inInterior(double a, double b, HitRecord& hr) {
+    bool inInterior(float a, float b, HitRecord& hr) {
         if (a < 0 || a > 1 || b < 0 || b > 1) {
             return false;
         }
@@ -80,7 +80,7 @@ private:
     vec3 u, v;
     vec3 w;
     vec3 normal;
-    double d;
+    float d;
     MaterialPtr mat;
     AABB aabb;
 };

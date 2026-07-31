@@ -15,7 +15,7 @@ class Perlin {
 
         }
 
-        double noise(const vec3& p) const {
+        float noise(const vec3& p) const {
             //"fractional" pieces of each coordinate
             auto u = p.x() - std::floor(p.x());
             auto v = p.y() - std::floor(p.y());
@@ -45,9 +45,9 @@ class Perlin {
 
         }
 
-        double turb(const vec3& p, int depth) const {
-            double accum = 0;
-            double weight = 1.0;
+        float turb(const vec3& p, int depth) const {
+            float accum = 0;
+            float weight = 1.0;
             vec3 temp = p;
             for (int i = 0; i < depth; ++i){
                 accum += weight * noise(temp);
@@ -73,7 +73,7 @@ class Perlin {
 
         static void permute(int* perm, int n){
             for (int i = n-1 ; i > 0; --i){
-                int target = randomInt(0, n);
+                int target = randomInt(0, i);
                 int tmp = perm[i];
                 perm[i] = perm[target];
                 perm[target] = tmp;
@@ -81,12 +81,12 @@ class Perlin {
             }
         }
 
-        double triLinearInterp(vec3 c[2][2][2], double u, double v, double w) const {
-            double uu = u * u * (3-2*u);
-            double vv = v * v * (3-2*v);
-            double ww = w * w * (3-2*w);
+        float triLinearInterp(vec3 c[2][2][2], float u, float v, float w) const {
+            float uu = u * u * (3-2*u);
+            float vv = v * v * (3-2*v);
+            float ww = w * w * (3-2*w);
 
-            double accum = 0;
+            float accum = 0;
             for (int i = 0; i < 2; ++i){
                 for (int j = 0; j < 2; ++j){
                     for (int k = 0; k < 2; ++k){

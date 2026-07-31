@@ -14,7 +14,7 @@ class Light : public Material {
             return false;
         }
 
-        vec3 emit(double u, double v, const vec3& p) const override{
+        vec3 emit(float u, float v, const vec3& p) const override{
             return emission;
         }
 

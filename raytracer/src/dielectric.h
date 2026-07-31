@@ -44,7 +44,7 @@ public:
         vec3 reflected = reflect(v, outwardNormal);
 
         if (refract(v, outwardNormal, R, refracted)) {
-            if (randomDouble(0, 1.0) < schlick(cosine, nt)) {
+            if (randomFloat(0, 1.0) < schlick(cosine, nt)) {
                 scattered = Ray(hr.p, reflected, rIn.time());
             } else {
                 scattered = Ray(hr.p, refracted, rIn.time());

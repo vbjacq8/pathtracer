@@ -9,10 +9,10 @@
  * Prefer this header over per-file pi / infinity definitions to avoid
  * duplicate or ambiguous symbols when headers are combined.
  */
-inline constexpr double pi = std::numbers::pi;
-inline constexpr double infinity = std::numeric_limits<double>::infinity();
+inline constexpr float pi = std::numbers::pi_v<float>;
+inline constexpr float infinity = std::numeric_limits<float>::infinity();
 
 /** \brief Converts degrees to radians. */
-inline double degreesToRadians(double degrees) {
-    return degrees * pi / 180.0;
+inline float degreesToRadians(float degrees) {
+    return degrees * pi / 180.0f;
 }

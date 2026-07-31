@@ -16,8 +16,8 @@
 namespace {
 
 /** Matches pathTrace's tMin floor in color.h (shadow-acne bias). */
-constexpr double kHitEps = 0.001;
-constexpr double kGeomEps = 1e-6;
+constexpr float kHitEps = 0.001;
+constexpr float kGeomEps = 1e-6;
 
 MaterialPtr dummyMat() {
     return std::make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.0f);
@@ -57,9 +57,9 @@ TEST(HitableHit, SphereHitPointLiesOnSurfaceWithinFloatingPointTolerance) {
     HitRecord hr;
 
     ASSERT_TRUE(sphere->hit(r, 0.0, infinity, hr));
-    const double radiusError = std::fabs(hr.p.norm() - 1.0);
+    const float radiusError = std::fabs(hr.p.norm() - 1.0);
     // Exact algebra would put p on the sphere; FP leaves a small residual.
-    EXPECT_LT(radiusError, 1e-9);
+    EXPECT_LT(radiusError, 1e-5f);
     EXPECT_NEAR(hr.normal.norm(), 1.0, kGeomEps);
 }
 

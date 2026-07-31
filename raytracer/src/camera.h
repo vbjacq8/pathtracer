@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "color.h"
+#include "constants.h"
 #include "my_random.h"
 
 /**
@@ -9,12 +10,12 @@
  */
 class Camera {
 public:
-    Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect, double aperture, double focusDist) {
+    Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, float vfov, float aspect, float aperture, float focusDist) {
         this->lensRadius = aperture / 2;
         this->focusDistance = focusDist;
-        double theta = vfov * M_PI / 180;
-        double halfHeight = tan(theta / 2) * focusDist;
-        double halfWidth = halfHeight * aspect;
+        float theta = vfov * pi / 180;
+        float halfHeight = tan(theta / 2) * focusDist;
+        float halfWidth = halfHeight * aspect;
         this->w = unit_vector(lookfrom - lookat);
         this->u = unit_vector(cross(vup, w));
         this->v = cross(w, u);
@@ -24,10 +25,10 @@ public:
         this->lowerLeftCorner = origin - halfWidth * u - halfHeight * v - w * focusDist;
     }
 
-    Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, double vfov, double aspect) {
-        double theta = vfov * M_PI / 180;
-        double halfHeight = tan(theta / 2);
-        double halfWidth = halfHeight * aspect;
+    Camera(const vec3& lookfrom, const vec3& lookat, const vec3& vup, float vfov, float aspect) {
+        float theta = vfov * pi / 180;
+        float halfHeight = tan(theta / 2);
+        float halfWidth = halfHeight * aspect;
         this->w = unit_vector(lookfrom - lookat);
         this->u = unit_vector(cross(vup, w));
         this->v = cross(w, u);
@@ -39,10 +40,10 @@ public:
         this->focusDistance = 1;
     }
 
-    Camera(double vfov, double aspect) {
-        double theta = vfov * M_PI / 180;
-        double halfHeight = tan(theta / 2);
-        double halfWidth = halfHeight * aspect;
+    Camera(float vfov, float aspect) {
+        float theta = vfov * pi / 180;
+        float halfHeight = tan(theta / 2);
+        float halfWidth = halfHeight * aspect;
         this->horizontal = vec3(2 * halfWidth, 0, 0);
         this->vertical = vec3(0, 2 * halfHeight, 0);
         this->lowerLeftCorner = vec3(-halfWidth, -halfHeight, -1);
@@ -63,10 +64,10 @@ public:
      * \param t vertical coordinate in [0, 1]
      * \returns Ray from the lens or pinhole through the viewport
      */
-    Ray getRay(double s, double t) const {
+    Ray getRay(float s, float t) const {
         vec3 rd = lensRadius * randomInDisc();
         vec3 offset = rd.x() * u + rd.y() * v;
-        double rayTime = randomDouble(0,1);
+        float rayTime = randomFloat(0,1);
         return Ray(origin + offset, lowerLeftCorner + s * horizontal + t * vertical - origin - offset, rayTime);
     }
 
@@ -78,10 +79,10 @@ public:
                      BackgroundFn background = colorBlueWhiteGradient) {
         vec3 col(0, 0, 0);
         for (int k = 0; k < numSamples; k++) {
-            double randcoeff1 = randomDouble(0.0, 1.0);
-            double randcoeff2 = randomDouble(0.0, 1.0);
-            double u = double(i + randcoeff1) / double(nx);
-            double v = double(j + randcoeff2) / double(ny);
+            float randcoeff1 = randomFloat(0.0, 1.0);
+            float randcoeff2 = randomFloat(0.0, 1.0);
+            float u = float(i + randcoeff1) / float(nx);
+            float v = float(j + randcoeff2) / float(ny);
             Ray r = getRay(u, v);
             col += pathTrace(r, world, depth, background);
         }
@@ -96,8 +97,8 @@ public:
     vec3 u = vec3(1, 0, 0);
     vec3 v = vec3(0, 1, 0);
     vec3 w = vec3(0, 0, 1);
-    double lensRadius = 0.0;
-    double focusDistance = 1.0;
+    float lensRadius = 0.0;
+    float focusDistance = 1.0;
 };
 
 #endif
