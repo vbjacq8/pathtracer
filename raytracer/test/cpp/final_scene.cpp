@@ -2,8 +2,7 @@
 #include "../../src/hittables.h"
 #include "../../src/my_random.h"
 #include "../../src/bvh_weekend.h"
-//#include "../../src/mvc/interactive.h"
-#include "../../src/render.h"
+#include "../../src/mvc/interactive.h"
 
 #include <memory>
 #include <vector>
@@ -77,5 +76,5 @@ HitablePtr finalScene() {
 }
 
 int main(int argc, char** argv) {
-    return render(argc, argv, finalScene(), colorVoid);
+    return interactiveRender(argc, argv, finalScene(), colorVoid);
 }

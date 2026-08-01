@@ -60,7 +60,7 @@ inline void orbitCamera(RenderOptions& opts, float dx, float dy) {
 inline void dollyCamera(RenderOptions& opts, float delta) {
     vec3 dir = unit_vector(opts.lookfrom - opts.lookat);
     float dist = (opts.lookfrom - opts.lookat).norm();
-    dist = std::max(0.1, dist + delta);
+    dist = std::max(0.1f, dist + delta);
     opts.lookfrom = opts.lookat + dir * dist;
 }
 
