@@ -2,33 +2,28 @@
 #define RAY_H
 
 #include "vec3.h"
-
-#ifdef __CUDACC__
-#define RAY_HD __host__ __device__
-#else
-#define RAY_HD
-#endif
+#include "cuda_annot.h"
 
 /**
  * \brief Ray defined by an origin and direction.
  */
 class Ray {
 public:
-    RAY_HD Ray() {}
-    RAY_HD Ray(const vec3& a, const vec3& b, float T) : A(a), B(b), T(T) {}
-    RAY_HD Ray(const vec3& a, const vec3& b) : Ray(a,b,0) {}
+    PATHTRACER_HD Ray() {}
+    PATHTRACER_HD Ray(const vec3& a, const vec3& b, float T) : A(a), B(b), T(T) {}
+    PATHTRACER_HD Ray(const vec3& a, const vec3& b) : Ray(a,b,0) {}
 
     /** \returns Ray origin. */
-    RAY_HD vec3 origin() const { return A; }
+    PATHTRACER_HD vec3 origin() const { return A; }
     /** \returns Ray direction (not necessarily unit length). */
-    RAY_HD vec3 direction() const { return B; }
+    PATHTRACER_HD vec3 direction() const { return B; }
     
-    RAY_HD float time() const {return T;}
+    PATHTRACER_HD float time() const {return T;}
     /**
      * \brief Evaluates the ray at parameter \p t.
      * \returns \p origin + t * direction
      */
-    RAY_HD vec3 point_at_parameter(float t) const { return A + B * t; }
+    PATHTRACER_HD vec3 point_at_parameter(float t) const { return A + B * t; }
 
 private:
     vec3 A;
@@ -46,14 +41,14 @@ using BackgroundFn = vec3 (*)(const Ray&);
  * \brief Sky color for rays that miss geometry.
  * \returns Blue-white gradient from the ray direction.
  */
-RAY_HD inline vec3 colorBlueWhiteGradient(const Ray& r) {
+PATHTRACER_HD inline vec3 colorBlueWhiteGradient(const Ray& r) {
     vec3 unit_direction = unit_vector(r.direction());
     float t = 0.5f * (unit_direction.y() + 1.0f);
     return (1.0f - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
 /** \brief Black background for rays that miss geometry. */
-RAY_HD inline vec3 colorVoid(const Ray&) {
+PATHTRACER_HD inline vec3 colorVoid(const Ray&) {
     return vec3(0, 0, 0);
 }
 
@@ -61,7 +56,7 @@ RAY_HD inline vec3 colorVoid(const Ray&) {
  * \brief Ray-sphere intersection test.
  * \returns Hit distance along the ray, or -1 when there is no hit.
  */
-RAY_HD inline float hitSphere(const vec3& center, float radius, const Ray& r) {
+PATHTRACER_HD inline float hitSphere(const vec3& center, float radius, const Ray& r) {
     vec3 oc = r.origin() - center;
     float b = 2.0f * dot(oc, r.direction());
     float a = dot(r.direction(), r.direction());
@@ -75,7 +70,7 @@ RAY_HD inline float hitSphere(const vec3& center, float radius, const Ray& r) {
 }
 
 /** \brief Flat color when a ray hits a sphere; sky gradient otherwise. */
-RAY_HD inline vec3 colorSphere(const Ray& r, const vec3& center, float radius, const vec3& color) {
+PATHTRACER_HD inline vec3 colorSphere(const Ray& r, const vec3& center, float radius, const vec3& color) {
     if (hitSphere(center, radius, r) > 0.0) {
         return color;
     }
@@ -83,7 +78,7 @@ RAY_HD inline vec3 colorSphere(const Ray& r, const vec3& center, float radius, c
 }
 
 /** \brief Normal-based shading when a ray hits a sphere; sky gradient otherwise. */
-RAY_HD inline vec3 colorShadedSphere(const Ray& r, const vec3& center, float radius, const vec3& color) {
+PATHTRACER_HD inline vec3 colorShadedSphere(const Ray& r, const vec3& center, float radius, const vec3& color) {
     float t = hitSphere(center, radius, r);
     if (t > 0.0f) {
         vec3 N = r.point_at_parameter(t) - center;
@@ -94,7 +89,7 @@ RAY_HD inline vec3 colorShadedSphere(const Ray& r, const vec3& center, float rad
 }
 
 /** \brief Normal-based shading when a ray hits a sphere; sky gradient otherwise. */
-RAY_HD inline vec3 colorShadedSphere(const Ray& r, const vec3& center, float radius) {
+PATHTRACER_HD inline vec3 colorShadedSphere(const Ray& r, const vec3& center, float radius) {
     float t = hitSphere(center, radius, r);
     if (t > 0.0f) {
         vec3 N = unit_vector(r.point_at_parameter(t) - center);
