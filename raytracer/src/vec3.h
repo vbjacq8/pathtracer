@@ -46,7 +46,7 @@ public:
     PATHTRACER_HD inline vec3& operator/=(const float t);
 
     /** \returns Euclidean length. */
-    PATHTRACER_HD inline float norm() const { return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
+    PATHTRACER_HD inline float norm() const { return sqrtf(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
     /** \returns Squared Euclidean length. */
     PATHTRACER_HD inline float squared_norm() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
     /** Scales this vector to unit length in place. */

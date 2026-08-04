@@ -12,23 +12,16 @@
 HitablePtr perlinSceneTwo(){
     std::vector<HitablePtr> objects;
 
-    auto pertext = std::make_shared<Noise>(4);
-    objects.push_back(std::make_shared<Sphere>(
-        vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(
-            pertext)));
+    auto* perlMat = new Lambertian(new Noise(4));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, -1000, 0), 1000, perlMat));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, 2, 0), 2, perlMat));
 
-    objects.push_back(std::make_shared<Sphere>(
-        vec3(0, 2, 0), 2, std::make_shared<Lambertian>(
-            pertext)));
+    objects.push_back(std::make_shared<Quad>(vec3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0),
+                                            new DiffuseLight(vec3(4, 4, 4))));
 
-    objects.push_back(std::make_shared<Quad>(vec3(3,1,-2), vec3(2,0,0), vec3(0,2,0), std::make_shared<DiffuseLight>(
-        vec3(4,4,4))));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, 7, 0), 2, new DiffuseLight(vec3(4, 4, 4))));
 
-
-    objects.push_back(std::make_shared<Sphere>(vec3(0,7,0), 2, std::make_shared<DiffuseLight>(
-        vec3(4,4,4))));
-
-        return make_shared<BVHWeekend>(std::move(objects));
+        return std::make_shared<BVHWeekend>(std::move(objects));
 
 }
 

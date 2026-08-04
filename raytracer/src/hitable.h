@@ -1,8 +1,9 @@
 #ifndef HITABLE_H
 #define HITABLE_H
 
-#include "ray.h"
 #include "aabb.h"
+#include "cuda_annot.h"
+#include "ray.h"
 
 #include <memory>
 
@@ -15,17 +16,16 @@ struct HitRecord {
     float t;
     vec3 p;
     vec3 normal;
-    std::shared_ptr<Material> matPtr;
+    Material* matPtr = nullptr;
     float u;
     float v;
     bool frontFace;
 
     /** Sets \p normal to point against \p r; records whether the geometric normal faced the ray. */
-    void setFaceNormal(const Ray& r, const vec3& outwardNormal) {
+    PATHTRACER_HD void setFaceNormal(const Ray& r, const vec3& outwardNormal) {
         frontFace = dot(r.direction(), outwardNormal) < 0;
-        normal = frontFace ? outwardNormal : (-1.0 * outwardNormal);
+        normal = frontFace ? outwardNormal : (-1.0f * outwardNormal);
     }
-    
 };
 
 /**
@@ -43,18 +43,18 @@ public:
      * \param hr hit record updated ON SUCCESS; if no hit, hitRecord not updated.
      * \returns true when a hit is found
      */
-    virtual bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) = 0;
+    PATHTRACER_HD virtual bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) = 0;
 
     /** \returns Axis-aligned bounds of this primitive. */
-    virtual AABB boundingBox() const = 0;
+    PATHTRACER_HD virtual AABB boundingBox() const = 0;
 
     /**
      * \returns Centroid used for spatial partitioning.
      * Default: midpoint of \p boundingBox(); override for motion or multi-primitive shapes.
      */
-    virtual vec3 centroid() const {
+    PATHTRACER_HD virtual vec3 centroid() const {
         const AABB box = boundingBox();
-        return 0.5 * (box.min + box.max);
+        return 0.5f * (box.min + box.max);
     }
 };
 

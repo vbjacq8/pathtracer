@@ -7,10 +7,12 @@
 
 /**
  * \brief Box primitive using 6 \sa Quad primitives as sides. Flexible even when sides are not aligned with axes.
+ *
+ * Stores a non-owning \p matPtr shared by all sides. The caller owns the material.
  */
 class BoxQuadImpl: public Hitable {
 public:
-    BoxQuadImpl(const AABB& b, MaterialPtr mPtr) : matPtr(std::move(mPtr)) {
+    BoxQuadImpl(const AABB& b, Material* mPtr) : matPtr(mPtr) {
         min = b.min;
         max = b.max;
         vec3 dr = max - min;
@@ -27,7 +29,7 @@ public:
     }
 
     // Must use a delegating ctor initializer — a body call creates a temporary and throws it away.
-    BoxQuadImpl(const vec3& min, const vec3& max, MaterialPtr mPtr)
+    BoxQuadImpl(const vec3& min, const vec3& max, Material* mPtr)
         : BoxQuadImpl(
             AABB(
                 vec3(std::fmin(min.x(),max.x()), std::fmin(min.y(),max.y()), std::fmin(min.z(),max.z())),
@@ -39,7 +41,7 @@ public:
     AABB boundingBox() const override;
 
 
-    MaterialPtr matPtr;
+    Material* matPtr;
     vec3 min, max;
     //Is this allowed lol
     std::shared_ptr<HitableList> sides = std::make_shared<HitableList>();

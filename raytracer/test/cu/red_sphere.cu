@@ -9,7 +9,7 @@
  *
  * Build/run via repo root:
  *   source raytracer/cuda/env/longleaf_modules.sh
- *   ./run_cuda.sh --rebuild color_gradient.cu
+ *   ./run_cuda.sh --rebuild two_spheres.cu
  */
 
 int main() {
@@ -33,7 +33,7 @@ int main() {
     dim3 blocks(nx / tx + 1, ny / ty + 1);
     dim3 threads(tx, ty);
 
-    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin);
+    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin, nullptr);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 

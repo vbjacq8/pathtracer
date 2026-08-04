@@ -19,8 +19,8 @@ namespace {
 constexpr float kHitEps = 0.001;
 constexpr float kGeomEps = 1e-6;
 
-MaterialPtr dummyMat() {
-    return std::make_shared<Metal>(vec3(0.8, 0.8, 0.8), 0.0f);
+Material* dummyMat() {
+    return new Metal(vec3(0.8, 0.8, 0.8), 0.0f);
 }
 
 HitablePtr unitSphereAtOrigin() {

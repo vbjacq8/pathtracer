@@ -1,6 +1,7 @@
 #pragma once
 
-#include "hittables.h"
+#include "cuda_annot.h"
+#include "material.h"
 #include "my_random.h"
 
 /**
@@ -8,10 +9,10 @@
  * \param cosine cosine of the angle between the incident ray and the normal
  * \param nt ratio of indices of refraction
  */
-float schlick(float cosine, float nt) {
+PATHTRACER_HD inline float schlick(float cosine, float nt) {
     float r0 = (1 - nt) / (1 + nt);
     r0 = r0 * r0;
-    return r0 + (1 - r0) * pow((1 - cosine), 5);
+    return r0 + (1 - r0) * powf((1 - cosine), 5);
 }
 
 /**
@@ -19,13 +20,14 @@ float schlick(float cosine, float nt) {
  */
 class Dielectric : public Material {
 public:
-    Dielectric(float ri) : nt(ri) {}
+    PATHTRACER_HD Dielectric(float ri) : nt(ri) {}
 
     /**
      * \brief Reflects or refracts based on Snell's law and Schlick's approximation.
      * \copydoc Material::scatter
      */
-    virtual bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
+    PATHTRACER_HD bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation,
+                               Ray& scattered) const override {
         vec3 outwardNormal;
         float R;
         vec3 v = rIn.direction();
@@ -50,12 +52,12 @@ public:
                 scattered = Ray(hr.p, refracted, rIn.time());
             }
         } else {
-            scattered = Ray(hr.p, reflected,rIn.time());
+            scattered = Ray(hr.p, reflected, rIn.time());
         }
         return true;
     }
 
-    vec3 reflect(const vec3& v, const vec3& n) const {
+    PATHTRACER_HD vec3 reflect(const vec3& v, const vec3& n) const {
         return v - 2 * dot(v, n) * n;
     }
 
@@ -67,12 +69,12 @@ public:
      * \param refracted refracted direction written on success
      * \returns false on total internal reflection
      */
-    bool refract(const vec3& v, const vec3& n, float R, vec3& refracted) const {
+    PATHTRACER_HD bool refract(const vec3& v, const vec3& n, float R, vec3& refracted) const {
         vec3 uv = unit_vector(v);
         float dt = dot(uv, n);
         float D = 1 - R * R * (1 - dt * dt);
         if (D > 0) {
-            refracted = R * (uv - n * dt) - n * sqrt(D);
+            refracted = R * (uv - n * dt) - n * sqrtf(D);
             return true;
         } else {
             return false;

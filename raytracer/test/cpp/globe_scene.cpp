@@ -11,24 +11,24 @@
 HitablePtr globeScene(){
     std::vector<HitablePtr> objects;
     
-    auto earthTexture  = std::make_shared<Wallpaper>("earthmap.jpg");
-    auto earthSurface = std::make_shared<Lambertian>(earthTexture);
+    auto earthTexture  = new Wallpaper("earthmap.jpg");
+    auto earthSurface = new Lambertian(earthTexture);
     auto earth = std::make_shared<Sphere>(vec3(0,0,0), 1, earthSurface);
 
-    auto grassTexture  = std::make_shared<Wallpaper>("grass.jpg");
-    auto grassSurface = std::make_shared<Lambertian>(grassTexture);
+    auto grassTexture  = new Wallpaper("grass.jpg");
+    auto grassSurface = new Lambertian(grassTexture);
     auto grass  = std::make_shared<Sphere>(vec3(2.1,0,0), 1, grassSurface);
 
-    auto cobbleTexture = std::make_shared<Wallpaper>("cobble.png");
-    auto cobbleSurface = make_shared<Lambertian>(cobbleTexture);
-    auto cobble = make_shared<Sphere>(vec3(-2.1, 0, 0), 1, cobbleSurface);
+    auto cobbleTexture = new Wallpaper("cobble.png");
+    auto cobbleSurface = new Lambertian(cobbleTexture);
+    auto cobble = std::make_shared<Sphere>(vec3(-2.1, 0, 0), 1, cobbleSurface);
 
-    auto cosmicTexture = std::make_shared<Wallpaper>("cosmic.jpeg");
-    auto cosmicSurface = make_shared<Lambertian>(cosmicTexture);
-    auto cosmic = make_shared<Sphere>(vec3(0, 0, -2.1), 1, cosmicSurface);
+    auto cosmicTexture = new Wallpaper("cosmic.jpeg");
+    auto cosmicSurface = new Lambertian(cosmicTexture);
+    auto cosmic = std::make_shared<Sphere>(vec3(0, 0, -2.1), 1, cosmicSurface);
 
-    auto sunlight = std::make_shared<Light>(vec3(255, 255, 255));
-    auto sun = make_shared<Sphere>(vec3(0,1,4.1), 2, sunlight);
+    auto sunlight = new Light(vec3(255, 255, 255));
+    auto sun = std::make_shared<Sphere>(vec3(0,1,4.1), 2, sunlight);
 
     objects.push_back(earth);
     objects.push_back(cobble);

@@ -16,7 +16,7 @@
 HitablePtr finalScene() {
     std::vector<HitablePtr> objects;
 
-    auto ground = std::make_shared<Lambertian>(vec3(0.48, 0.83, 0.53));
+    auto ground = new Lambertian(vec3(0.48, 0.83, 0.53));
 
     std::vector<HitablePtr> boxPrims;
     constexpr int boxesPerSide = 20;
@@ -36,30 +36,30 @@ HitablePtr finalScene() {
     }
     objects.push_back(std::make_shared<BVHWeekend>(std::move(boxPrims)));
 
-    auto light = std::make_shared<DiffuseLight>(vec3(7, 7, 7));
+    auto light = new DiffuseLight(vec3(7, 7, 7));
     objects.push_back(std::make_shared<Quad>(vec3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light));
 
     const vec3 cen1(400, 400, 200);
     const vec3 cen2 = cen1 + vec3(30, 0, 0);
-    auto sphereMat = std::make_shared<Lambertian>(vec3(0.7, 0.3, 0.1));
+    auto sphereMat = new Lambertian(vec3(0.7, 0.3, 0.1));
     objects.push_back(std::make_shared<Sphere>(cen1, cen2, 50, sphereMat));
 
-    objects.push_back(std::make_shared<Sphere>(vec3(260, 150, 45), 50, std::make_shared<Dielectric>(1.5)));
-    objects.push_back(std::make_shared<Sphere>(vec3(0, 150, 145), 50, std::make_shared<Metal>(vec3(0.8, 0.8, 0.9), 1.0)));
+    objects.push_back(std::make_shared<Sphere>(vec3(260, 150, 45), 50, new Dielectric(1.5)));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, 150, 145), 50, new Metal(vec3(0.8, 0.8, 0.9), 1.0)));
 
-    auto boundary = std::make_shared<Sphere>(vec3(360, 150, 145), 70, std::make_shared<Dielectric>(1.5));
+    auto boundary = std::make_shared<Sphere>(vec3(360, 150, 145), 70, new Dielectric(1.5));
     objects.push_back(boundary);
     objects.push_back(std::make_shared<ConstantMedium>(boundary, 0.2, vec3(0.2, 0.4, 0.9)));
-    boundary = std::make_shared<Sphere>(vec3(0, 0, 0), 5000, std::make_shared<Dielectric>(1.5));
+    boundary = std::make_shared<Sphere>(vec3(0, 0, 0), 5000, new Dielectric(1.5));
     objects.push_back(std::make_shared<ConstantMedium>(boundary, 0.0001, vec3(1, 1, 1)));
 
-    auto emat = std::make_shared<Lambertian>(std::make_shared<Wallpaper>("earthmap.jpg"));
+    auto emat = new Lambertian(new Wallpaper("earthmap.jpg"));
     objects.push_back(std::make_shared<Sphere>(vec3(400, 200, 400), 100, emat));
-    auto pertext = std::make_shared<Noise>(0.2);
-    objects.push_back(std::make_shared<Sphere>(vec3(220, 280, 300), 80, std::make_shared<Lambertian>(pertext)));
+    auto pertext = new Noise(0.2);
+    objects.push_back(std::make_shared<Sphere>(vec3(220, 280, 300), 80, new Lambertian(pertext)));
 
     std::vector<HitablePtr> boxPrims2;
-    auto white = std::make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
+    auto white = new Lambertian(vec3(0.73, 0.73, 0.73));
     constexpr int ns = 1000;
     for (int j = 0; j < ns; ++j) {
         boxPrims2.push_back(std::make_shared<Sphere>(

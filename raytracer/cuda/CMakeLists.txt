@@ -14,23 +14,26 @@ endif()
 
 set(PATHTRACER_TEST_CU "${CMAKE_CURRENT_SOURCE_DIR}/../test/cu")
 set(PATHTRACER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../src")
+set(PATHTRACER_CUDA_HOST "${CMAKE_CURRENT_SOURCE_DIR}/host")
+set(PATHTRACER_CUDA_DEVICE "${CMAKE_CURRENT_SOURCE_DIR}/device")
 
-add_executable(color_gradient
-    "${PATHTRACER_TEST_CU}/color_gradient.cu"
-)
+function(add_cuda_demo name)
+    add_executable(${name} "${PATHTRACER_TEST_CU}/${name}.cu")
+    target_include_directories(${name} PRIVATE
+        "${PATHTRACER_CUDA_HOST}"
+        "${PATHTRACER_CUDA_DEVICE}"
+        "${PATHTRACER_SRC}"
+    )
+    set_target_properties(${name} PROPERTIES
+        CUDA_SEPARABLE_COMPILATION ON
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    )
+    target_compile_options(${name} PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra>
+        $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>
+    )
+endfunction()
 
-target_include_directories(color_gradient PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/host"
-    "${CMAKE_CURRENT_SOURCE_DIR}/device"
-    "${PATHTRACER_SRC}"
-)
-
-set_target_properties(color_gradient PROPERTIES
-    CUDA_SEPARABLE_COMPILATION ON
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
-
-target_compile_options(color_gradient PRIVATE
-    $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra>
-    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>
-)
+add_cuda_demo(red_sphere)
+add_cuda_demo(shaded_sphere)
+add_cuda_demo(two_spheres)

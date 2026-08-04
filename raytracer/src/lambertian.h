@@ -1,26 +1,31 @@
 #pragma once
 
+#include "cuda_annot.h"
 #include "material.h"
 #include "my_random.h"
 #include "texture.h"
 
-#include <memory>
-
 /**
  * \brief Ideal diffuse (Lambertian) material.
+ *
+ * \p tex is non-owning (scene / device texture pool owns the texture).
  */
 class Lambertian : public Material {
 public:
-    /** \brief Solid-color convenience: wraps \p a in a SolidColor texture. */
-    Lambertian(const vec3& a) : tex(std::make_shared<SolidColor>(a)) {}
+    /** \brief Solid-color convenience: wraps \p a in a SolidColor texture (caller must track it). */
+    PATHTRACER_HD Lambertian(const vec3& a) : tex(new SolidColor(a)) {}
 
-    Lambertian(std::shared_ptr<Texture> texture) : tex(std::move(texture)) {}
+    PATHTRACER_HD Lambertian(Texture* texture) : tex(texture) {}
+
+    Lambertian(const Lambertian&) = delete;
+    Lambertian& operator=(const Lambertian&) = delete;
 
     /**
      * \brief Scatters with a random direction in the hemisphere around the normal.
      * \copydoc Material::scatter
      */
-    bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
+    PATHTRACER_HD bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation,
+                               Ray& scattered) const override {
         vec3 newDirection = hr.normal + randomInSphere();
         if (newDirection.near_zero()) {
             newDirection = hr.normal;
@@ -30,5 +35,5 @@ public:
         return true;
     }
 
-    std::shared_ptr<Texture> tex;
+    Texture* tex;
 };

@@ -7,18 +7,20 @@
 
 /**
  * \brief Box primitive using AABB to keep track of corners; faster hit reads (i think), use when box will always be aligned with axes
+ *
+ * Stores a non-owning \p matPtr. The caller owns the material.
  */
 class BoxAABBImpl: public Hitable {
 public:
-    BoxAABBImpl(const AABB& b, MaterialPtr mPtr) : bounds(b), matPtr(std::move(mPtr)) {}
+    BoxAABBImpl(const AABB& b, Material* mPtr) : bounds(b), matPtr(mPtr) {}
 
-    BoxAABBImpl(const vec3& min, const vec3& max, MaterialPtr mPtr) : bounds(AABB(min, max)), matPtr(mPtr) {}
+    BoxAABBImpl(const vec3& min, const vec3& max, Material* mPtr) : bounds(AABB(min, max)), matPtr(mPtr) {}
 
     bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
     AABB boundingBox() const override;
 
     AABB bounds;
-    MaterialPtr matPtr;
+    Material* matPtr;
 };
 
 /**

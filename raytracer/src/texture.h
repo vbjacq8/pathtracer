@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cuda_annot.h"
 #include "vec3.h"
 #include "rtw_image.h"
 #include "perlin.h"
@@ -14,17 +15,17 @@
  */
 class Texture {
     public:
-        virtual ~Texture() = default;
-        virtual vec3 value(float u, float v, const vec3& p) const = 0;
+        PATHTRACER_HD virtual ~Texture() = default;
+        PATHTRACER_HD virtual vec3 value(float u, float v, const vec3& p) const = 0;
 };
 
 /** \brief Constant color for all coordinates. */
 class SolidColor : public Texture {
     public:
-        SolidColor(const vec3& a) : albedo(a) {}
-        SolidColor(float r, float g, float b) : SolidColor(vec3(r, g, b)) {}
+        PATHTRACER_HD SolidColor(const vec3& a) : albedo(a) {}
+        PATHTRACER_HD SolidColor(float r, float g, float b) : SolidColor(vec3(r, g, b)) {}
 
-        vec3 value(float /*u*/, float /*v*/, const vec3& /*p*/) const override {
+        PATHTRACER_HD vec3 value(float /*u*/, float /*v*/, const vec3& /*p*/) const override {
             return albedo;
         }
 

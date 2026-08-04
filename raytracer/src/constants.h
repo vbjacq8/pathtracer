@@ -1,15 +1,14 @@
 #pragma once
 
 #include <limits>
-#include <numbers>
 
-/**
- * \brief Shared numeric constants and helpers (RTIOW-style).
- *
- * Prefer this header over per-file pi / infinity definitions to avoid
- * duplicate or ambiguous symbols when headers are combined.
- */
+#if defined(__cplusplus) && __cplusplus >= 202002L && !defined(__CUDA_ARCH__)
+#include <numbers>
 inline constexpr float pi = std::numbers::pi_v<float>;
+#else
+inline constexpr float pi = 3.14159265358979323846f;
+#endif
+
 inline constexpr float infinity = std::numeric_limits<float>::infinity();
 
 /** \brief Converts degrees to radians. */

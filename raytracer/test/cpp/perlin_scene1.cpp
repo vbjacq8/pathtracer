@@ -12,17 +12,12 @@
 HitablePtr perlinSceneOne(){
     std::vector<HitablePtr> objects;
 
-    auto pertext = std::make_shared<Noise>(4);
-    objects.push_back(std::make_shared<Sphere>(
-        vec3(0,-1000,0), 1000, std::make_shared<Lambertian>(
-            pertext)));
-
-    objects.push_back(std::make_shared<Sphere>(
-        vec3(0, 2, 0), 2, std::make_shared<Lambertian>(
-            pertext)));
+    auto* perlMat = new Lambertian(new Noise(4));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, -1000, 0), 1000, perlMat));
+    objects.push_back(std::make_shared<Sphere>(vec3(0, 2, 0), 2, perlMat));
 
 
-    return make_shared<BVHWeekend>(std::move(objects));
+    return std::make_shared<BVHWeekend>(std::move(objects));
 
 }
 

@@ -3,13 +3,14 @@
 #include <cuda_runtime.h>
 
 #include "../../src/ray.h"
+#include "../../src/hitable.h"
 
 /**
  * \brief Primary-ray sky gradient: one thread per pixel.
  * Direction is (viewport point - origin), matching the CPU Camera ray setup.
  */
 __global__ void render(vec3* fb, int maxX, int maxY, vec3 lowerLeftCorner, vec3 horizontal,
-                       vec3 vertical, vec3 origin) {
+                       vec3 vertical, vec3 origin, Hitable* dWorld) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= maxX) || (j >= maxY)) {

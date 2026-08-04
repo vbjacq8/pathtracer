@@ -29,7 +29,7 @@ usage() {
     echo "Builds a .cu demo from raytracer/test/cu, runs it, writes PPM/PNG to raytracer/test/out/cuda." >&2
     echo "  --rebuild   Wipe cuda/build/ and reconfigure" >&2
     echo "  --arch SM   Pass -DCMAKE_CUDA_ARCHITECTURES=SM (e.g. 70, 80, 90)" >&2
-    echo "Example: $0 color_gradient.cu" >&2
+    echo "Example: $0 two_spheres.cu" >&2
 }
 
 while [[ $# -gt 0 ]]; do
@@ -69,7 +69,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$source_file" ]]; then
-    source_file="color_gradient.cu"
+    source_file="two_spheres.cu"
 fi
 source_file="$(basename "$source_file")"
 if [[ ! -f "$SRC_DIR/$source_file" ]]; then

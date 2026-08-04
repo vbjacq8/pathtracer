@@ -1,23 +1,31 @@
 #pragma once
 
+#include "cuda_annot.h"
 #include "hitable.h"
 #include "material.h"
 #include "my_random.h"
 #include "texture.h"
 
-#include <memory>
-
+/**
+ * \brief Volume phase function.
+ *
+ * \p tex is non-owning (scene / device texture pool owns the texture).
+ */
 class Isotropic : public Material {
 public:
-    Isotropic(const vec3& albedo) : tex(std::make_shared<SolidColor>(albedo)) {}
-    Isotropic(std::shared_ptr<Texture> tex) : tex(std::move(tex)) {}
+    PATHTRACER_HD Isotropic(const vec3& albedo) : tex(new SolidColor(albedo)) {}
+    PATHTRACER_HD Isotropic(Texture* texture) : tex(texture) {}
 
-    bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation, Ray& scattered) const override {
+    Isotropic(const Isotropic&) = delete;
+    Isotropic& operator=(const Isotropic&) = delete;
+
+    PATHTRACER_HD bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation,
+                               Ray& scattered) const override {
         scattered = Ray(hr.p, randomInSphere(), rIn.time());
         attenuation = tex->value(hr.u, hr.v, hr.p);
         return true;
     }
 
 private:
-    std::shared_ptr<Texture> tex;
+    Texture* tex;
 };
