@@ -4,6 +4,7 @@
 
 #include "../../src/ray.h"
 #include "../../src/hitable.h"
+#include "../../src/color.h"
 
 /**
  * \brief Primary-ray sky gradient: one thread per pixel.
@@ -22,5 +23,6 @@ __global__ void render(vec3* fb, int maxX, int maxY, vec3 lowerLeftCorner, vec3 
     vec3 direction = lowerLeftCorner + u * horizontal + v * vertical - origin;
     Ray r(origin, direction);
     //fb[pixelIdx] = colorBlueWhiteGradient(r);
-    fb[pixelIdx] = colorSphere(r, vec3(0,0,-1), 0.5, vec3(1,0,0));
+    fb[pixelIdx] = color(r, dWorld, 1);
+    //TODO: Make an actual color function/ pathtrace function 
 }

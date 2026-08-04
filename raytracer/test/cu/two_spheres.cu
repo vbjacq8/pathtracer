@@ -37,7 +37,7 @@ int main() {
 
     dim3 blocks(nx / 8 + 1, ny / 8 + 1);
     dim3 threads(8, 8);
-    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin, nullptr);
+    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, world);
     checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 

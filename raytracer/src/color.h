@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include "cuda_annot.h"
+
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
 constexpr float kSurvivalMin = 0.05; ///< avoids throughput / survival blowing up when survival -> 0
@@ -43,7 +45,7 @@ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
  * \brief Debug shading from surface normals.
  * \returns Normal map color on hit; \p background on miss.
  */
-inline vec3 color(const Ray& r, Hitable* world, int depth,
+PATHTRACER_HD inline vec3 color(const Ray& r, Hitable* world, int depth,
                   BackgroundFn background = colorBlueWhiteGradient) {
     (void)depth;
     HitRecord hr;
