@@ -29,7 +29,7 @@ public:
         , ownedTex(new SolidColor(albedo))
         , phaseFunction(new Isotropic(ownedTex)) {}
 
-    ~ConstantMedium() override {
+    PATHTRACER_HD ~ConstantMedium() override {
         delete phaseFunction;
         delete ownedTex;
     }

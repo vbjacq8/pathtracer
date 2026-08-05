@@ -29,7 +29,7 @@ struct AABB {
     vec3 min;
     vec3 max;
 
-    PATHTRACER_HD AABB() = default;
+    PATHTRACER_HD AABB() {}
 
     /** \brief Builds a box from two opposite corners (order does not matter). */
     PATHTRACER_HD AABB(const vec3& a, const vec3& b)
