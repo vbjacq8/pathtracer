@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include "aabb.h"
-#include "cuda_annot.h"
 #include "hitable.h"
 #include "material.h"
 

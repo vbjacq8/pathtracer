@@ -3,7 +3,6 @@
 #include <cmath>
 
 #include "constants.h"
-#include "cuda_annot.h"
 #include "vec3.h"
 
 #if !defined(__CUDA_ARCH__)

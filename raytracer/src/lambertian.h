@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cuda_annot.h"
 #include "material.h"
 #include "my_random.h"
 #include "texture.h"

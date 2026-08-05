@@ -16,8 +16,8 @@ public:
 
     BoxAABBImpl(const vec3& min, const vec3& max, Material* mPtr) : bounds(AABB(min, max)), matPtr(mPtr) {}
 
-    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
-    AABB boundingBox() const override;
+    PATHTRACER_HD bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
+    PATHTRACER_HD AABB boundingBox() const override;
 
     AABB bounds;
     Material* matPtr;
@@ -27,7 +27,7 @@ public:
  * \brief Ray-box intersection via AABB slab test.
  * \copydoc Hitable::hit
  */
-inline bool BoxAABBImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
+PATHTRACER_HD inline bool BoxAABBImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
     vec3 outwardNormal;
     if (!bounds.slabInterval(r, tMin, tMax, hr.t, outwardNormal)) {
         return false;
@@ -40,7 +40,7 @@ inline bool BoxAABBImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr
     return true;
 }
 
-inline AABB BoxAABBImpl::boundingBox() const {
+PATHTRACER_HD inline AABB BoxAABBImpl::boundingBox() const {
     return bounds;
 }
 

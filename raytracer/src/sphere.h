@@ -2,7 +2,6 @@
 #define SPHERE_H
 
 #include "constants.h"
-#include "cuda_annot.h"
 #include "hitable.h"
 #include "material.h"
 

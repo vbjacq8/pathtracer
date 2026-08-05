@@ -33,7 +33,7 @@ struct HitRecord {
  */
 class Hitable {
 public:
-    virtual ~Hitable() = default;
+    PATHTRACER_HD virtual ~Hitable() = default;
 
     /**
      * \brief Tests whether \p r hits this surface within (\p tMin, \p tMax).

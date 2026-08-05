@@ -17,7 +17,7 @@ public:
         aabb = this->object->boundingBox() + offset;
     }
 
-    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
+    PATHTRACER_HD bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
         // Move the ray into object space (translation does not change direction).
         const Ray offsetRay(r.origin() - offset, r.direction(), r.time());
         if (!object->hit(offsetRay, tMin, tMax, hr)) {
@@ -28,7 +28,7 @@ public:
         return true;
     }
 
-    AABB boundingBox() const override { return aabb; }
+    PATHTRACER_HD AABB boundingBox() const override { return aabb; }
 
 private:
     HitablePtr object;
@@ -43,8 +43,8 @@ class RotateY : public Hitable {
 public:
     RotateY(HitablePtr object, float angle) : object(std::move(object)) {
         const float radians = degreesToRadians(angle);
-        cosTheta = std::cos(radians);
-        sinTheta = std::sin(radians);
+        cosTheta = cosf(radians);
+        sinTheta = sinf(radians);
         bounds = this->object->boundingBox();
 
         vec3 min(infinity, infinity, infinity);
@@ -63,8 +63,8 @@ public:
                     const vec3 tester(newX, y, newZ);
 
                     for (int c = 0; c < 3; ++c) {
-                        min[c] = std::fmin(min[c], tester[c]);
-                        max[c] = std::fmax(max[c], tester[c]);
+                        min[c] = fminf(min[c], tester[c]);
+                        max[c] = fmaxf(max[c], tester[c]);
                     }
                 }
             }
@@ -73,7 +73,7 @@ public:
         bounds = AABB(min, max);
     }
 
-    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
+    PATHTRACER_HD bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override {
         // World -> object space (inverse rotation).
         const vec3 origin(
             cosTheta * r.origin().x() - sinTheta * r.origin().z(),
@@ -102,7 +102,7 @@ public:
         return true;
     }
 
-    AABB boundingBox() const override { return bounds; }
+    PATHTRACER_HD AABB boundingBox() const override { return bounds; }
 
 private:
     HitablePtr object;

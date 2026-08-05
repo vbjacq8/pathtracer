@@ -2,7 +2,6 @@
 #define HITABLE_LIST_H
 
 #include "constants.h"
-#include "cuda_annot.h"
 #include "hitable.h"
 
 #include <memory>

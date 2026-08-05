@@ -2,7 +2,6 @@
 #define RAY_H
 
 #include "vec3.h"
-#include "cuda_annot.h"
 
 /**
  * \brief Ray defined by an origin and direction.

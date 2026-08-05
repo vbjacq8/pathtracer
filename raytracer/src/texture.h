@@ -42,10 +42,10 @@ class Checkered : public Texture {
         Checkered(float scale, const vec3& evenColor, const vec3& oddColor)
             : Checkered(scale, std::make_shared<SolidColor>(evenColor), std::make_shared<SolidColor>(oddColor)) {}
 
-        vec3 value(float u, float v, const vec3& p) const override {
-            const int x = static_cast<int>(std::floor(invScale * p.x()));
-            const int y = static_cast<int>(std::floor(invScale * p.y()));
-            const int z = static_cast<int>(std::floor(invScale * p.z()));
+        PATHTRACER_HD vec3 value(float u, float v, const vec3& p) const override {
+            const int x = static_cast<int>(floorf(invScale * p.x()));
+            const int y = static_cast<int>(floorf(invScale * p.y()));
+            const int z = static_cast<int>(floorf(invScale * p.z()));
             if ((x + y + z) % 2 == 0) {
                 return even->value(u, v, p);
             }
@@ -62,7 +62,7 @@ class Checkered : public Texture {
 class Wallpaper : public Texture {
     public: 
         Wallpaper(const char* filename) : image(filename) {}
-        vec3 value(float u, float v, const vec3& /*p*/) const override {
+        PATHTRACER_HD vec3 value(float u, float v, const vec3& /*p*/) const override {
             if (image.height() <= 0) {
                 return vec3(0, 1, 1);  // cyan = missing texture
             }
@@ -85,14 +85,10 @@ class Wallpaper : public Texture {
 /** \brief Perlin noise texture */
 class Noise : public Texture {
     public: 
-        Noise(float scale) : scale(scale) {}
+        PATHTRACER_HD Noise(float scale) : scale(scale) {}
 
-
-        vec3 value(float u, float v, const vec3& p) const override {
-            //float pn = (perlin.noise(scale * p) + 1) * 0.5;
-            //float pn = perlin.turb(p,7);
-            //return vec3(1,1,1) * pn;
-            return vec3(.5, .5, .5) * (1 + std::sin(scale * p.z() * p.x() + 10 * perlin.turb(p, 7)));
+        PATHTRACER_HD vec3 value(float /*u*/, float /*v*/, const vec3& p) const override {
+            return vec3(.5f, .5f, .5f) * (1 + sinf(scale * p.z() * p.x() + 10 * perlin.turb(p, 7)));
         }
 
     private:

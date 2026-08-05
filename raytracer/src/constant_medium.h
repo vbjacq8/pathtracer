@@ -37,12 +37,12 @@ public:
     ConstantMedium(const ConstantMedium&) = delete;
     ConstantMedium& operator=(const ConstantMedium&) = delete;
 
-    bool hit(const Ray& rIn, float tMin, float tMax, HitRecord& hr) override {
+    PATHTRACER_HD bool hit(const Ray& rIn, float tMin, float tMax, HitRecord& hr) override {
         HitRecord hr1, hr2;
         if (!boundary->hit(rIn, -infinity, infinity, hr1)) {
             return false;
         }
-        if (!boundary->hit(rIn, hr1.t + 0.001, infinity, hr2)) {
+        if (!boundary->hit(rIn, hr1.t + 0.001f, infinity, hr2)) {
             return false;
         }
 
@@ -63,7 +63,7 @@ public:
 
         float rayLength = rIn.direction().norm();
         float distanceInBoundary = rayLength * (hr2.t - hr1.t);
-        float hitDistance = negInvDensity * std::log(randomFloat(0, 1));
+        float hitDistance = negInvDensity * logf(randomFloat(0, 1));
 
         if (hitDistance > distanceInBoundary) {
             return false;
@@ -78,7 +78,7 @@ public:
         return true;
     }
 
-    AABB boundingBox() const override { return boundary->boundingBox(); }
+    PATHTRACER_HD AABB boundingBox() const override { return boundary->boundingBox(); }
 
 private:
     std::shared_ptr<Hitable> boundary;

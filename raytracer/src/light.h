@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cuda_annot.h"
 #include "material.h"
 #include "vec3.h"
 

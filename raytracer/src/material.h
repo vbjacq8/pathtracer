@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cuda_annot.h"
 #include "hitable.h"
 
 /**

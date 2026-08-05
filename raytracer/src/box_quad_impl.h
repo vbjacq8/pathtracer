@@ -37,8 +37,8 @@ public:
              ),
              mPtr) {}
 
-    bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
-    AABB boundingBox() const override;
+    PATHTRACER_HD bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
+    PATHTRACER_HD AABB boundingBox() const override;
 
 
     Material* matPtr;
@@ -48,14 +48,14 @@ public:
 };
 
 /**
- * \brief Ray-box intersection via AABB slab test.
+ * \brief Ray-box intersection via child quads.
  * \copydoc Hitable::hit
  */
-inline bool BoxQuadImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
+PATHTRACER_HD inline bool BoxQuadImpl::hit(const Ray& r, float tMin, float tMax, HitRecord& hr) {
     return sides->hit(r, tMin, tMax, hr);
 }
 
-inline AABB BoxQuadImpl::boundingBox() const {
+PATHTRACER_HD inline AABB BoxQuadImpl::boundingBox() const {
     return AABB(min, max);
 }
 
