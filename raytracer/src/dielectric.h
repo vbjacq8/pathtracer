@@ -2,17 +2,7 @@
 
 #include "material.h"
 #include "my_random.h"
-
-/**
- * \brief Schlick approximation for Fresnel reflectance.
- * \param cosine cosine of the angle between the incident ray and the normal
- * \param nt ratio of indices of refraction
- */
-PATHTRACER_HD inline float schlick(float cosine, float nt) {
-    float r0 = (1 - nt) / (1 + nt);
-    r0 = r0 * r0;
-    return r0 + (1 - r0) * powf((1 - cosine), 5);
-}
+#include "optics.h"
 
 /**
  * \brief Dielectric material with reflection and refraction.
@@ -28,24 +18,24 @@ public:
     PATHTRACER_HD bool scatter(const Ray& rIn, const HitRecord& hr, vec3& attenuation,
                                Ray& scattered) const override {
         vec3 outwardNormal;
-        float R;
+        float etaRatio;
         vec3 v = rIn.direction();
         vec3 refracted;
-        attenuation = vec3(1.0, 1.0, 1.0);
+        attenuation = vec3(1.0f, 1.0f, 1.0f);
         float cosine;
         if (dot(v, hr.normal) < 0) {
-            R = 1 / nt;
+            etaRatio = 1.0f / nt;
             outwardNormal = hr.normal;
             cosine = -dot(v, hr.normal) / v.norm();
         } else {
-            outwardNormal = -1 * hr.normal;
+            outwardNormal = -1.0f * hr.normal;
             cosine = nt * dot(v, hr.normal) / v.norm();
-            R = nt;
+            etaRatio = nt;
         }
         vec3 reflected = reflect(v, outwardNormal);
 
-        if (refract(v, outwardNormal, R, refracted)) {
-            if (randomFloat(0, 1.0) < schlick(cosine, nt)) {
+        if (refract(v, outwardNormal, etaRatio, refracted)) {
+            if (randomFloat(0.0f, 1.0f) < schlick(cosine, nt)) {
                 scattered = Ray(hr.p, reflected, rIn.time());
             } else {
                 scattered = Ray(hr.p, refracted, rIn.time());
@@ -56,30 +46,5 @@ public:
         return true;
     }
 
-    PATHTRACER_HD vec3 reflect(const vec3& v, const vec3& n) const {
-        return v - 2 * dot(v, n) * n;
-    }
-
-    /**
-     * \brief Refracts \p v across the boundary with normal \p n.
-     * \param v incident direction
-     * \param n outward surface normal
-     * \param R ratio of indices of refraction
-     * \param refracted refracted direction written on success
-     * \returns false on total internal reflection
-     */
-    PATHTRACER_HD bool refract(const vec3& v, const vec3& n, float R, vec3& refracted) const {
-        vec3 uv = unit_vector(v);
-        float dt = dot(uv, n);
-        float D = 1 - R * R * (1 - dt * dt);
-        if (D > 0) {
-            refracted = R * (uv - n * dt) - n * sqrtf(D);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    vec3 attenuation;
     float nt;
 };

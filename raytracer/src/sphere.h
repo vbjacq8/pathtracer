@@ -12,13 +12,14 @@
  */
 class Sphere : public Hitable {
 public:
-    PATHTRACER_HD Sphere() : mat(nullptr) {}
+    PATHTRACER_HD Sphere() : mat(nullptr), matIndex(-1) {}
 
-    PATHTRACER_HD Sphere(const vec3& staticCenter, float R, Material* material)
-        : center(staticCenter, vec3(0, 0, 0)), radius(R), mat(material) {}
+    PATHTRACER_HD Sphere(const vec3& staticCenter, float R, Material* material, int materialIndex = -1)
+        : center(staticCenter, vec3(0, 0, 0)), radius(R), mat(material), matIndex(materialIndex) {}
 
-    PATHTRACER_HD Sphere(const vec3& center1, const vec3& center2, float R, Material* material)
-        : center(center1, center2 - center1), radius(R), mat(material) {}
+    PATHTRACER_HD Sphere(const vec3& center1, const vec3& center2, float R, Material* material,
+                         int materialIndex = -1)
+        : center(center1, center2 - center1), radius(R), mat(material), matIndex(materialIndex) {}
 
     PATHTRACER_HD bool hit(const Ray& r, float tMin, float tMax, HitRecord& hr) override;
     PATHTRACER_HD AABB boundingBox() const override;
@@ -28,6 +29,7 @@ private:
     Ray center;
     float radius;
     Material* mat;
+    int matIndex;
 
     /**
      * \brief Maps a unit-sphere direction to texture (u, v) in [0, 1].
@@ -50,6 +52,7 @@ private:
         const vec3 outwardNormal = (hr.p - currentCenter) / radius;
         hr.setFaceNormal(r, outwardNormal);
         hr.matPtr = mat;
+        hr.matIndex = matIndex;
         getSphereUV(outwardNormal, hr.u, hr.v);
     }
 };

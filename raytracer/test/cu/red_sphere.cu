@@ -1,4 +1,5 @@
 #include "../../cuda/host/check_cuda.cuh"
+#include "../../cuda/host/timing.cuh"
 #include "../../cuda/device/render.cuh"
 #include "../../src/vec3.h"
 
@@ -9,7 +10,9 @@
  *
  * Build/run via repo root:
  *   source raytracer/cuda/env/longleaf_modules.sh
- *   ./run_cuda.sh --rebuild two_spheres.cu
+ *   ./run_cuda.sh --rebuild red_sphere.cu
+ *
+ * Total render runtime is printed to stderr for Longleaf benchmarking.
  */
 
 int main() {
@@ -33,9 +36,11 @@ int main() {
     dim3 blocks(nx / tx + 1, ny / ty + 1);
     dim3 threads(tx, ty);
 
-    render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin, nullptr);
-    checkCudaErrors(cudaGetLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    timeRenderAndReport([&]() {
+        renderNormals<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical,
+                                           origin, nullptr, 0);
+        checkCudaErrors(cudaGetLastError());
+    });
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
     for (int j = ny - 1; j >= 0; --j) {

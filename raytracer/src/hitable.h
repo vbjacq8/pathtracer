@@ -16,7 +16,8 @@ struct HitRecord {
     float t;
     vec3 p;
     vec3 normal;
-    Material* matPtr = nullptr;
+    Material* matPtr = nullptr; ///< CPU / legacy virtual materials
+    int matIndex = -1;          ///< CUDA flat MaterialRec table index (-1 = none)
     float u;
     float v;
     bool frontFace;

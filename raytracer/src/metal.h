@@ -2,6 +2,7 @@
 
 #include "material.h"
 #include "my_random.h"
+#include "optics.h"
 
 /**
  * \brief Reflective metal with optional surface fuzz.
@@ -28,10 +29,6 @@ public:
         scattered = Ray(hr.p, reflected + fuzz * randomInSphere(), rIn.time());
         attenuation = albedo;
         return (dot(scattered.direction(), hr.normal) > 0);
-    }
-
-    PATHTRACER_HD vec3 reflect(const vec3& v, const vec3& n) const {
-        return v - 2 * dot(v, n) * n;
     }
 
     vec3 albedo;

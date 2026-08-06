@@ -17,8 +17,9 @@ namespace {
  */
 class Quad : public Hitable {
 public:
-    PATHTRACER_HD Quad(const vec3& q, const vec3& u, const vec3& v, Material* mat)
-        : q(q), u(u), v(v), mat(mat) {
+    PATHTRACER_HD Quad(const vec3& q, const vec3& u, const vec3& v, Material* mat,
+                       int materialIndex = -1)
+        : q(q), u(u), v(v), mat(mat), matIndex(materialIndex) {
         setBoundingBox();
 
         vec3 n = cross(u, v);
@@ -51,6 +52,7 @@ public:
         hr.p = intersection;
         hr.setFaceNormal(r, normal);
         hr.matPtr = mat;
+        hr.matIndex = matIndex;
         return true;
     }
     PATHTRACER_HD AABB boundingBox() const override { return aabb; }
@@ -81,5 +83,6 @@ private:
     vec3 normal;
     float d;
     Material* mat;
+    int matIndex;
     AABB aabb;
 };

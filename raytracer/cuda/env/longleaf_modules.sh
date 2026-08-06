@@ -36,8 +36,53 @@ if [[ "$_load_ok" -ne 1 ]]; then
 fi
 unset _load_ok
 
+# MathDx ships cuRANDDx + commonDx headers (needed by device/my_random.cuh).
+_mathdx_ok=0
+if module load mathdx 2>/dev/null \
+    || module load nvidia-mathdx 2>/dev/null \
+    || module load MathDx 2>/dev/null; then
+    _mathdx_ok=1
+fi
+
+# If no module, accept an already-set root or a common install prefix.
+if [[ -z "${mathdx_ROOT:-}${MATHDX_ROOT:-}" ]]; then
+    for _cand in \
+        /opt/nvidia/mathdx/25.06 \
+        /opt/nvidia/mathdx/24.08 \
+        /opt/nvidia/mathdx/24.01 \
+        /usr/local/nvidia/mathdx/25.06; do
+        if [[ -d "$_cand" ]]; then
+            export mathdx_ROOT="$_cand"
+            export MATHDX_ROOT="$_cand"
+            _mathdx_ok=1
+            break
+        fi
+    done
+    unset _cand
+else
+    # Normalize so CMake's find_package(mathdx) sees mathdx_ROOT.
+    if [[ -n "${MATHDX_ROOT:-}" && -z "${mathdx_ROOT:-}" ]]; then
+        export mathdx_ROOT="$MATHDX_ROOT"
+    fi
+    if [[ -n "${mathdx_ROOT:-}" && -z "${MATHDX_ROOT:-}" ]]; then
+        export MATHDX_ROOT="$mathdx_ROOT"
+    fi
+    _mathdx_ok=1
+fi
+
+if [[ "$_mathdx_ok" -ne 1 ]]; then
+    echo "warning: MathDx not found via module or /opt/nvidia/mathdx/*" >&2
+    echo "  cmake needs curanddx.hpp + commonDx. Try: module avail mathdx" >&2
+    echo "  or: export mathdx_ROOT=/path/to/nvidia/mathdx/YY.MM" >&2
+fi
+unset _mathdx_ok
+
 echo "Loaded modules:"
 module list 2>&1 || true
+
+if [[ -n "${mathdx_ROOT:-}" ]]; then
+    echo "mathdx_ROOT: $mathdx_ROOT"
+fi
 
 if command -v nvcc >/dev/null 2>&1; then
     echo "nvcc: $(nvcc --version | tail -n1)"
