@@ -7,6 +7,7 @@
 
 /**
  * Minimal polymorphic DeviceScene path-trace smoke test: one sphere + ground.
+ * RNG matches cudaFlatTable (cuRANDDx via my_random.cuh + my_random.h bridge).
  *
  *   ./run_cuda.sh --rebuild shaded_sphere.cu
  *
@@ -34,11 +35,16 @@ int main() {
     checkCudaErrors(
         cudaMallocManaged(reinterpret_cast<void**>(&fb), size_t(numPixels) * sizeof(vec3)));
 
+    RNG* states = nullptr;
+    checkCudaErrors(
+        cudaMallocManaged(reinterpret_cast<void**>(&states), size_t(numPixels) * sizeof(RNG)));
+    bindDeviceRng(states, nx);
+
     dim3 blocks(nx / 8 + 1, ny / 8 + 1);
     dim3 threads(8, 8);
     timeRenderAndReport([&]() {
         render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin,
-                                    world, maxDepth);
+                                    world, states, maxDepth);
         checkCudaErrors(cudaGetLastError());
     });
 
@@ -51,6 +57,7 @@ int main() {
         }
     }
 
+    checkCudaErrors(cudaFree(states));
     checkCudaErrors(cudaFree(fb));
     scene.free();
     return 0;

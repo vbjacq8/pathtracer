@@ -10,17 +10,39 @@
 #endif
 
 /**
+ * Host/device random helpers.
+ *
+ * Selection is **compile-time**, not runtime: nvcc emits a host version and a
+ * device version of each \p PATHTRACER_HD function. On the device pass,
+ * \p __CUDA_ARCH__ is defined; on the host pass it is not.
+ *
+ * - Host (CPU batch / interactive): mt19937
+ * - Device + \p PATHTRACER_CUDA_RNG (CUDA demos): cuRANDDx via \p my_random.cuh
+ *   zero-arg bridge (same generator as the flat-table branch)
+ * - Device without that flag: cheap hash fallback
+ *
+ * There is no useful runtime "am I on GPU?" switch inside one compiled body —
+ * the linker already picked the host or device specialization.
+ */
+
+#if defined(__CUDA_ARCH__) && defined(PATHTRACER_CUDA_RNG)
+#include "../cuda/device/my_random.cuh"
+#endif
+
+/**
  * \brief Uniform random numbers in [\p min, \p max).
- * Host: mt19937. Device: cheap per-thread hash (replace with curand later).
  */
 PATHTRACER_HD inline float randomFloat(float min, float max) {
 #if defined(__CUDA_ARCH__)
-    unsigned int x =
-        static_cast<unsigned int>(clock()) + threadIdx.x * 374761393u +
-        blockIdx.x * 668265263u + threadIdx.y * 982451653u;
+#    if defined(PATHTRACER_CUDA_RNG)
+    return pathtracerDeviceRandomFloat(min, max);
+#    else
+    unsigned int x = static_cast<unsigned int>(clock()) + threadIdx.x * 374761393u +
+                     blockIdx.x * 668265263u + threadIdx.y * 982451653u;
     x = (x ^ (x >> 13)) * 1274126177u;
     float u = static_cast<float>(x & 0x00FFFFFFu) / static_cast<float>(0x01000000);
     return min + (max - min) * u;
+#    endif
 #else
     static std::mt19937 engine{std::random_device{}()};
     static std::uniform_real_distribution<float> dist(0.0f, 1.0f);

@@ -20,6 +20,7 @@ __device__ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
         return true;
     }
     const float survival = fmaxf(kSurvivalMin, fminf(maxComponent(throughput), kSurvivalMax));
+    // Uses my_random.h → cuRANDDx bridge (same generator as cudaFlatTable).
     if (randomFloat(0.0f, 1.0f) > survival) {
         return false;
     }
@@ -31,7 +32,8 @@ __device__ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
 /**
  * \brief Device path tracer using polymorphic Hitable / Material virtuals.
  *
- * Materials use \p my_random.h device RNG (no flat tables / cuRANDDx).
+ * \p Material::scatter calls zero-arg \p randomFloat / \p randomInSphere; with
+ * \p PATHTRACER_CUDA_RNG those resolve to cuRANDDx via \p my_random.cuh.
  */
 __device__ inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
                                  BackgroundFn background = colorBlueWhiteGradient) {

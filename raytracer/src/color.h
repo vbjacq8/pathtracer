@@ -7,6 +7,9 @@
 
 #include <algorithm>
 
+#include "cuda_annot.h"
+
+
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
 constexpr float kSurvivalMin = 0.05; ///< avoids throughput / survival blowing up when survival -> 0

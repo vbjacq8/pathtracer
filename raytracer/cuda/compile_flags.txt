@@ -10,3 +10,4 @@ c++
 -Idevice
 -Ihost
 -Iintellisense
+-DPATHTRACER_CUDA_ARCH=700
