@@ -6,7 +6,7 @@
 #include <iostream>
 
 /**
- * Minimal flat-table path-trace smoke test: one sphere + ground.
+ * Minimal polymorphic DeviceScene path-trace smoke test: one sphere + ground.
  *
  *   ./run_cuda.sh --rebuild shaded_sphere.cu
  *
@@ -14,11 +14,11 @@
  */
 int main() {
     DeviceScene scene;
-    const int red = scene.addLambertian(vec3(1.0f, 0.0f, 0.0f));
-    const int ground = scene.addLambertian(vec3(0.8f, 0.8f, 0.0f));
+    Material* red = scene.addLambertian(vec3(1.0f, 0.0f, 0.0f));
+    Material* ground = scene.addLambertian(vec3(0.8f, 0.8f, 0.0f));
     scene.addSphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, red);
     scene.addSphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, ground);
-    const HitableRec* hitables = scene.buildWorld();
+    Hitable* world = scene.buildWorld();
 
     const int nx = 200;
     const int ny = 100;
@@ -34,16 +34,11 @@ int main() {
     checkCudaErrors(
         cudaMallocManaged(reinterpret_cast<void**>(&fb), size_t(numPixels) * sizeof(vec3)));
 
-    RNG* states = nullptr;
-    checkCudaErrors(
-        cudaMallocManaged(reinterpret_cast<void**>(&states), size_t(numPixels) * sizeof(RNG)));
-
     dim3 blocks(nx / 8 + 1, ny / 8 + 1);
     dim3 threads(8, 8);
     timeRenderAndReport([&]() {
         render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin,
-                                    hitables, scene.hitableCount(), scene.materialRecs(),
-                                    scene.textureRecs(), states, maxDepth);
+                                    world, maxDepth);
         checkCudaErrors(cudaGetLastError());
     });
 
@@ -56,7 +51,6 @@ int main() {
         }
     }
 
-    checkCudaErrors(cudaFree(states));
     checkCudaErrors(cudaFree(fb));
     scene.free();
     return 0;

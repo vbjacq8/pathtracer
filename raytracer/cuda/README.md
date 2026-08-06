@@ -1,40 +1,36 @@
-# CUDA path tracer (Longleaf / NVIDIA) — flat tables
+# CUDA path tracer (Longleaf / NVIDIA) — polymorphism
 
 GPU backend lives here. Demos live under `raytracer/test/cu/`.
 
-This branch (`cudaFlatTable`) uses **flat POD tables** for textures, materials, and
-hitables — no device `new` / virtual dispatch.
+This branch (`cudaPolymorphism`) uses **device-new polymorphic** `Texture` /
+`Material` / `Hitable` objects (virtual `hit` / `scatter` / `value`), matching
+the CPU scene style via `DeviceScene` factories.
 
 ## Layout
 
 | Path | Role |
 |------|------|
-| `device/` | Kernels + flat records (`hitable_rec.cuh`, `material_rec.cuh`, …) |
+| `device/` | Kernels (`render.cuh`, `path_trace.cuh`) |
 | `host/` | Host helpers (`device_scene.cuh`, `timing.cuh`, `check_cuda.cuh`) |
-| `env/longleaf_modules.sh` | `module load` helper for UNC Longleaf (CUDA + MathDx) |
-| `common.hpp` | `Arch` for cuRANDDx `SM<Arch>()` |
+| `env/longleaf_modules.sh` | `module load` helper for UNC Longleaf |
 | `build/` | CMake output (gitignored) |
 | `../test/cu/` | CUDA demos (e.g. `two_spheres.cu`) |
 | `../test/out/cuda/` | PPM/PNG from CUDA demos |
 
-Device RNG (`device/my_random.cuh`) uses **cuRANDDx** (MathDx). Flat dispatch:
-`hitScene` / `scatterMaterial` switch on `HitableType` / `MatType`. Shared
-`reflect` / `refract` / `schlick` are in `../src/optics.h`.
-
-On Longleaf, `longleaf_modules.sh` loads MathDx when available and exports `mathdx_ROOT` for
-CMake (`find_package(mathdx … curanddx)`). Override with
-`export mathdx_ROOT=/path/to/nvidia/mathdx/YY.MM` if the module name differs.
+Path tracing calls virtual `Hitable::hit` and `Material::scatter` / `emit`.
+Device RNG for scatter comes from `../src/my_random.h` (hash/`clock` on device).
+Shared `reflect` / `refract` / `schlick` are in `../src/optics.h`.
 
 ## Scene construction
 
 Build worlds on the **host** with `DeviceScene` (`host/device_scene.cuh`):
 
-- Textures / materials / hitables → flat host vectors (`TextureRec`, `MaterialRec`, `HitableRec`)
-- `buildWorld()` uploads managed tables once
-- Supported hitables: static sphere, moving sphere, quad
+- Textures / materials / hitables → 1-thread device factories (`new` on device for correct vtables)
+- Host pools own the pointers; `buildWorld()` wraps hitables in a device `HitableList`
+- `free()` tears down world → hitables → materials → textures
 
-Demos call `render(..., hitables, count, materials, textures, states, depth)`.
-Each demo prints `Total runtime: <ms> ms` to **stderr** (stdout remains PPM).
+Demos call `render(..., world, depth)`. Each demo prints `Total runtime: <ms> ms`
+to **stderr** (stdout remains PPM).
 
 ## Longleaf OnDemand
 
@@ -54,7 +50,7 @@ Pin a GPU arch if needed:
 nvidia-smi --query-gpu=compute_cap --format=csv
 ```
 
-Compare against the polymorphic GPU branch: `cudaPolymorphism`.
+Compare against the flat-table GPU branch: `cudaFlatTable` (requires MathDx / cuRANDDx).
 
 ## IntelliSense (local Mac, no CUDA toolkit)
 

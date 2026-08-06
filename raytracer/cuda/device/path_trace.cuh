@@ -1,12 +1,9 @@
 #pragma once
 
 #include "../../src/constants.h"
+#include "../../src/hitable.h"
+#include "../../src/my_random.h"
 #include "../../src/ray.h"
-
-#include "hitable_rec.cuh"
-#include "material_rec.cuh"
-#include "my_random.cuh"
-#include "scatter.cuh"
 
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
@@ -18,12 +15,12 @@ __device__ inline float maxComponent(const vec3& v) {
     return fmaxf(v.r(), fmaxf(v.g(), v.b()));
 }
 
-__device__ inline bool applyRussianRoulette(vec3& throughput, int bounce, RNG* states, int tid) {
+__device__ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
     if (bounce < kMinBouncesBeforeRoulette) {
         return true;
     }
     const float survival = fmaxf(kSurvivalMin, fminf(maxComponent(throughput), kSurvivalMax));
-    if (randomFloat(0.0f, 1.0f, states, tid) > survival) {
+    if (randomFloat(0.0f, 1.0f) > survival) {
         return false;
     }
     throughput /= survival;
@@ -32,11 +29,11 @@ __device__ inline bool applyRussianRoulette(vec3& throughput, int bounce, RNG* s
 }  // namespace
 
 /**
- * \brief Device path tracer using flat HitableRec / MaterialRec / TextureRec tables.
+ * \brief Device path tracer using polymorphic Hitable / Material virtuals.
+ *
+ * Materials use \p my_random.h device RNG (no flat tables / cuRANDDx).
  */
-__device__ inline vec3 pathTrace(const Ray& r, const HitableRec* hitables, int hitableCount,
-                                 const MaterialRec* materials, const TextureRec* textures,
-                                 int maxDepth, RNG* states, int tid,
+__device__ inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
                                  BackgroundFn background = colorBlueWhiteGradient) {
     Ray current = r;
     vec3 radiance(0.0f, 0.0f, 0.0f);
@@ -44,26 +41,25 @@ __device__ inline vec3 pathTrace(const Ray& r, const HitableRec* hitables, int h
 
     for (int bounce = 0; bounce < maxDepth; ++bounce) {
         HitRecord hr;
-        if (!hitScene(hitables, hitableCount, current, kHitEps, infinity, hr)) {
+        if (!world->hit(current, kHitEps, infinity, hr)) {
             radiance += throughput * background(current);
             return radiance;
         }
 
-        if (hr.matIndex < 0 || materials == nullptr) {
+        if (hr.matPtr == nullptr) {
             return radiance;
         }
 
-        const MaterialRec& mat = materials[hr.matIndex];
-        radiance += throughput * emitMaterial(mat, textures, hr.u, hr.v, hr.p);
+        radiance += throughput * hr.matPtr->emit(hr.u, hr.v, hr.p);
 
         Ray scattered;
         vec3 attenuation;
-        if (!scatterMaterial(mat, textures, current, hr, attenuation, scattered, states, tid)) {
+        if (!hr.matPtr->scatter(current, hr, attenuation, scattered)) {
             return radiance;
         }
 
         throughput = throughput * attenuation;
-        if (!applyRussianRoulette(throughput, bounce + 1, states, tid)) {
+        if (!applyRussianRoulette(throughput, bounce + 1)) {
             return radiance;
         }
         current = scattered;

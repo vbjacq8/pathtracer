@@ -6,7 +6,7 @@
 #include <iostream>
 
 /**
- * Host-composed CUDA scene with fully flat tables (hitables + materials).
+ * Host-composed CUDA scene with polymorphic device Materials / Hitables.
  *
  *   source raytracer/cuda/env/longleaf_modules.sh
  *   ./run_cuda.sh --rebuild two_spheres.cu
@@ -16,17 +16,17 @@
 int main() {
     DeviceScene scene;
 
-    const int blue = scene.addLambertian(vec3(0.1f, 0.2f, 0.5f));
-    const int ground = scene.addLambertian(vec3(0.8f, 0.8f, 0.0f));
-    const int metal = scene.addMetal(vec3(0.8f, 0.8f, 0.8f), 0.0f);
-    const int glass = scene.addDielectric(1.5f);
+    Material* blue = scene.addLambertian(vec3(0.1f, 0.2f, 0.5f));
+    Material* ground = scene.addLambertian(vec3(0.8f, 0.8f, 0.0f));
+    Material* metal = scene.addMetal(vec3(0.8f, 0.8f, 0.8f), 0.0f);
+    Material* glass = scene.addDielectric(1.5f);
 
     scene.addSphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, blue);
     scene.addSphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, ground);
     scene.addSphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, metal);
     scene.addSphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, glass);
 
-    const HitableRec* hitables = scene.buildWorld();
+    Hitable* world = scene.buildWorld();
     const int nx = 200;
     const int ny = 100;
     const int numPixels = nx * ny;
@@ -41,16 +41,11 @@ int main() {
     checkCudaErrors(
         cudaMallocManaged(reinterpret_cast<void**>(&fb), size_t(numPixels) * sizeof(vec3)));
 
-    RNG* states = nullptr;
-    checkCudaErrors(
-        cudaMallocManaged(reinterpret_cast<void**>(&states), size_t(numPixels) * sizeof(RNG)));
-
     dim3 blocks(nx / 8 + 1, ny / 8 + 1);
     dim3 threads(8, 8);
     timeRenderAndReport([&]() {
         render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin,
-                                    hitables, scene.hitableCount(), scene.materialRecs(),
-                                    scene.textureRecs(), states, maxDepth);
+                                    world, maxDepth);
         checkCudaErrors(cudaGetLastError());
     });
 
@@ -63,7 +58,6 @@ int main() {
         }
     }
 
-    checkCudaErrors(cudaFree(states));
     checkCudaErrors(cudaFree(fb));
     scene.free();
     return 0;

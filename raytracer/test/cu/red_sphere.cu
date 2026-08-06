@@ -38,7 +38,7 @@ int main() {
 
     timeRenderAndReport([&]() {
         renderNormals<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical,
-                                           origin, nullptr, 0);
+                                           origin, nullptr);
         checkCudaErrors(cudaGetLastError());
     });
 
