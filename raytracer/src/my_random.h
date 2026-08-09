@@ -6,24 +6,22 @@
 #include "vec3.h"
 
 /**
- * Host/device random helpers.
+ * Public RNG API for materials, camera, Perlin, integrators, etc.
  *
- * Selection is **compile-time**, not runtime: nvcc emits a host version and a
- * device version of each \p PATHTRACER_HD function. On the device pass,
- * \p __CUDA_ARCH__ is defined; on the host pass it is not.
+ * One signature set everywhere — never overload these names in CUDA headers.
  *
- * - Host (CPU batch / interactive): mt19937
- * - Device + \p PATHTRACER_CUDA_RNG (CUDA demos): cuRANDDx via \p my_random.cuh
- *   zero-arg bridge (same generator as the flat-table branch)
+ * Compile-time selection (nvcc host vs device pass):
+ * - Host: mt19937
+ * - Device + \p PATHTRACER_CUDA_RNG: cuRANDDx via \p pathtracerDeviceRandomFloat
+ *   (defined in \p my_random.cuh; CUDA TUs include that header separately)
  * - Device without that flag: cheap hash fallback
  *
- * Include \p my_random.cuh on **both** host and device when
- * \p PATHTRACER_CUDA_RNG is set so demos see \p RNG / \p bindDeviceRng on the
- * host pass (not only under \p __CUDA_ARCH__).
+ * Do **not** include \p my_random.cuh from here — that pulled MathDx into every
+ * consumer and collided with \p randomInt / \p randomFloat overloads.
  */
 
-#if defined(PATHTRACER_CUDA_RNG)
-#include "../cuda/device/my_random.cuh"
+#if defined(__CUDA_ARCH__) && defined(PATHTRACER_CUDA_RNG)
+__device__ float pathtracerDeviceRandomFloat(float min, float max);
 #endif
 
 #if !defined(__CUDA_ARCH__)
@@ -31,7 +29,7 @@
 #endif
 
 /**
- * \brief Uniform random numbers in [\p min, \p max).
+ * \brief Uniform random float in [\p min, \p max).
  */
 PATHTRACER_HD inline float randomFloat(float min, float max) {
 #if defined(__CUDA_ARCH__)
@@ -51,17 +49,21 @@ PATHTRACER_HD inline float randomFloat(float min, float max) {
 #endif
 }
 
-#if !defined(__CUDA_ARCH__)
-inline int randomInt(int min, int max) {
-    // Inclusive range [min, max], matching typical RTIOW helper usage.
-    static std::mt19937 engine{std::random_device{}()};
-    std::uniform_int_distribution<int> dist(min, max);
-    return dist(engine);
+/**
+ * \brief Inclusive uniform random int in [\p min, \p max].
+ *
+ * Implemented via \p randomFloat so the same body works on host and device
+ * (including device-side Perlin construction).
+ */
+PATHTRACER_HD inline int randomInt(int min, int max) {
+    float u = randomFloat(0.0f, 1.0f);
+    int range = max - min + 1;
+    int v = min + static_cast<int>(u * static_cast<float>(range));
+    return v > max ? max : v;
 }
-#endif
 
 /**
- * \brief Random point inside the unit sphere
+ * \brief Random point inside the unit sphere.
  */
 PATHTRACER_HD inline vec3 randomInSphere() {
     float u = randomFloat(0.0f, 1.0f);

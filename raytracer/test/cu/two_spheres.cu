@@ -7,7 +7,7 @@
 
 /**
  * Host-composed CUDA scene with polymorphic device Materials / Hitables.
- * RNG matches cudaFlatTable (cuRANDDx via my_random.cuh + my_random.h bridge).
+ * RNG: my_random.h public API + my_random.cuh cuRANDDx bridge.
  *
  *   source raytracer/cuda/env/longleaf_modules.sh
  *   ./run_cuda.sh --rebuild two_spheres.cu

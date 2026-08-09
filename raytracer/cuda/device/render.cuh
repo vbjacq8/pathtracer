@@ -2,11 +2,14 @@
 
 #include <cuda_runtime.h>
 
+// RNG plumbing first so pathtracerDeviceRandomFloat is defined before
+// my_random.h (via color.h / path_trace.cuh) uses it on the device pass.
+#include "my_random.cuh"
+
 #include "../../src/color.h"
 #include "../../src/hitable.h"
 #include "../../src/ray.h"
 
-#include "my_random.cuh"
 #include "path_trace.cuh"
 
 /**

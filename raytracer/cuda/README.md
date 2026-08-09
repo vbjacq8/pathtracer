@@ -8,15 +8,21 @@ the CPU scene style via `DeviceScene` factories.
 
 ## RNG (cuRANDDx)
 
-CUDA demos define `PATHTRACER_CUDA_RNG`. On the **device** compile pass,
-`../src/my_random.h` selects cuRANDDx through `device/my_random.cuh`.
-`SM<Arch>()` is required by the cuRANDDx descriptor API (`Arch` is inlined in
-`my_random.cuh` from `__CUDA_ARCH__` / `PATHTRACER_CUDA_ARCH`).
+Two layers — keep them separate to avoid include / overload fights:
 
-Only the **cuRANDDx** MathDx component is required (`find_package(… curanddx)`).
-`commonDx` headers ship in the **same** MathDx `include/` — you do not install
-them separately. (NVIDIA sample `common.hpp` with `CUDA_CHECK_*` macros is
-unrelated and not used here.)
+| Header | Role |
+|--------|------|
+| `../src/my_random.h` | **Public API only**: `randomFloat`, `randomInt`, `randomInSphere`, `randomInDisc` (same signatures on CPU and GPU) |
+| `device/my_random.cuh` | **CUDA plumbing**: `RNG`, `initRandomStates`, `bindDeviceRng`, `pathtracerDeviceRandomFloat` |
+
+CUDA demos define `PATHTRACER_CUDA_RNG`. On the device pass, `my_random.h` calls
+`pathtracerDeviceRandomFloat` (implemented in `my_random.cuh`). Include
+`my_random.cuh` from CUDA TUs (`render.cuh` does this **before** shared
+headers). Do **not** include `.cuh` from `my_random.h`.
+
+`SM<Arch>()` is required by the cuRANDDx descriptor API (`Arch` from
+`__CUDA_ARCH__` / `PATHTRACER_CUDA_ARCH`). Only the **cuRANDDx** MathDx
+component is required (`find_package(… curanddx)`).
 
 CPU batch/interactive builds never set `PATHTRACER_CUDA_RNG`, so they keep mt19937.
 
