@@ -1,63 +1,37 @@
 #!/usr/bin/env bash
-# Build and run a CUDA demo from raytracer/test/cu (PPM → PNG under test/out/cuda).
+# Build and run a CUDA demo from raytracer/test/cu → PPM/PNG under test/out/cuda.
 #
-# On Longleaf OnDemand (GPU session):
-#   source raytracer/cuda/env/longleaf_modules.sh
-#   ./run_cuda.sh color_gradient.cu
-#
-# Options:
-#   ./run_cuda.sh --rebuild
-#   ./run_cuda.sh --arch 80
-#   ./run_cuda.sh color_gradient.cu
+#   source raytracer/cuda/env/longleaf_modules.sh   # Longleaf GPU session
+#   ./run_cuda.sh [--rebuild] [--arch SM] [source.cu]
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CUDA_DIR="$ROOT_DIR/raytracer/cuda"
-SRC_DIR="$ROOT_DIR/raytracer/test/cu"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CUDA_DIR="$ROOT/raytracer/cuda"
+SRC_DIR="$ROOT/raytracer/test/cu"
 BUILD_DIR="$CUDA_DIR/build"
-EXEC_DIR="$ROOT_DIR/raytracer/test/exec"
-OUT_DIR="$ROOT_DIR/raytracer/test/out/cuda"
-PPM_TO_PNG="$ROOT_DIR/scripts/ppm_to_png.py"
+EXEC_DIR="$ROOT/raytracer/test/exec"
+OUT_DIR="$ROOT/raytracer/test/out/cuda"
 
 rebuild=0
-cuda_arch=""
-source_file=""
+arch=""
+src="two_spheres.cu"
 
 usage() {
     echo "Usage: $0 [--rebuild] [--arch SM] [source.cu]" >&2
-    echo "Builds a .cu demo from raytracer/test/cu, runs it, writes PPM/PNG to raytracer/test/out/cuda." >&2
-    echo "  --rebuild   Wipe cuda/build/ and reconfigure" >&2
-    echo "  --arch SM   Pass -DCMAKE_CUDA_ARCHITECTURES=SM (e.g. 70, 80, 90)" >&2
-    echo "Example: $0 two_spheres.cu" >&2
+    echo "  --rebuild  Wipe cuda/build/ and reconfigure" >&2
+    echo "  --arch SM  CUDA arch (e.g. 75, 80, 90); default is CMake's 80" >&2
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help)
-            usage
-            exit 0
-            ;;
-        --rebuild)
-            rebuild=1
-            shift
-            ;;
-        --arch)
-            cuda_arch="$2"
-            shift 2
-            ;;
-        *.cu)
-            if [[ -n "$source_file" ]]; then
-                echo "Multiple source files specified." >&2
-                usage
-                exit 1
-            fi
-            source_file="$1"
-            shift
-            ;;
+        -h|--help) usage; exit 0 ;;
+        --rebuild) rebuild=1; shift ;;
+        --arch) arch="$2"; shift 2 ;;
+        *.cu) src="$(basename "$1")"; shift ;;
         *)
-            if [[ -z "$source_file" && -f "$SRC_DIR/${1%.cu}.cu" ]]; then
-                source_file="${1%.cu}.cu"
+            if [[ -f "$SRC_DIR/${1%.cu}.cu" ]]; then
+                src="${1%.cu}.cu"
                 shift
             else
                 echo "Unknown argument: $1" >&2
@@ -68,55 +42,29 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -z "$source_file" ]]; then
-    source_file="two_spheres.cu"
-fi
-source_file="$(basename "$source_file")"
-if [[ ! -f "$SRC_DIR/$source_file" ]]; then
-    echo "Source file not found: $SRC_DIR/$source_file" >&2
-    exit 1
-fi
+[[ -f "$SRC_DIR/$src" ]] || { echo "Not found: $SRC_DIR/$src" >&2; exit 1; }
+command -v nvcc >/dev/null || { echo "nvcc not found (source longleaf_modules.sh on Longleaf)" >&2; exit 1; }
+command -v cmake >/dev/null || { echo "cmake not found" >&2; exit 1; }
 
-base_name="$(basename "$source_file" .cu)"
+name="${src%.cu}"
+jobs="$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)"
 
-if ! command -v nvcc >/dev/null 2>&1; then
-    echo "nvcc not found. On Longleaf: source raytracer/cuda/env/longleaf_modules.sh" >&2
-    exit 1
-fi
-
-if ! command -v cmake >/dev/null 2>&1; then
-    echo "cmake not found. On Longleaf: module load cmake (or source longleaf_modules.sh)" >&2
-    exit 1
-fi
-
-mkdir -p "$OUT_DIR" "$EXEC_DIR"
-if [[ "$rebuild" -eq 1 ]]; then
-    rm -rf "$BUILD_DIR"
-fi
-mkdir -p "$BUILD_DIR"
+[[ "$rebuild" -eq 1 ]] && rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR" "$OUT_DIR" "$EXEC_DIR"
 
 cmake_args=(-S "$CUDA_DIR" -B "$BUILD_DIR")
-if [[ -n "$cuda_arch" ]]; then
-    cmake_args+=(-DCMAKE_CUDA_ARCHITECTURES="$cuda_arch")
-fi
+[[ -n "$arch" ]] && cmake_args+=(-DCMAKE_CUDA_ARCHITECTURES="$arch")
 
 cmake "${cmake_args[@]}"
-cmake --build "$BUILD_DIR" --target "$base_name" -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)"
+cmake --build "$BUILD_DIR" --target "$name" -j"$jobs"
 
-bin_path="$BUILD_DIR/bin/$base_name"
-if [[ ! -x "$bin_path" ]]; then
-    echo "Build did not produce $bin_path" >&2
-    exit 1
-fi
-cp "$bin_path" "$EXEC_DIR/$base_name"
+bin="$BUILD_DIR/bin/$name"
+cp "$bin" "$EXEC_DIR/$name"
 
-ppm_path="$OUT_DIR/$base_name.ppm"
-"$EXEC_DIR/$base_name" > "$ppm_path"
+ppm="$OUT_DIR/$name.ppm"
+"$EXEC_DIR/$name" > "$ppm"
+python3 "$ROOT/scripts/ppm_to_png.py" "$ppm" "${ppm%.ppm}.png"
 
-if [[ -f "$PPM_TO_PNG" ]]; then
-    python3 "$PPM_TO_PNG" "$ppm_path" "${ppm_path%.ppm}.png"
-    echo "PNG: ${ppm_path%.ppm}.png"
-fi
-
-echo "Built $EXEC_DIR/$base_name"
-echo "Wrote $ppm_path"
+echo "Built $EXEC_DIR/$name"
+echo "Wrote $ppm"
+echo "Wrote ${ppm%.ppm}.png"

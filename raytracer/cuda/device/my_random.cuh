@@ -1,16 +1,34 @@
 #pragma once
 
-#include "vec3.h"
+#include "../../src/vec3.h"
 
 #include <cuda_runtime.h>
 #include <math_constants.h>
 #include <curanddx.hpp>
 
-#include "../common.hpp"
+/**
+ * Target SM for cuRANDDx \p SM<Arch>() (required by the descriptor API).
+ * Device passes use \p __CUDA_ARCH__; host / IntelliSense fall back to
+ * \p PATHTRACER_CUDA_ARCH (set by CMake when a single arch is configured).
+ *
+ * MathDx 26.06 documents SM >= 750 (Turing+). Prefer \p ./run_cuda.sh --arch 80
+ * (etc.) to match the GPU; default 800 is Ampere.
+ */
+#ifndef PATHTRACER_CUDA_ARCH
+#    if defined(__CUDA_ARCH__)
+#        define PATHTRACER_CUDA_ARCH __CUDA_ARCH__
+#    else
+#        define PATHTRACER_CUDA_ARCH 800
+#    endif
+#endif
+
+constexpr unsigned int Arch = PATHTRACER_CUDA_ARCH;
 
 constexpr unsigned int SUBSEQUENCES = 4096;
 constexpr unsigned long long SEED = 1234ULL;
 
+// Official cuRANDDx pattern: Generator + SM<Arch> + Thread (header-only; needs
+// MathDx include dir, which also ships commonDx alongside curanddx.hpp).
 using RNG = decltype(curanddx::Generator<curanddx::xorwow>() + curanddx::SM<Arch>() +
                      curanddx::Thread());
 constexpr typename RNG::offset_type OFFSET = 2ULL;
