@@ -5,10 +5,28 @@
 #include "material.h"
 #include "my_random.h"
 
-#include <algorithm>
-
 #include "cuda_annot.h"
 
+/**
+ * \brief Debug shading from surface normals.
+ * \returns Normal map color on hit; \p background on miss.
+ */
+PATHTRACER_HD inline vec3 color(const Ray& r, Hitable* world, int depth,
+                  BackgroundFn background = colorBlueWhiteGradient) {
+    (void)depth;
+    constexpr float kHitEps = 0.001f;
+    HitRecord hr;
+    if (world->hit(r, kHitEps, infinity, hr)) {
+        return 0.5 * vec3(hr.normal.x() + 1.0, hr.normal.y() + 1.0, hr.normal.z() + 1.0);
+    }
+    return background(r);
+}
+
+// CUDA demos use device/path_trace.cuh for pathTrace (same names). Skip the CPU
+// copy when PATHTRACER_CUDA_RNG is set so render.cuh can include both headers.
+#ifndef PATHTRACER_CUDA_RNG
+
+#include <algorithm>
 
 namespace {
 constexpr int kMinBouncesBeforeRoulette = 5;
@@ -41,20 +59,6 @@ inline bool applyRussianRoulette(vec3& throughput, int bounce) {
     return true;
 }
 }  // namespace
-
-/**
- * \brief Debug shading from surface normals.
- * \returns Normal map color on hit; \p background on miss.
- */
-PATHTRACER_HD inline vec3 color(const Ray& r, Hitable* world, int depth,
-                  BackgroundFn background = colorBlueWhiteGradient) {
-    (void)depth;
-    HitRecord hr;
-    if (world->hit(r, kHitEps, infinity, hr)) {
-        return 0.5 * vec3(hr.normal.x() + 1.0, hr.normal.y() + 1.0, hr.normal.z() + 1.0);
-    }
-    return background(r);
-}
 
 /**
  * \brief Path tracing integrator; material behavior comes from Material::scatter at each hit.
@@ -100,3 +104,5 @@ inline vec3 pathTrace(const Ray& r, Hitable* world, int maxDepth,
 
     return radiance;
 }
+
+#endif  // !PATHTRACER_CUDA_RNG
