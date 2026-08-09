@@ -12,6 +12,8 @@ SRC_DIR="$ROOT/raytracer/test/cu"
 BUILD_DIR="$CUDA_DIR/build"
 EXEC_DIR="$ROOT/raytracer/test/exec"
 OUT_DIR="$ROOT/raytracer/test/out/cuda"
+# Sibling of the repo: csrepos/nvidia-mathdx-.../nvidia/mathdx/26.06
+MATHDX_DEFAULT="$ROOT/../nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06"
 
 rebuild=0
 arch=""
@@ -52,8 +54,14 @@ jobs="$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)"
 [[ "$rebuild" -eq 1 ]] && rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR" "$OUT_DIR" "$EXEC_DIR"
 
+# Point CMake at MathDx (absolute path). Needed if you only module load cuda.
+if [[ -z "${mathdx_ROOT:-}" && -d "$MATHDX_DEFAULT/include" ]]; then
+    mathdx_ROOT="$(cd "$MATHDX_DEFAULT" && pwd)"
+fi
+
 cmake_args=(-S "$CUDA_DIR" -B "$BUILD_DIR")
 [[ -n "$arch" ]] && cmake_args+=(-DCMAKE_CUDA_ARCHITECTURES="$arch")
+[[ -n "${mathdx_ROOT:-}" ]] && cmake_args+=(-Dmathdx_ROOT="$mathdx_ROOT")
 
 cmake "${cmake_args[@]}"
 cmake --build "$BUILD_DIR" --target "$name" -j"$jobs"
