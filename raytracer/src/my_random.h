@@ -5,10 +5,6 @@
 #include "constants.h"
 #include "vec3.h"
 
-#if !defined(__CUDA_ARCH__)
-#include <random>
-#endif
-
 /**
  * Host/device random helpers.
  *
@@ -21,12 +17,17 @@
  *   zero-arg bridge (same generator as the flat-table branch)
  * - Device without that flag: cheap hash fallback
  *
- * There is no useful runtime "am I on GPU?" switch inside one compiled body —
- * the linker already picked the host or device specialization.
+ * Include \p my_random.cuh on **both** host and device when
+ * \p PATHTRACER_CUDA_RNG is set so demos see \p RNG / \p bindDeviceRng on the
+ * host pass (not only under \p __CUDA_ARCH__).
  */
 
-#if defined(__CUDA_ARCH__) && defined(PATHTRACER_CUDA_RNG)
+#if defined(PATHTRACER_CUDA_RNG)
 #include "../cuda/device/my_random.cuh"
+#endif
+
+#if !defined(__CUDA_ARCH__)
+#include <random>
 #endif
 
 /**
@@ -50,12 +51,14 @@ PATHTRACER_HD inline float randomFloat(float min, float max) {
 #endif
 }
 
+#if !defined(__CUDA_ARCH__)
 inline int randomInt(int min, int max) {
     // Inclusive range [min, max], matching typical RTIOW helper usage.
     static std::mt19937 engine{std::random_device{}()};
     std::uniform_int_distribution<int> dist(min, max);
     return dist(engine);
 }
+#endif
 
 /**
  * \brief Random point inside the unit sphere

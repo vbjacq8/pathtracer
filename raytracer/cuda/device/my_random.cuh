@@ -117,17 +117,18 @@ __device__ inline float pathtracerDeviceRandomFloat(float min, float max) {
  * \brief Host: publish RNG table + framebuffer width for the zero-arg device bridge.
  * Call once before launching \p render.
  */
+// Host-only: visible on the host pass of a .cu (when __CUDA_ARCH__ is unset).
 #if !defined(__CUDA_ARCH__)
 inline void bindDeviceRng(RNG* states, int fbWidth) {
     cudaError_t err = cudaMemcpyToSymbol(g_pathtracer_rng_states, &states, sizeof(states));
     if (err != cudaSuccess) {
-        std::fprintf(stderr, "bindDeviceRng states: %s\n", cudaGetErrorString(err));
-        std::exit(static_cast<int>(err));
+        fprintf(stderr, "bindDeviceRng states: %s\n", cudaGetErrorString(err));
+        exit(static_cast<int>(err));
     }
     err = cudaMemcpyToSymbol(g_pathtracer_fb_width, &fbWidth, sizeof(fbWidth));
     if (err != cudaSuccess) {
-        std::fprintf(stderr, "bindDeviceRng width: %s\n", cudaGetErrorString(err));
-        std::exit(static_cast<int>(err));
+        fprintf(stderr, "bindDeviceRng width: %s\n", cudaGetErrorString(err));
+        exit(static_cast<int>(err));
     }
 }
 #endif
