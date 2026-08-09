@@ -1,7 +1,7 @@
+#include "../../cuda/host/batch_cli.cuh"
 #include "../../cuda/host/check_cuda.cuh"
 #include "../../cuda/host/timing.cuh"
 #include "../../cuda/device/render.cuh"
-#include "../../src/vec3.h"
 
 #include <iostream>
 
@@ -11,51 +11,46 @@
  * Build/run via repo root:
  *   source raytracer/cuda/env/longleaf_modules.sh
  *   ./run_cuda.sh --rebuild red_sphere.cu
+ *   ./run_cuda.sh red_sphere.cu --width 400 --samples 1
  *
  * Total render runtime is printed to stderr for Longleaf benchmarking.
  */
+int main(int argc, char** argv) {
+    RenderOptions opts;
+    setRtiowDemoDefaults(opts, /*depth=*/1);
+    const int cli = applyCudaCli(argc, argv, opts);
+    if (cli == 2) {
+        return 0;
+    }
+    if (cli != 0) {
+        return 1;
+    }
 
-int main() {
-    int nx = 200;
-    int ny = 100;
-
-    // Classic RTIOW viewport (camera at origin looking down -z).
-    vec3 lowerLeftCorner(-2.0f, -1.0f, -1.0f);
-    vec3 horizontal(4.0f, 0.0f, 0.0f);
-    vec3 vertical(0.0f, 2.0f, 0.0f);
-    vec3 origin(0.0f, 0.0f, 0.0f);
-
-    int numPixels = nx * ny;
-    size_t fbSize = size_t(numPixels) * sizeof(vec3);
+    const int nx = opts.width;
+    const int ny = opts.height;
+    const int numPixels = nx * ny;
+    const Camera cam = makeCameraFromOpts(opts);
 
     vec3* fb = nullptr;
-    checkCudaErrors(cudaMallocManaged(reinterpret_cast<void**>(&fb), fbSize));
+    checkCudaErrors(
+        cudaMallocManaged(reinterpret_cast<void**>(&fb), size_t(numPixels) * sizeof(vec3)));
 
-    int tx = 8;
-    int ty = 8;
-    dim3 blocks(nx / tx + 1, ny / ty + 1);
-    dim3 threads(tx, ty);
+    RNG* states = nullptr;
+    checkCudaErrors(
+        cudaMallocManaged(reinterpret_cast<void**>(&states), size_t(numPixels) * sizeof(RNG)));
+    bindDeviceRng(states, nx);
+
+    dim3 blocks(nx / 8 + 1, ny / 8 + 1);
+    dim3 threads(8, 8);
 
     timeRenderAndReport([&]() {
-        renderNormals<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical,
-                                           origin, nullptr);
+        renderNormals<<<blocks, threads>>>(fb, nx, ny, cam, opts.samples, nullptr, states);
         checkCudaErrors(cudaGetLastError());
     });
 
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-    for (int j = ny - 1; j >= 0; --j) {
-        for (int i = 0; i < nx; ++i) {
-            size_t pixelIdx = size_t(j * nx + i);
-            float r = fb[pixelIdx][0];
-            float g = fb[pixelIdx][1];
-            float b = fb[pixelIdx][2];
-            int ir = int(r * 255.99f);
-            int ig = int(g * 255.99f);
-            int ib = int(b * 255.99f);
-            std::cout << ir << " " << ig << " " << ib << "\n";
-        }
-    }
+    writeCudaPpm(fb, nx, ny, std::cout);
 
+    checkCudaErrors(cudaFree(states));
     checkCudaErrors(cudaFree(fb));
     return 0;
 }

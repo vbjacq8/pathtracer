@@ -35,10 +35,15 @@ target_include_directories(Pathtracer INTERFACE
 target_link_libraries(Pathtracer INTERFACE mathdx::curanddx)
 target_compile_definitions(Pathtracer INTERFACE PATHTRACER_CUDA_RNG=1)
 
+# Shared host CLI (parseOptions) compiled once for all CUDA demos.
+add_library(pathtracer_parse STATIC "${CMAKE_CURRENT_SOURCE_DIR}/../src/parse.cpp")
+target_include_directories(pathtracer_parse PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../src")
+target_compile_features(pathtracer_parse PUBLIC cxx_std_17)
+
 # 3–4. Executables that link our library.
 foreach(demo IN ITEMS red_sphere shaded_sphere two_spheres)
     add_executable(${demo} "${CMAKE_CURRENT_SOURCE_DIR}/../test/cu/${demo}.cu")
-    target_link_libraries(${demo} PRIVATE Pathtracer)
+    target_link_libraries(${demo} PRIVATE Pathtracer pathtracer_parse)
     set_target_properties(${demo} PROPERTIES
         CUDA_SEPARABLE_COMPILATION ON
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

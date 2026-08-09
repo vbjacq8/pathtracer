@@ -51,6 +51,7 @@ On UNC Longleaf OnDemand (GPU session):
 ```bash
 source raytracer/cuda/env/longleaf_modules.sh
 ./run_cuda.sh two_spheres.cu
+./run_cuda.sh two_spheres.cu --width 400 --samples 50 --lookfrom 0 0 0 --vfov 90
 ```
 
-Output: `raytracer/test/out/cuda/two_spheres.ppm`. Use `./run_cuda.sh --arch 80` (etc.) to pin SM arch. macOS/Apple Silicon cannot build/run this locally.
+Output: `raytracer/test/out/cuda/two_spheres.ppm`. Same `RenderOptions` CLI as `./run_cpp_test.sh` (`--width`, `--samples`, `--depth`, `--lookfrom`, `--lookat`, `--vfov`, …). Use `./run_cuda.sh --arch 80` (etc.) to pin SM arch. macOS/Apple Silicon cannot build/run this locally.

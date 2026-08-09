@@ -2,7 +2,11 @@
 # Build and run a CUDA demo from raytracer/test/cu → PPM/PNG under test/out/cuda.
 #
 #   source raytracer/cuda/env/longleaf_modules.sh   # Longleaf GPU session
-#   ./run_cuda.sh [--rebuild] [--arch SM] [source.cu]
+#   ./run_cuda.sh [--rebuild] [--arch SM] [source.cu] [program args...]
+#
+# Program args are the same RenderOptions as ./run_cpp_test.sh (width, samples,
+# lookfrom, vfov, depth, …). Example:
+#   ./run_cuda.sh two_spheres.cu --width 400 --samples 50 --depth 50
 
 set -euo pipefail
 
@@ -17,32 +21,59 @@ MATHDX_DEFAULT="$ROOT/../nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06"
 
 rebuild=0
 arch=""
-src="two_spheres.cu"
+src=""
+program_args=()
 
 usage() {
-    echo "Usage: $0 [--rebuild] [--arch SM] [source.cu]" >&2
+    echo "Usage: $0 [--rebuild] [--arch SM] [source.cu] [program args...]" >&2
     echo "  --rebuild  Wipe cuda/build/ and reconfigure" >&2
     echo "  --arch SM  CUDA arch (e.g. 75, 80, 90); default is CMake's 80" >&2
+    echo "Program args are forwarded to the binary (same as run_cpp_test.sh):" >&2
+    echo "  --width, --height, --samples, --depth, --lookfrom, --lookat, --vfov, ..." >&2
+    echo "Example: $0 two_spheres.cu --width 400 --samples 50" >&2
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help) usage; exit 0 ;;
+        -h|--help)
+            if [[ -z "$src" && ${#program_args[@]} -eq 0 && $# -eq 1 ]]; then
+                usage
+                exit 0
+            fi
+            program_args+=("$1")
+            shift
+            ;;
         --rebuild) rebuild=1; shift ;;
         --arch) arch="$2"; shift 2 ;;
-        *.cu) src="$(basename "$1")"; shift ;;
+        --)
+            shift
+            program_args+=("$@")
+            break
+            ;;
+        *.cu)
+            if [[ -n "$src" ]]; then
+                echo "Multiple source files specified." >&2
+                usage
+                exit 1
+            fi
+            src="$(basename "$1")"
+            shift
+            ;;
         *)
-            if [[ -f "$SRC_DIR/${1%.cu}.cu" ]]; then
+            if [[ -z "$src" && -f "$SRC_DIR/${1%.cu}.cu" ]]; then
                 src="${1%.cu}.cu"
                 shift
             else
-                echo "Unknown argument: $1" >&2
-                usage
-                exit 1
+                program_args+=("$1")
+                shift
             fi
             ;;
     esac
 done
+
+if [[ -z "$src" ]]; then
+    src="two_spheres.cu"
+fi
 
 [[ -f "$SRC_DIR/$src" ]] || { echo "Not found: $SRC_DIR/$src" >&2; exit 1; }
 command -v nvcc >/dev/null || { echo "nvcc not found (source longleaf_modules.sh on Longleaf)" >&2; exit 1; }
@@ -69,8 +100,15 @@ cmake --build "$BUILD_DIR" --target "$name" -j"$jobs"
 bin="$BUILD_DIR/bin/$name"
 cp "$bin" "$EXEC_DIR/$name"
 
+for arg in ${program_args[@]+"${program_args[@]}"}; do
+    if [[ "$arg" == "--help" || "$arg" == "-?" ]]; then
+        "$EXEC_DIR/$name" ${program_args[@]+"${program_args[@]}"}
+        exit 0
+    fi
+done
+
 ppm="$OUT_DIR/$name.ppm"
-"$EXEC_DIR/$name" > "$ppm"
+"$EXEC_DIR/$name" ${program_args[@]+"${program_args[@]}"} > "$ppm"
 python3 "$ROOT/scripts/ppm_to_png.py" "$ppm" "${ppm%.ppm}.png"
 
 echo "Built $EXEC_DIR/$name"
