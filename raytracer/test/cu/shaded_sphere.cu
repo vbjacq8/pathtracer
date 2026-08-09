@@ -1,3 +1,4 @@
+#include "../../cuda/host/batch_cli.cuh"
 #include "../../cuda/host/check_cuda.cuh"
 #include "../../cuda/host/device_scene.cuh"
 #include "../../cuda/host/timing.cuh"
@@ -9,10 +10,21 @@
  * Minimal flat-table path-trace smoke test: one sphere + ground.
  *
  *   ./run_cuda.sh --rebuild shaded_sphere.cu
+ *   ./run_cuda.sh shaded_sphere.cu --width 400 --samples 50 --depth 10
  *
  * Total render runtime is printed to stderr for Longleaf benchmarking.
  */
-int main() {
+int main(int argc, char** argv) {
+    RenderOptions opts;
+    setRtiowDemoDefaults(opts, /*depth=*/10);
+    const int cli = applyCudaCli(argc, argv, opts);
+    if (cli == 2) {
+        return 0;
+    }
+    if (cli != 0) {
+        return 1;
+    }
+
     DeviceScene scene;
     const int red = scene.addLambertian(vec3(1.0f, 0.0f, 0.0f));
     const int ground = scene.addLambertian(vec3(0.8f, 0.8f, 0.0f));
@@ -20,15 +32,10 @@ int main() {
     scene.addSphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, ground);
     const HitableRec* hitables = scene.buildWorld();
 
-    const int nx = 200;
-    const int ny = 100;
+    const int nx = opts.width;
+    const int ny = opts.height;
     const int numPixels = nx * ny;
-    const int maxDepth = 10;
-
-    vec3 lowerLeftCorner(-2.0f, -1.0f, -1.0f);
-    vec3 horizontal(4.0f, 0.0f, 0.0f);
-    vec3 vertical(0.0f, 2.0f, 0.0f);
-    vec3 origin(0.0f, 0.0f, 0.0f);
+    const Camera cam = makeCameraFromOpts(opts);
 
     vec3* fb = nullptr;
     checkCudaErrors(
@@ -37,24 +44,17 @@ int main() {
     RNG* states = nullptr;
     checkCudaErrors(
         cudaMallocManaged(reinterpret_cast<void**>(&states), size_t(numPixels) * sizeof(RNG)));
+    bindDeviceRng(states, nx);
 
     dim3 blocks(nx / 8 + 1, ny / 8 + 1);
     dim3 threads(8, 8);
     timeRenderAndReport([&]() {
-        render<<<blocks, threads>>>(fb, nx, ny, lowerLeftCorner, horizontal, vertical, origin,
-                                    hitables, scene.hitableCount(), scene.materialRecs(),
-                                    scene.textureRecs(), states, maxDepth);
+        render<<<blocks, threads>>>(fb, nx, ny, cam, opts.samples, hitables, scene.hitableCount(),
+                                    scene.materialRecs(), scene.textureRecs(), states, opts.depth);
         checkCudaErrors(cudaGetLastError());
     });
 
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-    for (int j = ny - 1; j >= 0; --j) {
-        for (int i = 0; i < nx; ++i) {
-            const vec3& p = fb[j * nx + i];
-            std::cout << int(p[0] * 255.99f) << " " << int(p[1] * 255.99f) << " "
-                      << int(p[2] * 255.99f) << "\n";
-        }
-    }
+    writeCudaPpm(fb, nx, ny, std::cout);
 
     checkCudaErrors(cudaFree(states));
     checkCudaErrors(cudaFree(fb));

@@ -4,5 +4,6 @@ raytracer/test/exec/**
 raytracer/test/out/**
 raytracer/test/unit/build/**
 raytracer/cuda/build/**
+.worktrees/
 raytracer/exec/
 raytracer/out/
