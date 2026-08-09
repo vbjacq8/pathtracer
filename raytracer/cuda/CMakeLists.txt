@@ -33,6 +33,7 @@ target_include_directories(Pathtracer INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/device"
     "${CMAKE_CURRENT_SOURCE_DIR}/../src")
 target_link_libraries(Pathtracer INTERFACE mathdx::curanddx)
+target_compile_definitions(Pathtracer INTERFACE PATHTRACER_CUDA_RNG=1)
 
 # 3–4. Executables that link our library.
 foreach(demo IN ITEMS red_sphere shaded_sphere two_spheres)

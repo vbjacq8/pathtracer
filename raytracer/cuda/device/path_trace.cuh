@@ -23,7 +23,7 @@ __device__ inline bool applyRussianRoulette(vec3& throughput, int bounce, RNG* s
         return true;
     }
     const float survival = fmaxf(kSurvivalMin, fminf(maxComponent(throughput), kSurvivalMax));
-    if (randomFloat(0.0f, 1.0f, states, tid) > survival) {
+    if (pathtracer_cuda_rng::uniformFloat(0.0f, 1.0f, states, tid) > survival) {
         return false;
     }
     throughput /= survival;

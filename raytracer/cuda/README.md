@@ -5,6 +5,21 @@ GPU backend lives here. Demos live under `raytracer/test/cu/`.
 This branch (`cudaFlatTable`) uses **flat POD tables** for textures, materials, and
 hitables — no device `new` / virtual dispatch.
 
+## RNG (cuRANDDx)
+
+Two layers — keep them separate to avoid include / overload fights:
+
+| Header | Role |
+|--------|------|
+| `../src/my_random.h` | **Public API only**: `randomFloat`, `randomInt`, `randomInSphere`, `randomInDisc` (same signatures on CPU and GPU) |
+| `device/my_random.cuh` | **CUDA plumbing**: `RNG`, `initRandomStates`, `pathtracer_cuda_rng::*` (explicit `states`/`tid` for flat kernels), optional `__host__ bindDeviceRng` / bridge for shared HD headers |
+
+Flat kernels call `pathtracer_cuda_rng::uniformFloat` / `inSphere` with the per-pixel table — they do **not** overload the public `my_random.h` names. Include `my_random.cuh` from CUDA TUs (`render.cuh` does this **before** shared headers). Do **not** include `.cuh` from `my_random.h`.
+
+CUDA demos define `PATHTRACER_CUDA_RNG` (gates host-only textures out of the nvcc TU). `SM<Arch>()` comes from `__CUDA_ARCH__` / `PATHTRACER_CUDA_ARCH` in `my_random.cuh`.
+
+CPU batch/interactive builds never set `PATHTRACER_CUDA_RNG`, so they keep mt19937 and full texture types.
+
 ## Layout
 
 | Path | Role |
@@ -12,13 +27,11 @@ hitables — no device `new` / virtual dispatch.
 | `device/` | Kernels + flat records (`hitable_rec.cuh`, `material_rec.cuh`, …) |
 | `host/` | Host helpers (`device_scene.cuh`, `timing.cuh`, `check_cuda.cuh`) |
 | `env/longleaf_modules.sh` | `module load` helper for UNC Longleaf (CUDA + MathDx) |
-| `common.hpp` | `Arch` for cuRANDDx `SM<Arch>()` |
 | `build/` | CMake output (gitignored) |
 | `../test/cu/` | CUDA demos (e.g. `two_spheres.cu`) |
 | `../test/out/cuda/` | PPM/PNG from CUDA demos |
 
-Device RNG (`device/my_random.cuh`) uses **cuRANDDx** (MathDx). Flat dispatch:
-`hitScene` / `scatterMaterial` switch on `HitableType` / `MatType`. Shared
+Flat dispatch: `hitScene` / `scatterMaterial` switch on `HitableType` / `MatType`. Shared
 `reflect` / `refract` / `schlick` are in `../src/optics.h`.
 
 On Longleaf, `longleaf_modules.sh` loads MathDx when available and exports `mathdx_ROOT` for
@@ -43,7 +56,7 @@ Each demo prints `Total runtime: <ms> ms` to **stderr** (stdout remains PPM).
 
 ```bash
 source raytracer/cuda/env/longleaf_modules.sh
-./run_cuda.sh two_spheres.cu
+./run_cuda.sh --rebuild --arch 80 two_spheres.cu
 # runtime is on stderr; PPM is captured to raytracer/test/out/cuda/
 ```
 

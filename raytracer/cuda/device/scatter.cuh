@@ -17,7 +17,7 @@ __device__ inline bool scatterMaterial(const MaterialRec& m, const TextureRec* t
                                        Ray& scattered, RNG* states, int tid) {
     switch (m.type) {
     case MatType::Lambertian: {
-        vec3 newDirection = hr.normal + randomInSphere(states, tid);
+        vec3 newDirection = hr.normal + pathtracer_cuda_rng::inSphere(states, tid);
         if (newDirection.near_zero()) {
             newDirection = hr.normal;
         }
@@ -27,7 +27,8 @@ __device__ inline bool scatterMaterial(const MaterialRec& m, const TextureRec* t
     }
     case MatType::Metal: {
         vec3 reflected = reflect(unit_vector(rIn.direction()), hr.normal);
-        scattered = Ray(hr.p, reflected + m.fuzz * randomInSphere(states, tid), rIn.time());
+        scattered = Ray(hr.p, reflected + m.fuzz * pathtracer_cuda_rng::inSphere(states, tid),
+                        rIn.time());
         attenuation = m.albedo;
         return dot(scattered.direction(), hr.normal) > 0.0f;
     }
@@ -49,7 +50,8 @@ __device__ inline bool scatterMaterial(const MaterialRec& m, const TextureRec* t
         }
         const vec3 reflected = reflect(v, outwardNormal);
         if (refract(v, outwardNormal, etaRatio, refracted)) {
-            if (randomFloat(0.0f, 1.0f, states, tid) < schlick(cosine, m.ior)) {
+            if (pathtracer_cuda_rng::uniformFloat(0.0f, 1.0f, states, tid) <
+                schlick(cosine, m.ior)) {
                 scattered = Ray(hr.p, reflected, rIn.time());
             } else {
                 scattered = Ray(hr.p, refracted, rIn.time());
@@ -60,7 +62,7 @@ __device__ inline bool scatterMaterial(const MaterialRec& m, const TextureRec* t
         return true;
     }
     case MatType::Isotropic: {
-        scattered = Ray(hr.p, randomInSphere(states, tid), rIn.time());
+        scattered = Ray(hr.p, pathtracer_cuda_rng::inSphere(states, tid), rIn.time());
         attenuation = sampleMaterialAlbedo(m, textures, hr.u, hr.v, hr.p);
         return true;
     }
