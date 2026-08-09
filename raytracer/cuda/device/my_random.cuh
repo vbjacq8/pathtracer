@@ -91,9 +91,11 @@ __device__ inline float pathtracerDeviceRandomFloat(float min, float max) {
 /**
  * \brief Host: publish RNG table + framebuffer width for the device bridge.
  * Call once before launching \p render.
+ *
+ * Must stay visible on both nvcc passes (do not gate on \p __CUDA_ARCH__ — that
+ * makes the identifier disappear on the device pass and breaks host call sites).
  */
-#if !defined(__CUDA_ARCH__)
-inline void bindDeviceRng(RNG* states, int fbWidth) {
+__host__ inline void bindDeviceRng(RNG* states, int fbWidth) {
     cudaError_t err = cudaMemcpyToSymbol(g_pathtracer_rng_states, &states, sizeof(states));
     if (err != cudaSuccess) {
         fprintf(stderr, "bindDeviceRng states: %s\n", cudaGetErrorString(err));
@@ -105,4 +107,3 @@ inline void bindDeviceRng(RNG* states, int fbWidth) {
         exit(static_cast<int>(err));
     }
 }
-#endif

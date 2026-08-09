@@ -13,7 +13,7 @@ Two layers — keep them separate to avoid include / overload fights:
 | Header | Role |
 |--------|------|
 | `../src/my_random.h` | **Public API only**: `randomFloat`, `randomInt`, `randomInSphere`, `randomInDisc` (same signatures on CPU and GPU) |
-| `device/my_random.cuh` | **CUDA plumbing**: `RNG`, `initRandomStates`, `bindDeviceRng`, `pathtracerDeviceRandomFloat` |
+| `device/my_random.cuh` | **CUDA plumbing**: `RNG`, `initRandomStates`, `__host__ bindDeviceRng`, `pathtracerDeviceRandomFloat` |
 
 CUDA demos define `PATHTRACER_CUDA_RNG`. On the device pass, `my_random.h` calls
 `pathtracerDeviceRandomFloat` (implemented in `my_random.cuh`). Include
